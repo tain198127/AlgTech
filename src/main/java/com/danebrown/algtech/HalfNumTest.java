@@ -4,6 +4,20 @@ import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,8 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by danebrown on 2021/7/11
@@ -21,21 +37,87 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @author danebrown
  */
+@BenchmarkMode(Mode.All)
+@State(Scope.Thread)
+@Fork(2)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
+//@Warmup(iterations = 3)
+@Measurement(iterations = 5)
 @Log4j2
 public class HalfNumTest {
-    public static void main(String[] args) {
-        HalfNumTest halfNumTest = new HalfNumTest();
+    private List<int[]> prepareData = new ArrayList<>();
+    @Setup
+    public void setupData(){
         for (int i = 0; i < 100; i++) {
             int[] test =
-                    halfNumTest.generate(ThreadLocalRandom.current().nextInt(1000, 19000));
+                    generate(ThreadLocalRandom.current().nextInt(1000, 19000));
+            prepareData.add(test);
+        }
+    }
+
+    @Benchmark
+    public void dpVersionMH(){
+        for (int[] v: prepareData
+             ) {
+            dpVersion(v);
+        }
+    }
+    @Benchmark
+    public void hashVersionMH(){
+        for (int[] v: prepareData
+        ) {
+            hashVersion(v);
+        }
+    }
+public static void printMenu(){
+    System.out.println("请选择测试模式:");
+    System.out.println("1:正确性校验");
+    System.out.println("2:性能校验");
+    System.out.println("0:退出");
+}
+    public static void main(String[] args) throws RunnerException {
+        printMenu();
+        Scanner scanner = new Scanner(System.in);
+        while (true){
+            if(scanner.hasNextLine()){
+                String input = scanner.nextLine();
+                switch (input){
+                    case "1":{
+                        HalfNumTest halfNumTest = new HalfNumTest();
+                                halfNumTest.compare();
+                        printMenu();
+                    };break;
+                    case "2":{
+                        Options opt = new OptionsBuilder()
+                                .include(HalfNumTest.class.getSimpleName())
+                                .build();
+                        new Runner(opt).run();
+                        printMenu();
+                    };break;
+                    case "0":return;
+                    default:{
+                        System.err.println("请输入正确选项");
+                        printMenu();
+                    }continue;
+                }
+            }
+
+        }
+
+//
+
+    }
+    public void compare(){
+        setupData();
+        for (int i = 0; i < prepareData.size(); i++) {
 
             long begin = System.currentTimeMillis();
-            String result4Test = halfNumTest.dpVersion(test);
+            String result4Test = dpVersion(prepareData.get(i));
             long end = System.currentTimeMillis();
             long testTime = end-begin;
 
             begin = System.currentTimeMillis();
-            String verify4Test = halfNumTest.hashVersion(test);
+            String verify4Test = hashVersion(prepareData.get(i));
             end = System.currentTimeMillis();
             long verifyTime = end-begin;
             if (!verify4Test.equals(result4Test)) {
@@ -46,12 +128,10 @@ public class HalfNumTest {
             }
             log.debug("测试结果[{}]耗时:{} VS. 对数器[{}]耗时:{}",result4Test,testTime,
                     verify4Test,verifyTime);
-            System.out.println("-----");
+            log.debug("-----");
         }
         System.out.println("对数成功");
-        System.exit(0);
     }
-
     /**
      * 动态规划版超级水王
      *
@@ -77,7 +157,7 @@ public class HalfNumTest {
             }
         }
         if(hp <=0){
-            return String.format("%d:0",Integer.MIN_VALUE);
+            return Integer.MIN_VALUE+":0";
         }
         else if(hp > 0){
             for (int i = 0; i < ary.length; i++) {
@@ -87,10 +167,10 @@ public class HalfNumTest {
             }
         }
         if(count > (ary.length >>1)){
-            return String.format("%d:%d",candidate,count);
+            return candidate+":"+count;
         }
         else {
-            return String.format("%d:0",Integer.MIN_VALUE);
+            return Integer.MIN_VALUE+":0";
         }
     }
 
@@ -121,9 +201,10 @@ public class HalfNumTest {
                 Integer.MIN_VALUE;
         log.debug("{}",tmpCount);
         if (realValue < 0) {
-            return String.valueOf(String.format("%d:0",realValue));
+            return realValue+":0";
         } else
-            return String.format("%d:%d", tmpKey.get(), realValue);
+            return tmpKey.get()+":"+realValue;
+
     }
 
     /**
@@ -137,7 +218,7 @@ public class HalfNumTest {
         for (int i = 0; i < ret.length; i++) {
             ret[i] = ThreadLocalRandom.current().nextInt(1,65535);
         }
-        if(ThreadLocalRandom.current().nextBoolean()){
+        if(true){
             //随机产生水王
             int halfNum = ThreadLocalRandom.current().nextInt(1,65535);
             //随机产生水王个数
