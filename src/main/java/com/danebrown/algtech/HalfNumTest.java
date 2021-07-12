@@ -1,9 +1,7 @@
 package com.danebrown.algtech;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.time.StopWatch;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -13,7 +11,6 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -24,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -46,92 +42,97 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 public class HalfNumTest {
     private List<int[]> prepareData = new ArrayList<>();
-    @Setup
-    public void setupData(){
-        for (int i = 0; i < 100; i++) {
-            int[] test =
-                    generate(ThreadLocalRandom.current().nextInt(1000, 19000));
-            prepareData.add(test);
-        }
+
+    public static void printMenu() {
+        System.out.println("请选择测试模式:");
+        System.out.println("1:正确性校验");
+        System.out.println("2:性能校验");
+        System.out.println("0:退出");
     }
 
-    @Benchmark
-    public void dpVersionMH(){
-        for (int[] v: prepareData
-             ) {
-            dpVersion(v);
-        }
-    }
-    @Benchmark
-    public void hashVersionMH(){
-        for (int[] v: prepareData
-        ) {
-            hashVersion(v);
-        }
-    }
-public static void printMenu(){
-    System.out.println("请选择测试模式:");
-    System.out.println("1:正确性校验");
-    System.out.println("2:性能校验");
-    System.out.println("0:退出");
-}
     public static void main(String[] args) throws RunnerException {
         printMenu();
         Scanner scanner = new Scanner(System.in);
-        while (true){
-            if(scanner.hasNextLine()){
+        while (true) {
+            if (scanner.hasNextLine()) {
                 String input = scanner.nextLine();
-                switch (input){
-                    case "1":{
+                switch (input) {
+                    case "1": {
                         HalfNumTest halfNumTest = new HalfNumTest();
-                                halfNumTest.compare();
+                        halfNumTest.compare();
                         printMenu();
-                    };break;
-                    case "2":{
-                        Options opt = new OptionsBuilder()
-                                .include(HalfNumTest.class.getSimpleName())
-                                .build();
+                    }
+                    ;
+                    break;
+                    case "2": {
+                        Options opt = new OptionsBuilder().include(HalfNumTest.class.getSimpleName()).build();
                         new Runner(opt).run();
                         printMenu();
-                    };break;
-                    case "0":return;
-                    default:{
+                    }
+                    ;
+                    break;
+                    case "0":
+                        return;
+                    default: {
                         System.err.println("请输入正确选项");
                         printMenu();
-                    }continue;
+                    }
+                    continue;
                 }
             }
 
         }
 
-//
+        //
 
     }
-    public void compare(){
+
+    @Setup
+    public void setupData() {
+        for (int i = 0; i < 100; i++) {
+            int[] test = generate(ThreadLocalRandom.current().nextInt(1000, 19000));
+            prepareData.add(test);
+        }
+    }
+
+    @Benchmark
+    public void dpVersionMH() {
+        for (int[] v : prepareData) {
+            dpVersion(v);
+        }
+    }
+
+    @Benchmark
+    public void hashVersionMH() {
+        for (int[] v : prepareData) {
+            hashVersion(v);
+        }
+    }
+
+    public void compare() {
         setupData();
         for (int i = 0; i < prepareData.size(); i++) {
 
             long begin = System.currentTimeMillis();
             String result4Test = dpVersion(prepareData.get(i));
             long end = System.currentTimeMillis();
-            long testTime = end-begin;
+            long testTime = end - begin;
 
             begin = System.currentTimeMillis();
             String verify4Test = hashVersion(prepareData.get(i));
             end = System.currentTimeMillis();
-            long verifyTime = end-begin;
+            long verifyTime = end - begin;
             if (!verify4Test.equals(result4Test)) {
-                System.err.println(String.format("对数错误！结束！:待测试结果:[%s]," +
-                        "对数器结果:[%s]",result4Test,verify4Test));
+                System.err.println(String.format("对数错误！结束！:待测试结果:[%s]," + "对数器结果:[%s]", result4Test, verify4Test));
                 System.exit(1);
                 break;
             }
-            log.debug("测试结果[{}]耗时:{} VS. 对数器[{}]耗时:{}",result4Test,testTime,
-                    verify4Test,verifyTime);
+            log.debug("测试结果[{}]耗时:{} VS. 对数器[{}]耗时:{}", result4Test, testTime, verify4Test, verifyTime);
             log.debug("-----");
         }
         System.out.println("对数成功");
     }
+
     /**
      * 动态规划版超级水王
      *
@@ -139,38 +140,34 @@ public static void printMenu(){
      * @return
      */
     public String dpVersion(int[] ary) {
-        log.debug("{}",ary);
+        log.debug("{}", ary);
         int candidate = Integer.MIN_VALUE;
         int hp = 0;
         int count = 0;
         for (int i = 0; i < ary.length; i++) {
-            if(hp == 0){
+            if (hp == 0) {
                 //对冲完了以后才赋值，否则保留之前的candidate
                 candidate = ary[i];
-                hp=1;
-            }
-            else if(candidate!= ary[i]){
+                hp = 1;
+            } else if (candidate != ary[i]) {
                 hp--;
-            }
-            else if(candidate == ary[i]){
+            } else if (candidate == ary[i]) {
                 hp++;
             }
         }
-        if(hp <=0){
-            return Integer.MIN_VALUE+":0";
-        }
-        else if(hp > 0){
+        if (hp <= 0) {
+            return Integer.MIN_VALUE + ":0";
+        } else if (hp > 0) {
             for (int i = 0; i < ary.length; i++) {
-                if(ary[i] == candidate){
+                if (ary[i] == candidate) {
                     count++;
                 }
             }
         }
-        if(count > (ary.length >>1)){
-            return candidate+":"+count;
-        }
-        else {
-            return Integer.MIN_VALUE+":0";
+        if (count > (ary.length >> 1)) {
+            return candidate + ":" + count;
+        } else {
+            return Integer.MIN_VALUE + ":0";
         }
     }
 
@@ -197,13 +194,12 @@ public static void printMenu(){
         Optional<Integer> tmpKey = tmpCount.keySet().stream().filter(item -> {
             return tmpCount.get(item) > ary.length / 2;
         }).findFirst();
-        int realValue = tmpKey.isPresent() ? tmpCount.get(tmpKey.get()) :
-                Integer.MIN_VALUE;
-        log.debug("{}",tmpCount);
+        int realValue = tmpKey.isPresent() ? tmpCount.get(tmpKey.get()) : Integer.MIN_VALUE;
+        log.debug("{}", tmpCount);
         if (realValue < 0) {
-            return realValue+":0";
+            return realValue + ":0";
         } else
-            return tmpKey.get()+":"+realValue;
+            return tmpKey.get() + ":" + realValue;
 
     }
 
@@ -216,20 +212,20 @@ public static void printMenu(){
     public int[] generate(int times) {
         int[] ret = new int[times];
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = ThreadLocalRandom.current().nextInt(1,65535);
+            ret[i] = ThreadLocalRandom.current().nextInt(1, 65535);
         }
-        if(true){
+        if (true) {
             //随机产生水王
-            int halfNum = ThreadLocalRandom.current().nextInt(1,65535);
+            int halfNum = ThreadLocalRandom.current().nextInt(1, 65535);
             //随机产生水王个数
-            int length = ThreadLocalRandom.current().nextInt(times>>1,times-1);
+            int length = ThreadLocalRandom.current().nextInt(times >> 1, times - 1);
             //填充水王
-            Arrays.fill(ret,0,length,halfNum);
+            Arrays.fill(ret, 0, length, halfNum);
             //洗牌
             ArrayUtils.shuffle(ret);
         }
 
-        log.debug("{}",ret);
+        log.debug("{}", ret);
         return ret;
     }
 
