@@ -155,15 +155,18 @@ public class HalfNumTest {
                 hp++;
             }
         }
+        //全都对冲完了，表明没有过半的num
         if (hp <= 0) {
             return Integer.MIN_VALUE + ":0";
         } else if (hp > 0) {
+            //有幸存者——>有过半num必有幸存者，但是有幸存者不代表有过半num，因此要检查一遍
             for (int i = 0; i < ary.length; i++) {
                 if (ary[i] == candidate) {
                     count++;
                 }
             }
         }
+        //超过1/2 >> 表示右移1位，相当于除以2
         if (count > (ary.length >> 1)) {
             return candidate + ":" + count;
         } else {
