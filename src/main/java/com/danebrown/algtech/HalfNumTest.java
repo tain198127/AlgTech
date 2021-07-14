@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author danebrown
  */
-@BenchmarkMode(Mode.All)
+@BenchmarkMode(Mode.AverageTime)
 @State(Scope.Thread)
 @Fork(2)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
