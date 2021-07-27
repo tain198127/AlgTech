@@ -25,11 +25,30 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+<!--        common-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.12.0</version>
         </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>3.4.8</version>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-tools</artifactId>
+            <version>3.4.8</version>
+        </dependency>
+
+
+        <!--        common-->
         <!--        log4j2-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
