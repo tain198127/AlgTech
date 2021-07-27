@@ -2,6 +2,7 @@ package com.danebrown.algtech;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
 
@@ -9,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -22,7 +24,7 @@ import java.util.function.Supplier;
 @Log4j2
 public class SortCompare {
 
-    public int size = 100;
+    public int size = 50000;
     public int[] array = new int[size];
 
     /**
@@ -32,14 +34,16 @@ public class SortCompare {
     @Setup
     public void setupData(int mode){
         for (int i = 0; i < array.length; i++) {
-            array[i] = i;
+            array[i] = ThreadLocalRandom.current().nextInt();
+        }
+        Arrays.sort(array);
+        if(mode == 1){
+            ArrayUtils.reverse(array);
         }
         if(mode == 2){
            ArrayUtils.shuffle(array);
         }
-        if(mode == 1){
-            ArrayUtils.reverse(array);
-        }
+
     }
     /**
      * 对数器
@@ -83,9 +87,6 @@ public class SortCompare {
         }
         return cp;
     }
-
-
-
     private void innerSwap(int[] cp, int j, int i) {
         cp[i] = cp[i] ^ cp[j];
         cp[j] = cp[i] ^ cp[j];
@@ -99,16 +100,33 @@ public class SortCompare {
      * @return
      */
     public boolean compareWrap(Supplier<int[]> forTest,String testMethodName,
-                               Supplier<int[]> standard){
-        int[] test = forTest.get();
+                               Supplier<int[]> standard,boolean isCompare){
+        StopWatch stopWatch = new StopWatch();
+
+        stopWatch.start();
         int[] standardArr = standard.get();
-        boolean result = compare(test,standardArr);
-        log.debug("原始数据:{}\n测试数据:{}",standardArr,test);
-        if(!result){
-            log.error("{}测试失败",testMethodName);
-        }
-        else{
-            log.info("{}测试成功",testMethodName);
+        stopWatch.stop();
+
+        log.info("测试计算耗时:{} 毫秒",stopWatch.getTime(TimeUnit.MILLISECONDS));
+        boolean result = !isCompare;
+        if(isCompare){
+            result = true;
+            stopWatch.reset();
+            stopWatch.start();
+            int[] test = forTest.get();
+            stopWatch.stop();
+            log.info("标准计算耗时:{} 毫秒",stopWatch.getTime(TimeUnit.MILLISECONDS));
+
+
+            result = compare(test,standardArr);
+            log.debug("标准结果:{}",standardArr);
+            log.debug("测试结果:{}",test);
+            if(!result){
+                log.error("{}测试失败",testMethodName);
+            }
+            else{
+                log.info("{}测试成功",testMethodName);
+            }
         }
         return result;
     }
@@ -123,7 +141,7 @@ public class SortCompare {
         boolean compareResult =
                 sortCompare.compareWrap(() -> sortCompare.insertSort(),
                 "insertSort",
-                () -> result);
+                () -> sortCompare.standardSort(),true);
 
 
     }
