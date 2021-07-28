@@ -13,36 +13,32 @@ import java.util.concurrent.TimeUnit;
  * @author danebrown
  */
 @Log4j2
-public abstract class AlgCompImpl<T,R> implements AlgComp<T,R> {
+public abstract class AlgCompImpl<T,R>{
     /**
      * 准备原始测试数据
      * @return
      */
-    @Override
-    public abstract R prepare();
+    protected abstract R prepare();
 
     /**
      * 标准对数器
      * @param data
      * @return
      */
-    @Override
-    public abstract T standard(R data) ;
+    protected abstract T standard(R data) ;
 
     /**
      * 测试函数
      * @param data
      * @return
      */
-    @Override
-    public abstract T test(R data);
+    protected abstract T test(R data);
 
     /**
      * 对数
      * @param testName
      * @return
      */
-    @Override
     public boolean compare(String testName) {
         R setupData = prepare();
         R forTest = ObjectUtils.clone(setupData);
@@ -73,12 +69,31 @@ public abstract class AlgCompImpl<T,R> implements AlgComp<T,R> {
 
 
     /**
+     * 多次测试
+     * @param testName
+     * @param times
+     * @return
+     */
+    public boolean multiCompare(String testName, int times) {
+        boolean result = true;
+        for(int i = 0; i < times && result ; i++){
+            result = compare(testName);
+        }
+        return result;
+    }
+
+    /**
      * 值比较器
      * @param standard
      * @param test
      * @return
      */
     protected boolean testEqual(T standard, T test){
+        if (standard == null || test == null) {
+            log.error("测试数组为空");
+            return false;
+        }
+
         return standard.equals(test);
     }
 }
