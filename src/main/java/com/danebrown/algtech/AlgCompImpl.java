@@ -1,6 +1,8 @@
 package com.danebrown.algtech;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.bag.UnmodifiableBag;
 import org.apache.commons.lang3.ObjectUtils;
@@ -172,8 +174,10 @@ public abstract class AlgCompImpl<T,R>{
 
         }
 
+        String standardJson = JSONUtil.toJsonStr(standard);
+        String testJson = JSONUtil.toJsonStr(test);
 
 
-        return standard.equals(test);
+        return standardJson.equals(testJson);
     }
 }
