@@ -54,16 +54,19 @@ public abstract class AlgCompImpl<T,R>{
         R forStandard = null;
         //直接clone
         if(setupData instanceof Cloneable){
+            log.debug("克隆接口实现的克隆");
             forTest = ObjectUtil.clone(setupData);
             forStandard = ObjectUtil.clone(setupData);
         }
         //序列化克隆
         else if(setupData instanceof Serializable){
+            log.debug("序列化实现的克隆");
             forTest = ObjectUtil.cloneByStream(setupData);
             forStandard = ObjectUtil.cloneByStream(setupData);
         }
         //尽力序列化
         else {
+            log.warn("尽力序列化，可能导致出错");
             forTest = ObjectUtil.cloneIfPossible(setupData);
             forStandard = ObjectUtil.cloneIfPossible(setupData);
         }
