@@ -94,22 +94,26 @@ public class BitCompare {
             int evenTimes = num.length - oddTimes;
 
             int oddNum = ThreadLocalRandom.current().nextInt();
-            int evenNum = ThreadLocalRandom.current().nextInt();
 
             int cur_idx = 0;
+            //先把奇数次数字填上
             while (oddTimes > 0) {
                 num[cur_idx++] = oddNum;
                 oddTimes--;
             }
             while (evenTimes > 0) {
+                //范围随着eventTimes缩小
                 int randomEven = ThreadLocalRandom.current().nextInt(1,
                         evenTimes);
-                randomEven = randomEven %2 == 0?randomEven:randomEven+1;//保证是偶数
+                //保证是偶数，因为随机数范围是1~evenTimes，因此最小是1，因此+1保证是偶数；
+                randomEven = randomEven %2 == 0?randomEven:randomEven+1;
+                //从cur_idx到cur_idx+randomEven，填充一个随机数
                 Arrays.fill(num,cur_idx,cur_idx+=randomEven,
                         ThreadLocalRandom.current().nextInt());
+                //从eventTimes中减去用掉的randomEven
                 evenTimes = evenTimes - randomEven;
             }
-
+            //乱序
             Collections.shuffle(Collections.singletonList(num));
             return num;
         }
