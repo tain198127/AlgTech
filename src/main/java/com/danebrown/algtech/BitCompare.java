@@ -2,9 +2,14 @@ package com.danebrown.algtech;
 
 import lombok.extern.log4j.Log4j2;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by danebrown on 2021/7/29
@@ -97,10 +102,15 @@ public class BitCompare {
                 oddTimes--;
             }
             while (evenTimes > 0) {
-                num[cur_idx++] = evenNum;
-                evenTimes--;
+                int randomEven = ThreadLocalRandom.current().nextInt(1,
+                        evenTimes);
+                randomEven = randomEven %2 == 0?randomEven:randomEven+1;//保证是偶数
+                Arrays.fill(num,cur_idx,cur_idx+=randomEven,
+                        ThreadLocalRandom.current().nextInt());
+                evenTimes = evenTimes - randomEven;
             }
 
+            Collections.shuffle(Collections.singletonList(num));
             return num;
         }
 
@@ -119,6 +129,8 @@ public class BitCompare {
                 if (map.get(i) % 2 != 0) {
                     log.debug("{} 是 {} 次",i,map.get(i));
                     stringBuilder.append(i);
+                }else if(log.isDebugEnabled()){
+                    log.debug("偶数:{} 是 {} 次",i,map.get(i));
                 }
             }
 
