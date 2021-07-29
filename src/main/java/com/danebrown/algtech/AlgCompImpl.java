@@ -1,9 +1,17 @@
 package com.danebrown.algtech;
 
+import cn.hutool.core.util.ObjectUtil;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.bag.UnmodifiableBag;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.StopWatch;
 
+import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,8 +49,24 @@ public abstract class AlgCompImpl<T,R>{
      */
     public boolean compare(String testName) {
         R setupData = prepare();
-        R forTest = ObjectUtils.clone(setupData);
-        R forStandard = ObjectUtils.clone(setupData);
+
+        R forTest = null;
+        R forStandard = null;
+        //直接clone
+        if(setupData instanceof Cloneable){
+            forTest = ObjectUtil.clone(setupData);
+            forStandard = ObjectUtil.clone(setupData);
+        }
+        //序列化克隆
+        else if(setupData instanceof Serializable){
+            forTest = ObjectUtil.cloneByStream(setupData);
+            forStandard = ObjectUtil.cloneByStream(setupData);
+        }
+        //尽力序列化
+        else {
+            forTest = ObjectUtil.cloneIfPossible(setupData);
+            forStandard = ObjectUtil.cloneIfPossible(setupData);
+        }
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         T testResult = test(forTest);
@@ -93,6 +117,24 @@ public abstract class AlgCompImpl<T,R>{
             log.error("测试数组为空");
             return false;
         }
+        if(standard instanceof List && test instanceof List){
+            List standardList = (List)standard;
+            List testList = (List) test;
+            boolean result = true;
+            if(standardList.size() != testList.size()){
+                return false;
+            }
+            for (int i = 0; i < standardList.size() && result; i++) {
+                result = standardList.get(i).equals(testList.get(i));
+                if(!result){
+                    break;
+                }
+            }
+            return result;
+
+        }
+
+
 
         return standard.equals(test);
     }

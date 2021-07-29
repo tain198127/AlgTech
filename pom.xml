@@ -46,7 +46,17 @@
             <artifactId>reactor-tools</artifactId>
             <version>3.4.8</version>
         </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>4.5.15</version>
+        </dependency>
 
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>30.1.1-jre</version>
+        </dependency>
 
         <!--        common-->
         <!--        log4j2-->
