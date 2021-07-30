@@ -168,7 +168,7 @@ public class BitCompare {
 
         @Override
         protected int[] prepare() {
-            int times = ThreadLocalRandom.current().nextInt(3, 10000000);
+            int times = ThreadLocalRandom.current().nextInt(3, 10000);
 
             //保证是奇数长度
             int[] num = new int[times % 2 == 0 ? times - 1 : times];
@@ -218,8 +218,8 @@ public class BitCompare {
                 eor ^= data[i];
             }
             //此时eor一定是a ^ b的
-            //eor' 表示的是 eor只剩下最右边的1的那个数
-            //
+            //rightOne 表示的是 eor只剩下最右边的1的那个数
+            //用rightOne过滤掉数组中与 a 或者 b 的最右一个位是1的那些数。和eor_dash重新计算
             int rightOne = eor & (-eor);
             int eor_dash = 0;
 
@@ -238,7 +238,7 @@ public class BitCompare {
     }
 
     /**
-     *
+     * 查找数字二进制格式最右边为1
      */
     public static class LastRightOne extends AlgCompImpl<Integer, Integer> {
 
@@ -256,7 +256,18 @@ public class BitCompare {
          */
         @Override
         protected Integer standard(Integer data) {
-            int ret = data & (~data + 1);
+            char[] bin = Integer.toBinaryString(data).toCharArray();
+            boolean isSetZero=false;
+            for(int i=bin.length-1;i>=0;i--){
+                if(isSetZero){
+                    bin[i] = '0';
+                }
+                if(bin[i] == '1'){
+                    isSetZero = true;
+                }
+            }
+            int ret = Integer.parseUnsignedInt(String.valueOf(bin),2);
+//            int ret = data & (~data + 1);
             return ret;
         }
 

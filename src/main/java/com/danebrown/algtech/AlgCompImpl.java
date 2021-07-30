@@ -75,7 +75,7 @@ public abstract class AlgCompImpl<T,R>{
         stopWatch.start();
         T testResult = test(forTest);
         stopWatch.stop();
-        log.info("测试计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
+        log.debug("测试计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
         if(testTime != null){
             testTime.accept(stopWatch.getTime(TimeUnit.MILLISECONDS));
         }
@@ -85,7 +85,7 @@ public abstract class AlgCompImpl<T,R>{
         stopWatch.start();
         T standardResult = standard(forStandard);
         stopWatch.stop();
-        log.info("标准计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
+        log.debug("标准计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
         if(standardTime != null){
             standardTime.accept(stopWatch.getTime(TimeUnit.MILLISECONDS));
         }
@@ -93,7 +93,9 @@ public abstract class AlgCompImpl<T,R>{
         log.debug("标准结果:{}", standardResult);
         log.debug("测试结果:{}", testResult);
         if (!result) {
-            log.error("{}测试失败", testName);
+            log.error("{}测试失败，原始数据:{},测试结果:{},标准结果:{}", testName,setupData,
+                    testResult,
+                    standardResult);
         } else {
             log.info("{}测试成功", testName);
         }
@@ -105,7 +107,11 @@ public abstract class AlgCompImpl<T,R>{
      * @return
      */
     public boolean compare(String testName) {
-        return this.compare(testName,null,null);
+        return this.compare(testName,t->{
+            log.warn("{} 测试程序 耗时[{}]毫秒",testName,t);
+        },s->{
+            log.warn("{} 标准程序 耗时[{}]毫秒",testName,s);
+        });
     }
 
 
@@ -173,7 +179,12 @@ public abstract class AlgCompImpl<T,R>{
             return result;
 
         }
+        if(standard instanceof  Comparable && test instanceof Comparable){
+            Comparable standardComp = (Comparable) standard;
+            Comparable testComp = (Comparable) test;
+            return  ObjectUtils.compare(standardComp,testComp) == 0;
 
+        }
         String standardJson = JSONUtil.toJsonStr(standard);
         String testJson = JSONUtil.toJsonStr(test);
 
