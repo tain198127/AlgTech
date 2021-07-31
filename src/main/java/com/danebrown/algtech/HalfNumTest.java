@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  * Created by danebrown on 2021/7/11
  * mail: tain198127@163.com
  * 超级水王
- *
+ * 问题描述:在一组数里面，有一个数字重复出现的次数，超过了数组长度的一半，则这个数字是超级水王。找到这个数
  * @author danebrown
  */
 @BenchmarkMode(Mode.AverageTime)
