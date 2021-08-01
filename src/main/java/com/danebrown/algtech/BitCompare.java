@@ -294,7 +294,9 @@ public class BitCompare {
             int[] left =
                     result.stream().flatMapToInt(integer -> IntStream.of(integer)).toArray();
 
-            return Triple.of(left,k,m);
+            return Triple.of(left,ThreadLocalRandom.current().nextBoolean()?k
+                            :m-1
+                    ,m);
 
         }
 
