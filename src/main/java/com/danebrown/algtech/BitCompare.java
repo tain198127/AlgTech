@@ -298,6 +298,11 @@ public class BitCompare {
 
         }
 
+        /**
+         * 只有K次数字的标准程序
+         * @param data int[]是数组 中间的integer是K，右边的integer是M
+         * @return
+         */
         @Override
         protected Integer standard(Triple<int[],Integer,Integer> data) {
             Map<Integer,Integer> map = new HashMap<>();
@@ -319,13 +324,18 @@ public class BitCompare {
                    .orElse(-1);
         }
 
+        /**
+         * 只有K次数字的测试程序
+         * @param data int[]是数组 中间的integer是K，右边的integer是M
+         * @return
+         */
         @Override
         protected Integer test(Triple<int[],Integer,Integer> data) {
             int [] num = new int[32];
             int [] arr = data.getLeft();
             int k = data.getMiddle();
             int m = data.getRight();
-            for(int i =0;i< data.getLeft().length;i++){
+            for(int i =0;i< arr.length;i++){
                 for(int j = 0; j< num.length;j++){
                     if(((arr[i] >> j)&1) > 0){
                         num[j]++;
@@ -334,9 +344,18 @@ public class BitCompare {
             }
             int result = 0;
             for(int i = 0; i < num.length;i++){
-                if(num[i] %m !=0){
+                log.debug("{} -->{}",num[i] %m,num[i] %m %k);
+                if(num[i] %m !=0 && num[i] %m %k == 0){
                     result = result | (1<<i);
                 }
+                else if(num[i] %m ==0){
+                    log.debug("{} -->{}",num[i] %m,num[i] %m %k);
+                    continue;
+                }
+                else{
+                    return -1;
+                }
+
             }
             return result;
         }
