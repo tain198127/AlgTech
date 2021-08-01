@@ -97,7 +97,7 @@ public abstract class AlgCompImpl<T,R>{
                     testResult,
                     standardResult);
         } else {
-            log.info("{}测试成功", testName);
+            log.debug("{}测试成功", testName);
         }
         return result;
     }

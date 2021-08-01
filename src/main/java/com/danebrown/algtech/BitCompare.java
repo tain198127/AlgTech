@@ -44,7 +44,7 @@ public class BitCompare {
         twoOddNumSearch.multiCompare("查找两个奇数",1);
 
         OnlyKTimesNumSearch multiOddNumSearch = new OnlyKTimesNumSearch();
-        multiOddNumSearch.compare("查找只有K次的数字");
+        multiOddNumSearch.multiCompare("查找只有K次的数字",10);
 
     }
 
@@ -263,13 +263,13 @@ public class BitCompare {
         @Override
         protected Triple<int[],Integer,Integer> prepare() {
             //数值有K次
-            int k = ThreadLocalRandom.current().nextInt(1,10);
+            int k = ThreadLocalRandom.current().nextInt(1,100);
             //数值有M次
-            int m = ThreadLocalRandom.current().nextInt(k+1,k+10);
+            int m = ThreadLocalRandom.current().nextInt(k+1,k+100);
             //只分一组
             int kGroups = 1;
             //可以分N多组
-            int mGroups = ThreadLocalRandom.current().nextInt(1,10);
+            int mGroups = ThreadLocalRandom.current().nextInt(1,100);
             ArrayList<Integer> result  = new ArrayList<>();
             for(int i = 0;i < kGroups;i++){
                 //保证K组中，每一组的数不一样，同时，长度都是K
