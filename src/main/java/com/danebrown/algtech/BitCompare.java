@@ -44,7 +44,7 @@ public class BitCompare {
         twoOddNumSearch.multiCompare("查找两个奇数",1);
 
         OnlyKTimesNumSearch multiOddNumSearch = new OnlyKTimesNumSearch();
-        multiOddNumSearch.multiCompare("查找只有K次的数字",10);
+        multiOddNumSearch.multiCompare("查找只有K次的数字",100);
 
     }
 
@@ -281,6 +281,7 @@ public class BitCompare {
             for(int i = 0; i < mGroups; i++){
                 //保证M组中，每一组的数不一样，同时长度都是M
                 int mv = ThreadLocalRandom.current().nextInt();
+//                int mv = 0;
                 int [] data = new int[m];
                 Arrays.fill(data,mv);
                 result.addAll(Arrays.stream(data).boxed().collect(Collectors.toList()));
@@ -294,8 +295,9 @@ public class BitCompare {
             int[] left =
                     result.stream().flatMapToInt(integer -> IntStream.of(integer)).toArray();
 
-            return Triple.of(left,ThreadLocalRandom.current().nextBoolean()?k
-                            :m-1
+            return Triple.of(left,
+//                    ThreadLocalRandom.current().nextBoolean()?k :m-1
+                    k
                     ,m);
 
         }
@@ -352,7 +354,6 @@ public class BitCompare {
                 }
                 else if(num[i] %m ==0){
                     log.debug("{} -->{}",num[i] %m,num[i] %m %k);
-                    continue;
                 }
                 else{
                     return -1;
