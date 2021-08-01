@@ -1,15 +1,21 @@
 package com.danebrown.algtech;
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by danebrown on 2021/7/29
@@ -36,6 +42,9 @@ public class BitCompare {
 
         TwoOddNumSearch twoOddNumSearch = new TwoOddNumSearch();
         twoOddNumSearch.multiCompare("查找两个奇数",1);
+
+        OnlyKTimesNumSearch multiOddNumSearch = new OnlyKTimesNumSearch();
+        multiOddNumSearch.compare("查找只有K次的数字");
 
     }
 
@@ -234,6 +243,102 @@ public class BitCompare {
             arr.add(eor_fin);
             return arr.stream().sorted().mapToInt(v -> v).toArray();
 
+        }
+    }
+
+    /**
+     * 一个数组中，只有两种数字： 一个K次的数字，和M次的数字，找到这两个数字
+     * 例如出现7次1,7次2,7次3, 9次5
+     * M ！= 1， K < M
+     * 要求 额外空间复杂度 O(1)
+     * 要求 时间复杂度 O(N)
+     * int[] 表示测试结果
+     * Triple<int[],Integer,Integer> 表示测试数据
+     * 第一个int[]表示测试数组， middle表示k，right表示m
+     */
+    public static class OnlyKTimesNumSearch extends AlgCompImpl<Integer,
+            Triple<int[],Integer,Integer>>{
+
+
+        @Override
+        protected Triple<int[],Integer,Integer> prepare() {
+            //数值有K次
+            int k = ThreadLocalRandom.current().nextInt(1,10);
+            //数值有M次
+            int m = ThreadLocalRandom.current().nextInt(k+1,k+10);
+            //只分一组
+            int kGroups = 1;
+            //可以分N多组
+            int mGroups = ThreadLocalRandom.current().nextInt(1,10);
+            ArrayList<Integer> result  = new ArrayList<>();
+            for(int i = 0;i < kGroups;i++){
+                //保证K组中，每一组的数不一样，同时，长度都是K
+                int kv = ThreadLocalRandom.current().nextInt();
+                int[] data = new int[k];
+                Arrays.fill(data,kv);
+                result.addAll(Arrays.stream(data).boxed().collect(Collectors.toList()));
+            }
+            for(int i = 0; i < mGroups; i++){
+                //保证M组中，每一组的数不一样，同时长度都是M
+                int mv = ThreadLocalRandom.current().nextInt();
+                int [] data = new int[m];
+                Arrays.fill(data,mv);
+                result.addAll(Arrays.stream(data).boxed().collect(Collectors.toList()));
+            }
+
+
+
+
+            Collections.shuffle(result);
+
+            int[] left =
+                    result.stream().flatMapToInt(integer -> IntStream.of(integer)).toArray();
+
+            return Triple.of(left,k,m);
+
+        }
+
+        @Override
+        protected Integer standard(Triple<int[],Integer,Integer> data) {
+            Map<Integer,Integer> map = new HashMap<>();
+            for(int i: data.getLeft()){
+                if(!map.containsKey(i)){
+                    map.put(i,1);
+                }
+                else{
+                    map.put(i,map.get(i)+1);
+                }
+            }
+            log.debug("过程数据{}, k次为:{},m次为:{}",map,data.getMiddle(),data.getRight());
+
+           return map.entrySet().stream().filter(item->
+                   item.getValue().equals(data.getMiddle())
+           )
+                   .findFirst()
+                   .map(item->item.getKey())
+                   .orElse(-1);
+        }
+
+        @Override
+        protected Integer test(Triple<int[],Integer,Integer> data) {
+            int [] num = new int[32];
+            int [] arr = data.getLeft();
+            int k = data.getMiddle();
+            int m = data.getRight();
+            for(int i =0;i< data.getLeft().length;i++){
+                for(int j = 0; j< num.length;j++){
+                    if(((arr[i] >> j)&1) > 0){
+                        num[j]++;
+                    }
+                }
+            }
+            int result = 0;
+            for(int i = 0; i < num.length;i++){
+                if(num[i] %m !=0){
+                    result = result | (1<<i);
+                }
+            }
+            return result;
         }
     }
 

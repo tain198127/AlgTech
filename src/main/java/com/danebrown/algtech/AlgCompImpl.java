@@ -50,7 +50,7 @@ public abstract class AlgCompImpl<T,R>{
     public boolean compare(String testName, Consumer<Long> testTime,
                            Consumer<Long> standardTime ){
         R setupData = prepare();
-
+        log.trace("原始数据:{}",setupData);
         R forTest = null;
         R forStandard = null;
         //直接clone
