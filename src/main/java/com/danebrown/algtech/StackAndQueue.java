@@ -257,6 +257,15 @@ public class StackAndQueue {
             Stack<Integer> popStack = new Stack<>();
             pushStack.addAll(Arrays.stream(data.getLeft()).boxed().collect(Collectors.toList()));
             Integer[] ops = data.getRight();
+            /**
+             * 双栈拼队列
+             * ---->push 顺序 5,4,3,2,1
+             * pop空才干  [1,2,3,4,5][]->[][5,4,3,2,1]
+             * 要倒全倒完 []->[5,4,3,2,1]
+             * push后倒数 6->[]->[] ==> [6][]
+             * 倒在pop前
+             *
+             */
             Consumer<Void> push2pop = new Consumer<Void>() {
                 @Override
                 public void accept(Void aVoid) {
