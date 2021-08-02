@@ -16,7 +16,7 @@ public class MergeSort {
     public static class RecursionMergeSort extends AlgCompImpl<int[],int[]> {
 
         @Override
-        protected int[] prepare() {
+        public int[] prepare() {
             return new int[0];
         }
 

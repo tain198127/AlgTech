@@ -32,7 +32,7 @@ public abstract class AlgCompImpl<T,R>{
      * 准备原始测试数据
      * @return
      */
-    protected abstract R prepare();
+    public abstract R prepare();
 
     /**
      * 标准对数器

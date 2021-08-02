@@ -1,6 +1,7 @@
 package com.danebrown.algtech;
 
 import com.danebrown.algtech.algcomp.AlgCompImpl;
+import com.danebrown.algtech.algcomp.AlgCompMenu;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -26,30 +27,19 @@ import java.util.stream.IntStream;
 public class BitCompare {
 
     public static void main(String[] args) {
-        BitSwap bitSwap = new BitSwap();
-
-        bitSwap.multiCompare("异或对比", 1);
-        OddNumSearch oddNumSearch = new OddNumSearch();
-
-        oddNumSearch.compare("奇数次数字校验");
-        oddNumSearch.multiCompare("奇数次数字校验", 1);
-
-        LastRightOne lastRightOne = new LastRightOne();
-        lastRightOne.compare("保持最右边的一个1");
-
-
-        TwoOddNumSearch twoOddNumSearch = new TwoOddNumSearch();
-        twoOddNumSearch.multiCompare("查找两个奇数", 1);
-
-        OnlyKTimesNumSearch multiOddNumSearch = new OnlyKTimesNumSearch();
-        multiOddNumSearch.multiCompare("查找只有K次的数字", 100);
+        AlgCompMenu.addComp(new BitSwap(),"异或对比");
+        AlgCompMenu.addComp(new OddNumSearch(),"奇数次数字校验");
+        AlgCompMenu.addComp(new LastRightOne(),"保持最右边的一个1");
+        AlgCompMenu.addComp(new TwoOddNumSearch(),"查找两个奇数");
+        AlgCompMenu.addComp(new OnlyKTimesNumSearch(),"查找只有K次的数字");
+        AlgCompMenu.run();
 
     }
 
     public static class BitSwap extends AlgCompImpl<String, int[]> {
 
         @Override
-        protected int[] prepare() {
+        public int[] prepare() {
             return new int[]{ThreadLocalRandom.current().nextInt(), ThreadLocalRandom.current().nextInt()};
         }
 
@@ -100,7 +90,7 @@ public class BitCompare {
     public static class OddNumSearch extends AlgCompImpl<String, int[]> {
 
         @Override
-        protected int[] prepare() {
+        public int[] prepare() {
             int times = ThreadLocalRandom.current().nextInt(3, 10);
 
             //保证是奇数长度
@@ -174,7 +164,7 @@ public class BitCompare {
         OddNumSearch inner = new OddNumSearch();
 
         @Override
-        protected int[] prepare() {
+        public int[] prepare() {
             int times = ThreadLocalRandom.current().nextInt(3, 10000);
 
             //保证是奇数长度
@@ -258,7 +248,7 @@ public class BitCompare {
 
 
         @Override
-        protected Triple<int[], Integer, Integer> prepare() {
+        public Triple<int[], Integer, Integer> prepare() {
             //数值有K次
             int k = ThreadLocalRandom.current().nextInt(1, 100);
             //数值有M次
@@ -357,9 +347,8 @@ public class BitCompare {
     public static class LastRightOne extends AlgCompImpl<Integer, Integer> {
 
         @Override
-        protected Integer prepare() {
+        public Integer prepare() {
             return ThreadLocalRandom.current().nextInt(1000, 1000000);
-            //            return 128+256;
         }
 
         /**

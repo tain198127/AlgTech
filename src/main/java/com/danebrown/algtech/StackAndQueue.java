@@ -42,7 +42,7 @@ public class StackAndQueue {
          * @return
          */
         @Override
-        protected Pair<int[], Integer[]> prepare() {
+        public Pair<int[], Integer[]> prepare() {
             int dataSize = ThreadLocalRandom.current().nextInt(200,
                     20000);
 //            dataSize = 200;
@@ -164,7 +164,7 @@ public class StackAndQueue {
     public static class MaxMinStack extends AlgCompImpl<int[],Integer[]>{
 
         @Override
-        protected Integer[] prepare() {
+        public Integer[] prepare() {
             int dataSize = ThreadLocalRandom.current().nextInt(200,
                     20000);
             int popOpSize = dataSize/2;
@@ -222,6 +222,28 @@ public class StackAndQueue {
             int min = minStack.peek();
             int max = maxStack.peek();
             return new int[]{min,max};
+        }
+    }
+
+    /**
+     * 图的宽度是用队列实现的；图的深度是用栈实现的，这个是经典算法
+     */
+    public static class Stack2Queue extends AlgCompImpl<int[], Pair<int[], Integer[]>>{
+
+
+        @Override
+        public Pair<int[], Integer[]> prepare() {
+            return null;
+        }
+
+        @Override
+        protected int[] standard(Pair<int[], Integer[]> data) {
+            return new int[0];
+        }
+
+        @Override
+        protected int[] test(Pair<int[], Integer[]> data) {
+            return new int[0];
         }
     }
 }

@@ -17,10 +17,13 @@ import java.util.Scanner;
  * @author danebrown
  */
 @Log4j2
-public class AlgCompMenu {
+public final class AlgCompMenu {
     private static List<Triple<String, AlgCompImpl, Integer>> algCompList = new ArrayList<>();
     static {
         algCompList.add(0,null);
+    }
+    public static void addComp(AlgCompImpl comp){
+        addComp(comp,comp.getClass().getSimpleName());
     }
     public static void addComp(AlgCompImpl comp, String name){
         addComp(comp,name,100);
