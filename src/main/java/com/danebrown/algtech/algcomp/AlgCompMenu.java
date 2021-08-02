@@ -1,7 +1,9 @@
 package com.danebrown.algtech.algcomp;
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.logging.log4j.core.util.Integers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +44,19 @@ public class AlgCompMenu {
     public static void run() {
         printMeau();
         Scanner scanner = new Scanner(System.in);
-        int i;
-        while (scanner.hasNextLine() && (i = scanner.nextInt()) > 0) {
+
+        while (scanner.hasNextLine()) {
+
+            String input= scanner.next();
+            int i = StringUtils.isNumeric(input)?Integer.parseInt(input):-1;
+            if (i == 0){
+                break;
+            }
+            if(i > algCompList.size()-1 || i<0){
+                System.err.printf("请输入[%d-%d]之间的选项\n",0,algCompList.size()-1);
+                printMeau();
+                continue;
+            }
             runTest(i);
             printMeau();
         }
