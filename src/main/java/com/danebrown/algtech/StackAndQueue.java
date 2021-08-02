@@ -12,9 +12,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,6 +39,7 @@ public class StackAndQueue {
         AlgCompMenu.addComp(new MaxMinStack(), "最小最大栈");
         AlgCompMenu.addComp(new ArrayQueue(), "数组实现队列");
         AlgCompMenu.addComp(new Stack2Queue(), "栈转队列");
+        AlgCompMenu.addComp(new Queue2Stack(), "队列转栈");
         AlgCompMenu.run();
     }
 
@@ -51,7 +55,7 @@ public class StackAndQueue {
          */
         @Override
         public Pair<int[], Integer[]> prepare() {
-            int dataSize = ThreadLocalRandom.current().nextInt(200, 20000);
+            int dataSize = ThreadLocalRandom.current().nextInt(20, 10000);
 
             int opSize = ThreadLocalRandom.current().nextInt(0, dataSize - 1);
 
@@ -307,6 +311,79 @@ public class StackAndQueue {
                 result.add(pop.apply(null));
             }
             return result.stream().mapToInt(Integer::intValue).toArray();
+        }
+    }
+    @AlgName("队列转栈")
+    public static class Queue2Stack extends AlgCompImpl<int[], Pair<int[],
+            Integer[]>>{
+        private ArrayQueue arrayQueue = new ArrayQueue();
+
+        @Override
+        public Pair<int[], Integer[]> prepare() {
+            return arrayQueue.prepare();
+        }
+
+        @Override
+        protected int[] standard(Pair<int[], Integer[]> data) {
+            Queue<Integer> queue =
+                    new ConcurrentLinkedQueue<>();
+            queue.addAll(Arrays.stream(data.getLeft()).boxed().collect(Collectors.toList()));
+            Stack<Integer> stack = new Stack<>();
+            stack.addAll(queue.stream().collect(Collectors.toList()));
+            Integer[] ops = data.getRight();
+            for(int i = 0; i < ops.length;i++){
+                if(ops[i] == null){
+                    stack.pop();
+                }else{
+                    stack.push(ops[i]);
+                }
+            }
+            return stack.stream().mapToInt(Integer::intValue).toArray();
+
+        }
+
+        @Override
+        protected int[] test(Pair<int[], Integer[]> data) {
+            Queue<Integer> left = new ConcurrentLinkedQueue<>();
+            Queue<Integer> right = new ConcurrentLinkedQueue<>();
+            left.addAll(Arrays.stream(data.getLeft()).boxed().collect(Collectors.toList()));
+            Integer[] ops = data.getRight();
+            Function<Void,Queue<Integer>> swap = new Function<Void, Queue<Integer>>() {
+                @Override
+                public Queue<Integer> apply(Void aVoid) {
+                    Queue<Integer> forPop = left.size()<=0?right:left;
+                    Queue<Integer> holder = left.size()<=0?left:right;
+                    while (forPop.size()> 1){
+                        holder.add(forPop.poll());
+                    }
+                    return forPop;
+                }
+            };
+            Function<Void,Integer> poll = new Function<Void, Integer>() {
+                @Override
+                public Integer apply(Void aVoid) {
+                    Queue<Integer> swapQueue = swap.apply(null);
+                    return swapQueue.poll();
+                }
+            };
+            Function<Integer,Boolean> add = new Function<Integer, Boolean>() {
+                @Override
+                public Boolean apply(Integer integer) {
+                     Queue<Integer> swapQueue = left.size()<=0? right:left;
+                    return swapQueue.add(integer);
+
+                }
+            };
+            for (int i = 0; i < ops.length; i++) {
+                if (ops[i] == null) {
+                    poll.apply(null);
+                }
+                else{
+                    add.apply(ops[i]);
+                }
+            }
+            Queue<Integer> resultQueue = left.size()<=0? right:left;
+            return resultQueue.stream().mapToInt(Integer::intValue).toArray();
         }
     }
 }
