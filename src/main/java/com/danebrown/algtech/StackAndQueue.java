@@ -23,11 +23,6 @@ import java.util.stream.Collectors;
 public class StackAndQueue {
     public static void main(String[] args) {
         ArrayQueue arrayQueue = new ArrayQueue();
-        int[] data = {-2037836292, -1463292357, -1285751995, -742265016, -154105910, 113449666, 237217538, 574940591, 972061624, 1007078208, 1059374408, 1483736186, 1652565323, 1696583709, 1722850146, 2017439736};
-        Integer[] ops = {null, 1317035272, -336730510, 610757432, null, null, -1362722851, 1048214874};
-        Pair<int[], Integer[]> customSupplier = Pair.of(data, ops);
-        //        arrayQueue.compare("数组实现队列",()->{return customSupplier;});
-        //        arrayQueue.compare("数组实现队列");
         arrayQueue.multiCompare("数组实现队列", 100);
     }
 
@@ -43,11 +38,16 @@ public class StackAndQueue {
          */
         @Override
         protected Pair<int[], Integer[]> prepare() {
-            int[] result = new int[ThreadLocalRandom.current().nextInt(2, 200)];
+            int dataSize = ThreadLocalRandom.current().nextInt(200,
+                    20000);
+//            dataSize = 200;
+            int opSize= ThreadLocalRandom.current().nextInt(0, dataSize - 1);
+//            opSize = 500;
+            int[] result = new int[dataSize];
             for (int i = 0; i < result.length; i++) {
                 result[i] = ThreadLocalRandom.current().nextInt();
             }
-            Integer[] opList = new Integer[ThreadLocalRandom.current().nextInt(0, result.length - 1)];
+            Integer[] opList = new Integer[opSize];
 
             for (int i = 0; i < opList.length; i++) {
                 if (ThreadLocalRandom.current().nextBoolean()) {
@@ -106,41 +106,34 @@ public class StackAndQueue {
             log.debug("原始数据:{}", data.getLeft());
             log.debug("原始操作:{}", data.getRight());
             List<Integer> integerList = new ArrayList<>();
-            Function<Integer, Integer> add = new Function<Integer, Integer>() {
-                @Override
-                public Integer apply(Integer integer) {
-                    if (size[0] >= arr.length) {
+            Function<Integer, Integer> add = integer -> {
+                if (size[0] >= arr.length) {
+                    return null;
+                }
+                log.debug("test->add:val:{}", integer);
+
+                arr[tail[0]] = integer;
+                tail[0] = tail[0] < limit - 1 ? tail[0] + 1 : 0;
+                size[0]++;
+                return integer;
+            };
+            Function<Void, Integer> poll = aVoid -> {
+                int val = 0;
+                try {
+                    if (size[0] <= 0) {
                         return null;
                     }
-                    log.debug("test->add:val:{}", integer);
+                    val = arr[head[0]];
+                    log.debug("test->pull:val:{}", val);
 
-                    arr[tail[0]] = integer;
-                    tail[0] = tail[0] < limit - 1 ? tail[0] + 1 : 0;
-                    size[0]++;
-                    return integer;
-                }
-            };
-            Function<Void, Integer> poll = new Function<Void, Integer>() {
-                @Override
-                public Integer apply(Void aVoid) {
-                    int val = 0;
-                    try {
+                    integerList.add(val);
+                    head[0] = head[0] < limit - 1 ? head[0] + 1 : 0;
+                    size[0]--;
+                } catch (Exception ex) {
+                    log.error("test->poll->size:{};head:{};arr:{}", size[0], head[0], arr);
 
-                        if (size[0] <= 0) {
-                            return null;
-                        }
-                        val = arr[head[0]];
-                        log.debug("test->pull:val:{}", val);
-
-                        integerList.add(val);
-                        head[0] = head[0] < limit - 1 ? head[0] + 1 : 0;
-                        size[0]--;
-                    } catch (Exception ex) {
-                        log.error("test->poll->size:{};head:{};arr:{}", size[0], head[0], arr);
-
-                    } finally {
-                        return val;
-                    }
+                } finally {
+                    return val;
                 }
             };
             for (int i = 0; i < ops.length; i++) {
