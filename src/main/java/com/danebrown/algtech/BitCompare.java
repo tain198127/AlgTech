@@ -2,6 +2,7 @@ package com.danebrown.algtech;
 
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
+import com.danebrown.algtech.algcomp.AlgName;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -27,7 +28,7 @@ import java.util.stream.IntStream;
 public class BitCompare {
 
     public static void main(String[] args) {
-        AlgCompMenu.addComp(new BitSwap(),"异或对比");
+        AlgCompMenu.addComp(new BitSwap());
         AlgCompMenu.addComp(new OddNumSearch(),"奇数次数字校验");
         AlgCompMenu.addComp(new LastRightOne(),"保持最右边的一个1");
         AlgCompMenu.addComp(new TwoOddNumSearch(),"查找两个奇数");
@@ -36,6 +37,7 @@ public class BitCompare {
 
     }
 
+    @AlgName(name = "异或对比")
     public static class BitSwap extends AlgCompImpl<String, int[]> {
 
         @Override

@@ -1,6 +1,9 @@
 package com.danebrown.algtech.algcomp;
 
+import cn.hutool.core.annotation.AnnotationUtil;
+import com.google.common.base.Strings;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.AnnotationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.core.util.Integers;
@@ -23,7 +26,12 @@ public final class AlgCompMenu {
         algCompList.add(0,null);
     }
     public static void addComp(AlgCompImpl comp){
-        addComp(comp,comp.getClass().getSimpleName());
+        AlgName algName = comp.getClass().getAnnotation(AlgName.class);
+        String name =comp.getClass().getSimpleName();
+        if(algName != null && !Strings.isNullOrEmpty(algName.name())){
+            name = algName.name();
+        }
+        addComp(comp,name);
     }
     public static void addComp(AlgCompImpl comp, String name){
         addComp(comp,name,100);
