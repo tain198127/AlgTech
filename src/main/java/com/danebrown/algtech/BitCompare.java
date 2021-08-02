@@ -37,7 +37,7 @@ public class BitCompare {
 
     }
 
-    @AlgName(name = "异或对比")
+    @AlgName("异或对比")
     public static class BitSwap extends AlgCompImpl<String, int[]> {
 
         @Override
@@ -89,6 +89,7 @@ public class BitCompare {
      * 数组中查找奇数次数据
      * 其中只有一个奇数次，剩下的都是偶数次
      */
+    @AlgName("奇数次数字校验")
     public static class OddNumSearch extends AlgCompImpl<String, int[]> {
 
         @Override
@@ -162,6 +163,7 @@ public class BitCompare {
     /**
      * 数据中有两个奇数次数据，其他两个数是偶数次。找到这两个数
      */
+    @AlgName("查找两个奇数")
     public static class TwoOddNumSearch extends AlgCompImpl<int[], int[]> {
         OddNumSearch inner = new OddNumSearch();
 
@@ -246,6 +248,7 @@ public class BitCompare {
      * Triple<int[],Integer,Integer> 表示测试数据
      * 第一个int[]表示测试数组， middle表示k，right表示m
      */
+    @AlgName("查找只有K次的数字")
     public static class OnlyKTimesNumSearch extends AlgCompImpl<Integer, Triple<int[], Integer, Integer>> {
 
 

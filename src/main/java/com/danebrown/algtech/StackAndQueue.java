@@ -2,6 +2,7 @@ package com.danebrown.algtech;
 
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
+import com.danebrown.algtech.algcomp.AlgName;
 import com.google.common.collect.Queues;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
@@ -228,6 +229,7 @@ public class StackAndQueue {
     /**
      * 图的宽度是用队列实现的；图的深度是用栈实现的，这个是经典算法
      */
+    @AlgName
     public static class Stack2Queue extends AlgCompImpl<int[], Pair<int[], Integer[]>>{
 
 

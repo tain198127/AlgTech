@@ -1,5 +1,8 @@
 package com.danebrown.algtech.algcomp;
 
+import lombok.Value;
+
+import javax.annotation.Resource;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -22,5 +25,6 @@ public @interface AlgName {
      * 算法名称
      * @return
      */
-    String name() default "";
+    String value() default "";
+
 }

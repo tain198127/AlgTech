@@ -28,8 +28,8 @@ public final class AlgCompMenu {
     public static void addComp(AlgCompImpl comp){
         AlgName algName = comp.getClass().getAnnotation(AlgName.class);
         String name =comp.getClass().getSimpleName();
-        if(algName != null && !Strings.isNullOrEmpty(algName.name())){
-            name = algName.name();
+        if(algName != null && !Strings.isNullOrEmpty(algName.value())){
+            name = algName.value();
         }
         addComp(comp,name);
     }
