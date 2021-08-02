@@ -1,19 +1,16 @@
 package com.danebrown.algtech;
 
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -41,10 +38,10 @@ public class BitCompare {
 
 
         TwoOddNumSearch twoOddNumSearch = new TwoOddNumSearch();
-        twoOddNumSearch.multiCompare("查找两个奇数",1);
+        twoOddNumSearch.multiCompare("查找两个奇数", 1);
 
         OnlyKTimesNumSearch multiOddNumSearch = new OnlyKTimesNumSearch();
-        multiOddNumSearch.multiCompare("查找只有K次的数字",100);
+        multiOddNumSearch.multiCompare("查找只有K次的数字", 100);
 
     }
 
@@ -256,106 +253,95 @@ public class BitCompare {
      * Triple<int[],Integer,Integer> 表示测试数据
      * 第一个int[]表示测试数组， middle表示k，right表示m
      */
-    public static class OnlyKTimesNumSearch extends AlgCompImpl<Integer,
-            Triple<int[],Integer,Integer>>{
+    public static class OnlyKTimesNumSearch extends AlgCompImpl<Integer, Triple<int[], Integer, Integer>> {
 
 
         @Override
-        protected Triple<int[],Integer,Integer> prepare() {
+        protected Triple<int[], Integer, Integer> prepare() {
             //数值有K次
-            int k = ThreadLocalRandom.current().nextInt(1,100);
+            int k = ThreadLocalRandom.current().nextInt(1, 100);
             //数值有M次
-            int m = ThreadLocalRandom.current().nextInt(k+1,k+100);
+            int m = ThreadLocalRandom.current().nextInt(k + 1, k + 100);
             //只分一组
             int kGroups = 1;
             //可以分N多组
-            int mGroups = ThreadLocalRandom.current().nextInt(1,100);
-            ArrayList<Integer> result  = new ArrayList<>();
-            for(int i = 0;i < kGroups;i++){
+            int mGroups = ThreadLocalRandom.current().nextInt(1, 100);
+            ArrayList<Integer> result = new ArrayList<>();
+            for (int i = 0; i < kGroups; i++) {
                 //保证K组中，每一组的数不一样，同时，长度都是K
                 int kv = ThreadLocalRandom.current().nextInt();
                 int[] data = new int[k];
-                Arrays.fill(data,kv);
+                Arrays.fill(data, kv);
                 result.addAll(Arrays.stream(data).boxed().collect(Collectors.toList()));
             }
-            for(int i = 0; i < mGroups; i++){
+            for (int i = 0; i < mGroups; i++) {
                 //保证M组中，每一组的数不一样，同时长度都是M
                 int mv = ThreadLocalRandom.current().nextInt();
-//                int mv = 0;
-                int [] data = new int[m];
-                Arrays.fill(data,mv);
+                //                int mv = 0;
+                int[] data = new int[m];
+                Arrays.fill(data, mv);
                 result.addAll(Arrays.stream(data).boxed().collect(Collectors.toList()));
             }
-
-
 
 
             Collections.shuffle(result);
 
-            int[] left =
-                    result.stream().flatMapToInt(integer -> IntStream.of(integer)).toArray();
+            int[] left = result.stream().flatMapToInt(integer -> IntStream.of(integer)).toArray();
 
             return Triple.of(left,
-//                    ThreadLocalRandom.current().nextBoolean()?k :m-1
-                    k
-                    ,m);
+                    //                    ThreadLocalRandom.current().nextBoolean()?k :m-1
+                    k, m);
 
         }
 
         /**
          * 只有K次数字的标准程序
+         *
          * @param data int[]是数组 中间的integer是K，右边的integer是M
          * @return
          */
         @Override
-        protected Integer standard(Triple<int[],Integer,Integer> data) {
-            Map<Integer,Integer> map = new HashMap<>();
-            for(int i: data.getLeft()){
-                if(!map.containsKey(i)){
-                    map.put(i,1);
-                }
-                else{
-                    map.put(i,map.get(i)+1);
+        protected Integer standard(Triple<int[], Integer, Integer> data) {
+            Map<Integer, Integer> map = new HashMap<>();
+            for (int i : data.getLeft()) {
+                if (!map.containsKey(i)) {
+                    map.put(i, 1);
+                } else {
+                    map.put(i, map.get(i) + 1);
                 }
             }
-            log.debug("过程数据{}, k次为:{},m次为:{}",map,data.getMiddle(),data.getRight());
+            log.debug("过程数据{}, k次为:{},m次为:{}", map, data.getMiddle(), data.getRight());
 
-           return map.entrySet().stream().filter(item->
-                   item.getValue().equals(data.getMiddle())
-           )
-                   .findFirst()
-                   .map(item->item.getKey())
-                   .orElse(-1);
+            return map.entrySet().stream().filter(item -> item.getValue().equals(data.getMiddle())).findFirst().map(item -> item.getKey()).orElse(-1);
         }
 
         /**
          * 只有K次数字的测试程序
+         *
          * @param data int[]是数组 中间的integer是K，右边的integer是M
          * @return
          */
         @Override
-        protected Integer test(Triple<int[],Integer,Integer> data) {
-            int [] num = new int[32];
-            int [] arr = data.getLeft();
+        protected Integer test(Triple<int[], Integer, Integer> data) {
+            int[] num = new int[32];
+            int[] arr = data.getLeft();
             int k = data.getMiddle();
             int m = data.getRight();
-            for(int i =0;i< arr.length;i++){
-                for(int j = 0; j< num.length;j++){
-                    if(((arr[i] >> j)&1) > 0){
+            for (int i = 0; i < arr.length; i++) {
+                for (int j = 0; j < num.length; j++) {
+                    if (((arr[i] >> j) & 1) > 0) {
                         num[j]++;
                     }
                 }
             }
             int result = 0;
-            for(int i = 0; i < num.length;i++){
-                log.debug("{} -->{}",num[i] %m,num[i] %m %k);
-                if(num[i] %m !=0 && num[i] %m %k == 0){
-                    result = result | (1<<i);
-                }
-                else if(num[i] %m ==0){
-                    log.debug("{} -->{}",num[i] %m,num[i] %m %k);
-                }
-                else{
+            for (int i = 0; i < num.length; i++) {
+                log.debug("{} -->{}", num[i] % m, num[i] % m % k);
+                if (num[i] % m != 0 && num[i] % m % k == 0) {
+                    result = result | (1 << i);
+                } else if (num[i] % m == 0) {
+                    log.debug("{} -->{}", num[i] % m, num[i] % m % k);
+                } else {
                     return -1;
                 }
 
@@ -384,17 +370,17 @@ public class BitCompare {
         @Override
         protected Integer standard(Integer data) {
             char[] bin = Integer.toBinaryString(data).toCharArray();
-            boolean isSetZero=false;
-            for(int i=bin.length-1;i>=0;i--){
-                if(isSetZero){
+            boolean isSetZero = false;
+            for (int i = bin.length - 1; i >= 0; i--) {
+                if (isSetZero) {
                     bin[i] = '0';
                 }
-                if(bin[i] == '1'){
+                if (bin[i] == '1') {
                     isSetZero = true;
                 }
             }
-            int ret = Integer.parseUnsignedInt(String.valueOf(bin),2);
-//            int ret = data & (~data + 1);
+            int ret = Integer.parseUnsignedInt(String.valueOf(bin), 2);
+            //            int ret = data & (~data + 1);
             return ret;
         }
 
