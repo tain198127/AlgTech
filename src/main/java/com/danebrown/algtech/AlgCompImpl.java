@@ -75,6 +75,7 @@ public abstract class AlgCompImpl<T,R>{
         stopWatch.start();
         T testResult = test(forTest);
         stopWatch.stop();
+        log.debug("测试结果:{}", testResult);
         log.debug("测试计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
         if(testTime != null){
             testTime.accept(stopWatch.getTime(TimeUnit.MILLISECONDS));
@@ -85,17 +86,18 @@ public abstract class AlgCompImpl<T,R>{
         stopWatch.start();
         T standardResult = standard(forStandard);
         stopWatch.stop();
+        log.debug("标准结果:{}", standardResult);
+
         log.debug("标准计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
         if(standardTime != null){
             standardTime.accept(stopWatch.getTime(TimeUnit.MILLISECONDS));
         }
         result = testEqual(testResult, standardResult);
-        log.debug("标准结果:{}", standardResult);
-        log.debug("测试结果:{}", testResult);
         if (!result) {
-            log.error("{}测试失败，原始数据:{},测试结果:{},标准结果:{}", testName,setupData,
-                    testResult,
-                    standardResult);
+            log.error("{}测试失败,原始数据:{}", testName,setupData
+                    );
+            log.error("{}测试失败,测试结果:{}",testName,testResult);
+            log.error("{}测试失败,标准结果:{}",testName,standardResult);
         } else {
             log.debug("{}测试成功", testName);
         }
@@ -159,6 +161,9 @@ public abstract class AlgCompImpl<T,R>{
      * @return
      */
     protected boolean testEqual(T standard, T test){
+        if(standard == test){
+            return true;
+        }
         if (standard == null || test == null) {
             log.error("测试数组为空");
             return false;
