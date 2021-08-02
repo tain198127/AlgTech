@@ -2,12 +2,17 @@ package com.danebrown.algtech;
 
 import com.google.common.collect.Queues;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.checkerframework.checker.units.qual.A;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
+import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,8 +27,9 @@ import java.util.stream.Collectors;
 @Log4j2
 public class StackAndQueue {
     public static void main(String[] args) {
-        ArrayQueue arrayQueue = new ArrayQueue();
-        arrayQueue.multiCompare("数组实现队列", 100);
+        AlgCompMenu.addComp(new MaxMinStack(),"最小最大栈");
+        AlgCompMenu.addComp(new ArrayQueue(),"数组实现队列");
+        AlgCompMenu.run();
     }
 
     /**
@@ -151,5 +157,72 @@ public class StackAndQueue {
             return integerList.stream().mapToInt(v -> v).toArray();
         }
 
+    }
+
+    /**
+     * 最大最小栈
+     */
+    public static class MaxMinStack extends AlgCompImpl<int[],Integer[]>{
+
+        @Override
+        protected Integer[] prepare() {
+            int dataSize = ThreadLocalRandom.current().nextInt(200,
+                    20000);
+            int popOpSize = dataSize/2;
+            Integer[] data = new Integer[dataSize+popOpSize];
+            for (int i = 0; i < dataSize; i++) {
+                data[i]=ThreadLocalRandom.current().nextInt();
+            }
+            for(int i = dataSize; i < dataSize+popOpSize;i++){
+                data[i] = null;
+            }
+            return data;
+        }
+
+        @Override
+        protected int[] standard(Integer[] data) {
+            Stack<Integer> stack = new Stack<>();
+            for (int i = 0; i < data.length; i++) {
+                if(data[i] != null){
+                    stack.push(data[i]);
+                }
+                else{
+                    stack.pop();
+                }
+            }
+            int max =
+                    stack.stream().max(Comparator.comparingInt(o -> o)).orElse(Integer.MIN_VALUE);
+            int min =
+                    stack.stream().min(Comparator.comparingInt(o->o)).orElse(Integer.MAX_VALUE);
+            return new int[]{min,max};
+        }
+
+        @Override
+        protected int[] test(Integer[] data) {
+            Stack<Integer> testStack = new Stack<>();
+            Stack<Integer> maxStack = new Stack<>();
+            Stack<Integer> minStack = new Stack<>();
+
+            for (int i = 0; i < data.length; i++) {
+                if(data[i] != null){
+                    testStack.push(data[i]);
+                    maxStack.push(maxStack.size() <=0?
+                            data[i]:data[i] > maxStack.peek()?
+                            data[i]:
+                    maxStack.peek());
+                    minStack.push(minStack.size()<=0?
+                            data[i]:data[i] < minStack.peek()?data[i]:
+                            minStack.peek());
+                }
+                else{
+                    testStack.pop();
+                    maxStack.pop();
+                    minStack.pop();
+                }
+            }
+            int min = minStack.peek();
+            int max = maxStack.peek();
+            return new int[]{min,max};
+        }
     }
 }

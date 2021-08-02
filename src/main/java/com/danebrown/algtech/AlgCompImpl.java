@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 /**
  * Created by danebrown on 2021/7/28
  * mail: tain198127@163.com
- *
+ * 对数器
  * @author danebrown
  */
 @Log4j2
@@ -48,6 +48,14 @@ public abstract class AlgCompImpl<T,R>{
      */
     protected abstract T test(R data);
 
+    /**
+     * 对数
+     * @param testName 对数器名称
+     * @param testTime 测试时间消费者
+     * @param standardTime 标准程序时间消费者
+     * @param prepareSupplier 测试提供者
+     * @return
+     */
     public boolean compare(String testName, Consumer<Long> testTime,
                            Consumer<Long> standardTime ,
                            Supplier<R> prepareSupplier){
