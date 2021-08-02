@@ -23,7 +23,12 @@ import java.util.stream.Collectors;
 public class StackAndQueue {
     public static void main(String[] args) {
         ArrayQueue arrayQueue = new ArrayQueue();
-        arrayQueue.compare("数组实现队列");
+        int[] data = {-2037836292, -1463292357, -1285751995, -742265016, -154105910, 113449666, 237217538, 574940591, 972061624, 1007078208, 1059374408, 1483736186, 1652565323, 1696583709, 1722850146, 2017439736};
+        Integer[] ops = {null, 1317035272, -336730510, 610757432, null, null, -1362722851, 1048214874};
+        Pair<int[], Integer[]> customSupplier = Pair.of(data,ops);
+//        arrayQueue.compare("数组实现队列",()->{return customSupplier;});
+//        arrayQueue.compare("数组实现队列");
+        arrayQueue.multiCompare("数组实现队列",100);
     }
 
     /**
@@ -38,13 +43,14 @@ public class StackAndQueue {
          */
         @Override
         protected Pair<int[], Integer[]> prepare() {
-            int[] result = new int[ThreadLocalRandom.current().nextInt(5,
-                    1000)];
+            int[] result = new int[ThreadLocalRandom.current().nextInt(2,
+                    200)];
             for (int i = 0; i < result.length; i++) {
                 result[i] = ThreadLocalRandom.current().nextInt();
             }
             Integer[] opList =
-                    new Integer[ThreadLocalRandom.current().nextInt(1, result.length - 1)];
+                    new Integer[ThreadLocalRandom.current().nextInt(0,
+                            result.length - 1)];
 
             for (int i = 0; i < opList.length; i++) {
                 if (ThreadLocalRandom.current().nextBoolean()) {
@@ -62,8 +68,9 @@ public class StackAndQueue {
 
         @Override
         protected int[] standard(Pair<int[], Integer[]> data) {
+            int limit = data.getLeft().length+ + data.getRight().length;
             Queue<Integer> queue =
-                    Queues.newArrayBlockingQueue(data.getLeft().length);
+                    Queues.newArrayBlockingQueue(limit);
             queue.addAll(Arrays.stream(data.getLeft()).boxed().collect(Collectors.toList()));
             Integer[] ops = data.getRight();
             List<Integer> integerList = new ArrayList<>();
@@ -79,15 +86,11 @@ public class StackAndQueue {
                     log.debug("standard->pull:val:{}",val);
                     integerList.add(val) ;
                 } else {
-                    try{
-
+                    if(queue.size() >=limit){
+                        continue;
+                    }
                         queue.add(ops[i]);
                         log.debug("standard->add:val:{}",ops[i]);
-                    }
-                    catch (Exception ex){
-//                        log.debug("队列满了，插不进去");
-                    }
-
                 }
             }
             return integerList.stream().mapToInt(value -> value).toArray();
@@ -95,14 +98,15 @@ public class StackAndQueue {
 
         @Override
         protected int[] test(Pair<int[], Integer[]> data) {
-            int[] arr = new int[data.getLeft().length + data.getRight().length];
+            int limit = data.getLeft().length + data.getRight().length;
+            int[] arr = new int[limit];
             for (int i = 0; i < data.getLeft().length; i++) {
                 arr[i] = data.getLeft()[i];
             }
             Integer[] ops = data.getRight();
-            final int[] size = {0};
+            final int[] size = {data.getLeft().length};
             final int[] head = {0};
-            final int[] tail = {data.getLeft().length};
+            final int[] tail = {data.getLeft().length-1};
             log.debug("原始数据:{}",data.getLeft());
             log.debug("原始操作:{}",data.getRight());
             List<Integer> integerList = new ArrayList<>();
@@ -115,8 +119,8 @@ public class StackAndQueue {
                     log.debug("test->add:val:{}",integer);
 
                     arr[tail[0]] = integer;
-                    tail[0] = tail[0] < data.getLeft().length-1?tail[0]+1:0;
-
+                    tail[0] = tail[0] < limit-1?tail[0]+1:0;
+                    size[0]++;
                     return integer;
                 }
             };
@@ -126,15 +130,16 @@ public class StackAndQueue {
                     int val = 0;
                     try{
 
-                        if (size[0] < 0) {
+                        if (size[0] <= 0) {
                             return null;
                         }
                         val = arr[head[0]];
                         log.debug("test->pull:val:{}",val);
 
                         integerList.add(val);
-                        head[0] =head[0] < data.getLeft().length -1 ?
+                        head[0] =head[0] < limit -1 ?
                                 head[0]+1:0;
+                        size[0]--;
                     }
                     catch (Exception ex){
                         log.error("test->poll->size:{};head:{};arr:{}",size[0],

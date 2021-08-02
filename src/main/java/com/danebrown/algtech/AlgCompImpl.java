@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Created by danebrown on 2021/7/28
@@ -48,8 +49,10 @@ public abstract class AlgCompImpl<T,R>{
     protected abstract T test(R data);
 
     public boolean compare(String testName, Consumer<Long> testTime,
-                           Consumer<Long> standardTime ){
-        R setupData = prepare();
+                           Consumer<Long> standardTime ,
+                           Supplier<R> prepareSupplier){
+
+        R setupData =prepareSupplier == null? prepare():prepareSupplier.get();
         log.trace("原始数据:{}",setupData);
         R forTest = null;
         R forStandard = null;
@@ -103,17 +106,24 @@ public abstract class AlgCompImpl<T,R>{
         }
         return result;
     }
+    public boolean compare(String testName, Consumer<Long> testTime,
+                           Consumer<Long> standardTime){
+        return this.compare(testName,testTime,standardTime,null);
+    }
     /**
      * 对数
      * @param testName
      * @return
      */
     public boolean compare(String testName) {
+        return this.compare(testName,null);
+    }
+    public boolean compare(String testName,Supplier<R> prepareSupplier){
         return this.compare(testName,t->{
             log.warn("{} 测试程序 耗时[{}]毫秒",testName,t);
         },s->{
             log.warn("{} 标准程序 耗时[{}]毫秒",testName,s);
-        });
+        },prepareSupplier);
     }
 
 
