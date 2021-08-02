@@ -1,4 +1,4 @@
-package com.danebrown.algtech;
+package com.danebrown.algtech.algcomp;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSON;

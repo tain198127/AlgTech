@@ -1,12 +1,11 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompImpl;
+import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.google.common.collect.Queues;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.checkerframework.checker.units.qual.A;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;

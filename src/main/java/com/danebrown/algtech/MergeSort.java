@@ -1,5 +1,7 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompImpl;
+
 /**
  * Created by danebrown on 2021/8/2
  * mail: tain198127@163.com
@@ -11,7 +13,7 @@ public class MergeSort {
         RecursionMergeSort recursionMergeSort = new RecursionMergeSort();
         recursionMergeSort.compare("递归归并排序");
     }
-    public static class RecursionMergeSort extends  AlgCompImpl<int[],int[]>{
+    public static class RecursionMergeSort extends AlgCompImpl<int[],int[]> {
 
         @Override
         protected int[] prepare() {

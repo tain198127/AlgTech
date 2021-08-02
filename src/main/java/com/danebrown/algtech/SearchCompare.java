@@ -1,7 +1,6 @@
 package com.danebrown.algtech;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import com.danebrown.algtech.algcomp.AlgCompImpl;
 
 /**
  * Created by danebrown on 2021/7/27
@@ -9,7 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author danebrown
  */
-public class SearchCompare extends AlgCompImpl<Integer, Integer[]>{
+public class SearchCompare extends AlgCompImpl<Integer, Integer[]> {
     /**
      * 计算中值
      * 原始公式： (L+R)/2，但是L+R可能溢出。
