@@ -7,6 +7,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.bag.UnmodifiableBag;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.logging.log4j.Level;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -135,13 +136,16 @@ public abstract class AlgCompImpl<T,R>{
     }
 
 
+    public boolean multiCompare(String testName, int times){
+        return multiCompare(testName,times,null);
+    }
     /**
      * 多次测试
      * @param testName
      * @param times
      * @return
      */
-    public boolean multiCompare(String testName, int times) {
+    public boolean multiCompare(String testName, int times,Consumer consumer) {
         boolean result = true;
         List<Long> testTime = new ArrayList<>(times);
         List<Long> standardTime = new ArrayList<>(times);
@@ -151,6 +155,9 @@ public abstract class AlgCompImpl<T,R>{
             },s->{
                 standardTime.add(s);
             });
+            if(consumer != null){
+                consumer.accept(result);
+            }
         }
         long maxTest = testTime.stream().max(Long::compareTo).get();
         long minTest = testTime.stream().min(Long::compareTo).get();

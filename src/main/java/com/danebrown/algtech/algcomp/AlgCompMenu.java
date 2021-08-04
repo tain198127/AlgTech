@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.AnnotationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.util.Integers;
 
 import java.util.ArrayList;
@@ -88,7 +89,15 @@ public final class AlgCompMenu {
             log.info("第{}位对数器 :{},结果为:[{}]", idx, name, impl.compare(name));
         }
         else{
-            log.info("第{}位对数器 :{},循环:[{}]次,结果为:[{}]", idx, name, times, impl.multiCompare(name, times));
+            log.info("第{}位对数器 :{},循环:[{}]次,结果为:[{}]", idx, name, times,
+                    impl.multiCompare(name, times,r->
+                    {
+                        if(log.getLevel().intLevel() <= Level.INFO.intLevel()){
+                            System.out.print(".");
+                        }
+                    }
+
+                    ));
         }
     }
 
