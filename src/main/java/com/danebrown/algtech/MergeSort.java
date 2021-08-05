@@ -3,6 +3,7 @@ package com.danebrown.algtech;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
@@ -16,9 +17,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MergeSort {
     public static void main(String[] args) {
         AlgCompMenu.addComp(new RecursionMergeSort());
+        AlgCompMenu.addComp(new WhileMergeSort());
+        AlgCompMenu.addComp(new LeftMinSum());
+        AlgCompMenu.addComp(new ReversSortPair());
+        AlgCompMenu.addComp(new BiggerThanRightTwice());
         AlgCompMenu.run();
     }
-    @AlgName("递归归并排序")
+    @AlgName("递归归并排序[完成]")
     public static class RecursionMergeSort extends AlgCompImpl<int[],int[]> {
 
         @Override
@@ -74,6 +79,124 @@ public class MergeSort {
             for(i=0;i<tmp.length;i++){
                 data[L+i] = tmp[i];
             }
+        }
+    }
+
+    /**
+     * 循环版归并排序 第五章
+     */
+    @AlgName("循环归并排序")
+    public static class WhileMergeSort extends AlgCompImpl<int[],int[]>{
+
+        RecursionMergeSort recursionMergeSort  = new RecursionMergeSort();
+        @Override
+        public int[] prepare() {
+            return recursionMergeSort.prepare();
+        }
+
+        @Override
+        protected int[] standard(int[] data) {
+            return recursionMergeSort.standard(data);
+        }
+
+        @Override
+        protected int[] test(int[] data) {
+            return new int[0];
+        }
+    }
+
+    /**
+     *  第五章
+     */
+    @AlgName("小和")
+    public static class LeftMinSum extends AlgCompImpl<Integer,int[]>{
+        RecursionMergeSort recursionMergeSort = new RecursionMergeSort();
+        @Override
+        public int[] prepare() {
+            return recursionMergeSort.prepare();
+        }
+
+        @Override
+        protected Integer standard(int[] data) {
+
+            return null;
+        }
+
+        @Override
+        protected Integer test(int[] data) {
+            return null;
+        }
+    }
+
+    /**
+     *  第五章
+     */
+    @AlgName("逆序对计算，经典考题")
+    public static class ReversSortPair extends AlgCompImpl<Integer,int[]>{
+
+        @Override
+        public int[] prepare() {
+            return new int[0];
+        }
+
+        @Override
+        protected Integer standard(int[] data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(int[] data) {
+            return null;
+        }
+    }
+
+    /**
+     *  第五章
+     */
+    @AlgName("大于右侧数2倍")
+    public static class BiggerThanRightTwice extends AlgCompImpl<Integer,int[]>{
+        private RecursionMergeSort recursionMergeSort =
+                new RecursionMergeSort();
+        @Override
+        public int[] prepare() {
+            return recursionMergeSort.prepare();
+        }
+
+        @Override
+        protected Integer standard(int[] data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(int[] data) {
+            return null;
+        }
+    }
+
+    /**
+     * 给定一个数组，和最大值、最小值，数组中有多少个子数组累加的和在[low,high]内
+     */
+    @AlgName("滑动范围子数组")
+    public static class CountOfRangeSum extends AlgCompImpl<Integer,
+            Triple<int[],Integer,Integer>>{
+
+        RecursionMergeSort recursionMergeSort = new RecursionMergeSort();
+        @Override
+        public Triple<int[], Integer, Integer> prepare() {
+           int[] arr = recursionMergeSort.prepare();
+           int low = ThreadLocalRandom.current().nextInt();
+           int high = ThreadLocalRandom.current().nextInt(low,arr.length+low);
+           return Triple.of(arr,low,high);
+        }
+
+        @Override
+        protected Integer standard(Triple<int[], Integer, Integer> data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(Triple<int[], Integer, Integer> data) {
+            return null;
         }
     }
 }
