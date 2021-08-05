@@ -23,7 +23,7 @@ public class MergeSort {
 
         @Override
         public int[] prepare() {
-            int dataSize = ThreadLocalRandom.current().nextInt(200000, 500000);
+            int dataSize = ThreadLocalRandom.current().nextInt(2, 500000);
             int [] data = new int[dataSize];
             for(int i=0;i < dataSize; i++){
                 data[i] = ThreadLocalRandom.current().nextInt();
@@ -49,6 +49,9 @@ public class MergeSort {
             if(data == null || data.length <2||L ==R){
                 return;
             }
+            /**
+             * 这里很容易出错
+             */
             int middle = L + ((R-L)>>1);//L + (R-L)/2 = R/2 + L/2=(R+L)/2
             mergeSort(data,L,middle);
             mergeSort(data,middle+1,R);//这里容易出错
@@ -59,7 +62,7 @@ public class MergeSort {
             int[] tmp = new int[R-L+1];
             int l = L;
             int r = M+1;
-            while (l <= M && r <= R){
+            while (l <= M && r <= R){//这里容易出错
                 tmp[i++] = data[l] <= data[r]?data[l++]:data[r++];//谁大用谁
             }
             while (l <= M){
