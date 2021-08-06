@@ -145,7 +145,8 @@ public abstract class AlgCompImpl<T,R>{
      * @param times
      * @return
      */
-    public boolean multiCompare(String testName, int times,Consumer consumer) {
+    public boolean multiCompare(String testName, int times,
+                                Consumer consumer) {
         boolean result = true;
         List<Long> testTime = new ArrayList<>(times);
         List<Long> standardTime = new ArrayList<>(times);
@@ -158,6 +159,9 @@ public abstract class AlgCompImpl<T,R>{
             if(consumer != null){
                 consumer.accept(result);
             }
+        }
+        if(consumer != null) {
+            consumer.accept(null);
         }
         long maxTest = testTime.stream().max(Long::compareTo).get();
         long minTest = testTime.stream().min(Long::compareTo).get();

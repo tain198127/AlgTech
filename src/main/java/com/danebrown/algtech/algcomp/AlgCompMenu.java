@@ -93,7 +93,11 @@ public final class AlgCompMenu {
                     impl.multiCompare(name, times,r->
                     {
                         if(log.getLevel().intLevel() <= Level.INFO.intLevel()){
-                            System.out.print(".");
+                            if(r != null)
+                                System.out.print(".");
+                            else{
+                                System.out.println("");
+                            }
                         }
                     }
 

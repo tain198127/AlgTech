@@ -101,7 +101,51 @@ public class MergeSort {
 
         @Override
         protected int[] test(int[] data) {
-            return new int[0];
+            whileSort(data);
+            return data;
+        }
+        private void whileSort(int[] data){
+            if(data == null||data.length<2) {
+                return;
+            }
+            int N = data.length;
+            int mergeSize=1;
+            while (mergeSize < N){
+                int L = 0;//当前左组的第一个位置
+                while(L<N)
+                {
+                    int M = L+mergeSize -1;
+                    if(M >= N){
+                        break;
+                    }
+                    int R = Math.min(M+mergeSize,N-1);
+                    merge(data,L,M,R);
+                    L=R+1;
+                }
+                if(mergeSize > N/2){
+                    break;
+                }
+                mergeSize <<= 1;
+
+            }
+        }
+        private void merge(int[] data,int l,int m,int r){
+            int p1= l;
+            int p2 = m+1;
+            int[] tmp = new int[r-l+1];
+            int i = 0;
+            while (p1 <= m && p2 <= r){
+                tmp[i++] = data[p1]<=data[p2]?data[p1++]:data[p2++];
+            }
+            while (p1 <= m){
+                tmp[i++] = data[p1++];
+            }
+            while (p2 <= r){
+                tmp[i++] = data[p2++];
+            }
+            for(i=0;i<tmp.length;i++){
+                data[i+l] = tmp[i];
+            }
         }
     }
 
