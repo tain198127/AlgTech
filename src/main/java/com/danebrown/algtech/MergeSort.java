@@ -112,17 +112,17 @@ public class MergeSort {
             int mergeSize=1;
             while (mergeSize < N){
                 int L = 0;//当前左组的第一个位置
-                while(L<N)
+                while(L<N)   //这里很容易忘记
                 {
-                    int M = L+mergeSize -1;
-                    if(M >= N){
+                    int M = L+mergeSize -1;  //这里容易错
+                    if(M >= N){   //这里容易漏掉
                         break;
                     }
-                    int R = Math.min(M+mergeSize,N-1);
+                    int R = Math.min(M+mergeSize,N-1);   //这里容易错
                     merge(data,L,M,R);
-                    L=R+1;
+                    L=R+1; //这里容易漏掉
                 }
-                if(mergeSize > N/2){
+                if(mergeSize > N/2){   //这里容易漏掉
                     break;
                 }
                 mergeSize <<= 1;
