@@ -3,6 +3,7 @@ package com.danebrown.algtech;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.Arrays;
@@ -14,6 +15,7 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @author danebrown
  */
+@Log4j2
 public class MergeSort {
     public static void main(String[] args) {
         AlgCompMenu.addComp(new RecursionMergeSort());
@@ -158,24 +160,95 @@ public class MergeSort {
     /**
      * 第五章
      */
-    @AlgName("小和")
-    public static class LeftMinSum extends AlgCompImpl<Integer, int[]> {
-        RecursionMergeSort recursionMergeSort = new RecursionMergeSort();
-
+    @AlgName("最小和")
+    /**
+     * 在一个数组中，一个数左边比它小的数的总和，叫数的小和，所有数的小和累加起来，叫数组小和。求数组小和。
+     *  例子： [1,3,4,2,5]
+     * 1左边比1小的数：没有
+     * 3左边比3小的数：1
+     * 4左边比4小的数：1、3
+     * 2左边比2小的数：1
+     * 5左边比5小的数：1、3、4、 2
+     * 所以数组的小和为1+1+3+1+1+3+4+2=16
+     */ public static class LeftMinSum extends AlgCompImpl<Integer, int[]> {
         @Override
         public int[] prepare() {
-            return recursionMergeSort.prepare();
+            int dataSize = ThreadLocalRandom.current().nextInt(2, 50000);
+            int[] data = new int[dataSize];
+            for (int i = 0; i < dataSize; i++) {
+                data[i] = ThreadLocalRandom.current().nextInt();
+            }
+            return data;
         }
 
         @Override
         protected Integer standard(int[] data) {
+            int ret = 0;
+            for (int i = 0; i < data.length; i++) {
+                for (int j = 0; j < i; j++) {
+                    if (data[j] < data[i]) {
+                        ret += data[j];
+                    }
+                }
+            }
 
-            return null;
+            return ret;
         }
 
         @Override
         protected Integer test(int[] data) {
-            return null;
+            int result =mergeSort(data, 0, data.length - 1);
+            log.info("左侧最小和结果:{}", result);
+//            log.info("{}",data);
+            return result;
+        }
+
+        private int mergeSort(int[] data, int l, int r) {
+            int result = 0;
+
+            if (l >= r) {
+                return result;
+            }
+            int m = l + ((r - l) >> 2);
+            result += mergeSort(data, l, m);
+            result += mergeSort(data, m + 1, r);
+            result += merge(data, l, m, r);
+            return result;
+
+        }
+
+        private int merge(int[] data, int l, int m, int r) {
+            int[] tmp = new int[r - l + 1];
+            int p1 = l;
+            int p2 = m + 1;
+            int i = 0;
+            int result = 0;
+            while (p1 <= m && p2 <= r) {
+                //左组小的时候产生小和.这句是精髓.把
+                /**
+                 * 把计算小和数的问题，转化成了，右边有几个比这个小数大的。有几个比他大的就乘以几次。
+                 * 之所以能乘以几次，是因为每一次左组的时候，都已经是有序的了。也就是说，一旦发生了
+                 * 左组数小，那么一定可以判定，右边的都比这个数大。
+                 * 每一次递归，只算本次递归内的。下次递归计算下次的，这样算法累加起来，就把数组上所有
+                 * 比这个数大的记录下来了
+                 * 本质上是因为无论左侧还是右侧的数组，已经是有序的了。利用了上次计算的结果
+                 */
+                if(data[p1] < data[p2]){
+                    result += data[p1] * (r-p2+1);
+                }
+                tmp[i++] = data[p1] < data[p2] ? data[p1++] : data[p2++];
+            }
+            while (p1 <= m) {
+//                result += data[p1];
+                tmp[i++] = data[p1++];
+            }
+            while (p2 <= r) {
+                tmp[i++] = data[p2++];
+            }
+            for (i = 0; i < tmp.length; i++) {
+                data[i + l] = tmp[i];
+            }
+            return result;
         }
     }
 
