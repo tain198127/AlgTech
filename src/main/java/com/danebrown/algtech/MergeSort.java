@@ -7,7 +7,12 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.IntBinaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by danebrown on 2021/8/2
@@ -20,6 +25,7 @@ public class MergeSort {
     public static void main(String[] args) {
         AlgCompMenu.addComp(new RecursionMergeSort());
         AlgCompMenu.addComp(new WhileMergeSort());
+        AlgCompMenu.addComp(new RecLeftMinSum());
         AlgCompMenu.addComp(new LeftMinSum());
         AlgCompMenu.addComp(new ReversSortPair());
         AlgCompMenu.addComp(new BiggerThanRightTwice());
@@ -160,17 +166,18 @@ public class MergeSort {
     /**
      * 第五章
      */
-    @AlgName("最小和")
     /**
      * 在一个数组中，一个数左边比它小的数的总和，叫数的小和，所有数的小和累加起来，叫数组小和。求数组小和。
-     *  例子： [1,3,4,2,5]
+     * 例子： [1,3,4,2,5]
      * 1左边比1小的数：没有
      * 3左边比3小的数：1
      * 4左边比4小的数：1、3
      * 2左边比2小的数：1
      * 5左边比5小的数：1、3、4、 2
      * 所以数组的小和为1+1+3+1+1+3+4+2=16
-     */ public static class LeftMinSum extends AlgCompImpl<Integer, int[]> {
+     */
+    @AlgName("递归版本最小和")
+    public static class RecLeftMinSum extends AlgCompImpl<Integer, int[]> {
         @Override
         public int[] prepare() {
             int dataSize = ThreadLocalRandom.current().nextInt(2, 50000);
@@ -197,9 +204,9 @@ public class MergeSort {
 
         @Override
         protected Integer test(int[] data) {
-            int result =mergeSort(data, 0, data.length - 1);
-            log.info("左侧最小和结果:{}", result);
-//            log.info("{}",data);
+            int result = mergeSort(data, 0, data.length - 1);
+//            log.info("左侧最小和结果:{}", result);
+            //            log.info("{}",data);
             return result;
         }
 
@@ -233,13 +240,13 @@ public class MergeSort {
                  * 比这个数大的记录下来了
                  * 本质上是因为无论左侧还是右侧的数组，已经是有序的了。利用了上次计算的结果
                  */
-                if(data[p1] < data[p2]){
-                    result += data[p1] * (r-p2+1);
+                if (data[p1] < data[p2]) {
+                    result += data[p1] * (r - p2 + 1);
                 }
                 tmp[i++] = data[p1] < data[p2] ? data[p1++] : data[p2++];
             }
             while (p1 <= m) {
-//                result += data[p1];
+                //                result += data[p1];
                 tmp[i++] = data[p1++];
             }
             while (p2 <= r) {
@@ -247,6 +254,73 @@ public class MergeSort {
             }
             for (i = 0; i < tmp.length; i++) {
                 data[i + l] = tmp[i];
+            }
+            return result;
+        }
+    }
+    @AlgName("非递归版本最小和")
+    public static class LeftMinSum extends AlgCompImpl<Integer,int[]>{
+        private RecLeftMinSum recLeftMinSum = new RecLeftMinSum();
+        @Override
+        public int[] prepare() {
+//            return new int[]{2,3,5,1,2,8,0,7,4};
+            return recLeftMinSum.prepare();
+        }
+
+        @Override
+        protected Integer standard(int[] data) {
+            return recLeftMinSum.test(data);
+        }
+
+        @Override
+        protected Integer test(int[] data) {
+            int result = 0;
+
+            if(data == null || data.length<2){
+                return result;
+            }
+            int N = data.length;
+            int step = 1;
+            while (step < N){
+                int L = 0;
+                while (L <= N){
+                    int M = L + step -1;
+                    if(M >= N){
+                        break;
+                    }
+                    int R = Math.min(M + step,N-1);
+
+                    result += merge(data,L,M,R);
+                    L=R+1;
+                }
+                if(step > N/2){
+                    break;
+                }
+                step <<= 1;
+            }
+
+
+//            log.info("排序结果:{}",data);
+            return result;
+        }
+        protected int merge(int[] data,int l,int m,int r){
+            int p1 = l;
+            int p2 = m+1;
+            int i=0;
+            int[] tmp = new int[r-l+1];
+            int result = 0;
+            while (p1 <= m && p2 <= r){
+                result += data[p1]<data[p2]?(data[p1] * (r-p2+1)):0;
+                tmp[i++] = data[p1]<data[p2]?data[p1++]:data[p2++];
+            }
+            while(p1 <= m){
+                tmp[i++] = data[p1++];
+            }
+            while(p2 <= r){
+                tmp[i++] = data[p2++];
+            }
+            for(i =0;i < tmp.length;i++){
+                data[i+l] = tmp[i];
             }
             return result;
         }
