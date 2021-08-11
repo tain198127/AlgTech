@@ -341,7 +341,7 @@ public class MergeSort {
      * 问有几个逆序对
      */
     @AlgName("逆序对计算，经典考题")
-    public static class ReversSortPair extends AlgCompImpl<int[], int[]> {
+    public static class ReversSortPair extends AlgCompImpl<Integer, int[]> {
         RecursionMergeSort recursionMergeSort = new RecursionMergeSort();
 
         @Override
@@ -355,29 +355,31 @@ public class MergeSort {
         }
 
         @Override
-        protected int[] standard(int[] data) {
+        protected Integer standard(int[] data) {
             int count = 0;
             for (int i = 0; i < data.length; i++) {
                 for (int j = i + 1; j < data.length; j++) {
                     if (data[i] > data[j]) {
                         count++;
                     }
-//                    else{
-//                        break;
-//                    }
+                    //                    else{
+                    //                        break;
+                    //                    }
                 }
             }
-            log.info("标准逆序对个数{}",count);
-             recursionMergeSort.mergeSort(data);
-             return data;
+            return count;
+            //            log.info("标准逆序对个数{}",count);
+            //             recursionMergeSort.mergeSort(data);
+            //             return data;
         }
 
         @Override
-        protected int[] test(int[] data) {
+        protected Integer test(int[] data) {
             int result = mergeSort(data, 0, data.length - 1);
-            log.info("测试逆序对个数:{}", result);
-            return data;
-//            return result;
+            //            log.info("测试逆序对个数:{}", result);
+            //            return data;
+            //            return result;
+            return result;
         }
 
         public int mergeSort(int[] data, int l, int r) {
@@ -394,10 +396,11 @@ public class MergeSort {
 
         /**
          * 逆序对归并算法
+         *
          * @param data 原始数组
-         * @param l 左下标
-         * @param m 中值下标
-         * @param r 又下标
+         * @param l    左下标
+         * @param m    中值下标
+         * @param r    又下标
          * @return 逆序对个数
          */
         public int merge(int[] data, int l, int m, int r) {
@@ -410,7 +413,7 @@ public class MergeSort {
                 if (data[p1] > data[p2]) {
                     result += (p2 - m);
                 }
-                tmp[i--] = data[p2] <  data[p1]? data[p1--]:data[p2--];
+                tmp[i--] = data[p2] < data[p1] ? data[p1--] : data[p2--];
             }
             while (l <= p1) {
                 tmp[i--] = data[p1--];
