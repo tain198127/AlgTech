@@ -362,23 +362,14 @@ public class MergeSort {
                     if (data[i] > data[j]) {
                         count++;
                     }
-                    //                    else{
-                    //                        break;
-                    //                    }
                 }
             }
             return count;
-            //            log.info("标准逆序对个数{}",count);
-            //             recursionMergeSort.mergeSort(data);
-            //             return data;
         }
 
         @Override
         protected Integer test(int[] data) {
             int result = mergeSort(data, 0, data.length - 1);
-            //            log.info("测试逆序对个数:{}", result);
-            //            return data;
-            //            return result;
             return result;
         }
 
