@@ -7,12 +7,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.IntBinaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by danebrown on 2021/8/2
@@ -205,7 +200,7 @@ public class MergeSort {
         @Override
         protected Integer test(int[] data) {
             int result = mergeSort(data, 0, data.length - 1);
-//            log.info("左侧最小和结果:{}", result);
+            //            log.info("左侧最小和结果:{}", result);
             //            log.info("{}",data);
             return result;
         }
@@ -258,12 +253,14 @@ public class MergeSort {
             return result;
         }
     }
+
     @AlgName("非递归版本最小和")
-    public static class LeftMinSum extends AlgCompImpl<Integer,int[]>{
+    public static class LeftMinSum extends AlgCompImpl<Integer, int[]> {
         private RecLeftMinSum recLeftMinSum = new RecLeftMinSum();
+
         @Override
         public int[] prepare() {
-//            return new int[]{2,3,5,1,2,8,0,7,4};
+            //            return new int[]{2,3,5,1,2,8,0,7,4};
             return recLeftMinSum.prepare();
         }
 
@@ -276,51 +273,52 @@ public class MergeSort {
         protected Integer test(int[] data) {
             int result = 0;
 
-            if(data == null || data.length<2){
+            if (data == null || data.length < 2) {
                 return result;
             }
             int N = data.length;
             int step = 1;
-            while (step < N){
+            while (step < N) {
                 int L = 0;
-                while (L <= N){
-                    int M = L + step -1;
-                    if(M >= N){
+                while (L <= N) {
+                    int M = L + step - 1;
+                    if (M >= N) {
                         break;
                     }
-                    int R = Math.min(M + step,N-1);
+                    int R = Math.min(M + step, N - 1);
 
-                    result += merge(data,L,M,R);
-                    L=R+1;
+                    result += merge(data, L, M, R);
+                    L = R + 1;
                 }
-                if(step > N/2){
+                if (step > N / 2) {
                     break;
                 }
                 step <<= 1;
             }
 
 
-//            log.info("排序结果:{}",data);
+            //            log.info("排序结果:{}",data);
             return result;
         }
-        protected int merge(int[] data,int l,int m,int r){
+
+        protected int merge(int[] data, int l, int m, int r) {
             int p1 = l;
-            int p2 = m+1;
-            int i=0;
-            int[] tmp = new int[r-l+1];
+            int p2 = m + 1;
+            int i = 0;
+            int[] tmp = new int[r - l + 1];
             int result = 0;
-            while (p1 <= m && p2 <= r){
-                result += data[p1]<data[p2]?(data[p1] * (r-p2+1)):0;
-                tmp[i++] = data[p1]<data[p2]?data[p1++]:data[p2++];
+            while (p1 <= m && p2 <= r) {
+                result += data[p1] < data[p2] ? (data[p1] * (r - p2 + 1)) : 0;
+                tmp[i++] = data[p1] < data[p2] ? data[p1++] : data[p2++];
             }
-            while(p1 <= m){
+            while (p1 <= m) {
                 tmp[i++] = data[p1++];
             }
-            while(p2 <= r){
+            while (p2 <= r) {
                 tmp[i++] = data[p2++];
             }
-            for(i =0;i < tmp.length;i++){
-                data[i+l] = tmp[i];
+            for (i = 0; i < tmp.length; i++) {
+                data[i + l] = tmp[i];
             }
             return result;
         }
@@ -328,23 +326,102 @@ public class MergeSort {
 
     /**
      * 第五章
+     * 如果一个数组中，左边的数和右边的数组成逆序，我们称之为逆序对
+     * 例如[3,1,0,4,3,1]
+     * 其中
+     * [3,1][3,0][3,1]
+     * [1,0]
+     * [4,3][4,1]
+     * 都是逆序对
+     * 这道题的本质就是在问
+     * 右边有多少个数比他小
+     * 思路：merge中从右往左对比拷贝，相等继续，当出现左边的数比右边的大时，右边有几个数，就表示有几个
+     * 逆序对。因为在merge过程中，两边的数组本身已经有序了。利用的就是有序的特性
+     * <p>
+     * 问有几个逆序对
      */
     @AlgName("逆序对计算，经典考题")
-    public static class ReversSortPair extends AlgCompImpl<Integer, int[]> {
+    public static class ReversSortPair extends AlgCompImpl<int[], int[]> {
+        RecursionMergeSort recursionMergeSort = new RecursionMergeSort();
 
         @Override
         public int[] prepare() {
-            return new int[0];
+            int dataSize = ThreadLocalRandom.current().nextInt(2, 5000);
+            int[] data = new int[dataSize];
+            for (int i = 0; i < dataSize; i++) {
+                data[i] = ThreadLocalRandom.current().nextInt();
+            }
+            return data;
         }
 
         @Override
-        protected Integer standard(int[] data) {
-            return null;
+        protected int[] standard(int[] data) {
+            int count = 0;
+            for (int i = 0; i < data.length; i++) {
+                for (int j = i + 1; j < data.length; j++) {
+                    if (data[i] > data[j]) {
+                        count++;
+                    }
+//                    else{
+//                        break;
+//                    }
+                }
+            }
+            log.info("标准逆序对个数{}",count);
+             recursionMergeSort.mergeSort(data);
+             return data;
         }
 
         @Override
-        protected Integer test(int[] data) {
-            return null;
+        protected int[] test(int[] data) {
+            int result = mergeSort(data, 0, data.length - 1);
+            log.info("测试逆序对个数:{}", result);
+            return data;
+//            return result;
+        }
+
+        public int mergeSort(int[] data, int l, int r) {
+            int result = 0;
+            if (l >= r || data == null || data.length < 2) {
+                return result;
+            }
+            int m = l + ((r - l) >> 2);
+            result += mergeSort(data, l, m);
+            result += mergeSort(data, m + 1, r);
+            result += merge(data, l, m, r);
+            return result;
+        }
+
+        /**
+         * 逆序对归并算法
+         * @param data 原始数组
+         * @param l 左下标
+         * @param m 中值下标
+         * @param r 又下标
+         * @return 逆序对个数
+         */
+        public int merge(int[] data, int l, int m, int r) {
+            int i = r - l;
+            int p1 = m;
+            int p2 = r;
+            int[] tmp = new int[r - l + 1];
+            int result = 0;
+            while (l <= p1 && (m + 1) <= p2) {
+                if (data[p1] > data[p2]) {
+                    result += (p2 - m);
+                }
+                tmp[i--] = data[p2] <  data[p1]? data[p1--]:data[p2--];
+            }
+            while (l <= p1) {
+                tmp[i--] = data[p1--];
+            }
+            while (m + 1 <= p2) {
+                tmp[i--] = data[p2--];
+            }
+            for (i = 0; i < tmp.length; i++) {
+                data[i + l] = tmp[i];
+            }
+            return result;
         }
     }
 
