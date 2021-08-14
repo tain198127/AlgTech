@@ -4,10 +4,13 @@ import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 /**
  * Created by danebrown on 2021/8/2
@@ -24,6 +27,7 @@ public class MergeSort {
         AlgCompMenu.addComp(new LeftMinSum());
         AlgCompMenu.addComp(new ReversSortPair());
         AlgCompMenu.addComp(new BiggerThanRightTwice());
+        AlgCompMenu.addComp(new CountOfRangeSum());
         AlgCompMenu.run();
     }
 
@@ -424,24 +428,24 @@ public class MergeSort {
      * 右边有几个数乘以2以后，依旧小于当前的数
      */
     @AlgName("大于右侧数2倍")
-    public static class BiggerThanRightTwice extends AlgCompImpl<Integer,
-            int[]> {
+    public static class BiggerThanRightTwice extends AlgCompImpl<Integer, int[]> {
         private ReversSortPair reversSortPair = new ReversSortPair();
         private WhileMergeSort whileMergeSort = new WhileMergeSort();
+
         @Override
         public int[] prepare() {
             int[] pre = {1396581779, -937854641, -1001942975, 331070449, 911494688, 1252112712, -518685889, -2099230105, 1499333421, 880179086, -455919723, -514633115, -1998371172, 1386217678, -1658555230, 1779130473, 353096652, -1824614786, 1965216959, -199689732, -291094162, -2100728129, 992008266, 460670078, 716830395, -246401178, 1294603821, 414326368, -715172082, -1816814831, 2102853410, 1762497825, -2009375183, -777500377, 1535365379, 1782993543, 574765802, -259883399, 483476288, 5703938, -888524454, -1620064806, 1115847622, 1668424119, -1846221551, -666834199, 697063222, 1752394276, -1331118453, -1175289589, -1411246138, 273538865, 502870178, 1312373603, -1071811756, -1789410356, 1857052552, 1428540809, 490850739, 2021876286, 864861532, 1771377927, 1574072311, -96906451, 1410721574, -370575140, 407567569, -201496245, 568066012, -707497121, -1739473629, 886489744, 1583009397, -267828497, -1483481871, 1445374274, 1725133062, -536398563, 763981830, 732398053, -1712532843, 1296181653, 1748211987, 296813020, -142938284, -1329572769, 1083242123, -1785397650, -424991517, 358242197, -575858682, 90222382, 1659847088, -1869800483, 984400793, 74527482, -817383843, -1405319904, 1870279591, 2000748639, 352190146, -1899603527, 614153144, 95256613, -181122506, -436979003, 191729519, 640668972, -509974264, 953811968, 849651543, -2040000665, -1427423600, -798345960, -930101255, -2056789176, 740773450, 1258353959, 1397355849, 846185042, -563080353, -1706803335, 805791325, 1481825647, 967029655, 1569719724, 321276456, 1734168489, -2118750503, -470866386, 1388970773, -723546843, -205945951, -268570370, -1536775768, -340045313, -1229745811, -180257518, -341431247, -679156374, 1715074136, -1701026229, -1881797016, -1266165047, 1199064320, 1053435882, 2138233458, -2127324531, -639798923, -1783458816, 909188144, -1433304285, 953691421, -211562504, 35782819, -2012873789, 303738750, 1812703280, 1958585033, 905821279, 70030717, -1263226494, 488273127, -835925154, -1594840, 1971876238, -833939252, 1255550943, -2091872372, -182871991, 868699519, 1755703838, 569718143, -839960885, -1186860832, 1101305776, -418079739, 280245321, -676720045, -1319422984, 1818342092, 685198082, 1134058718, -1822682205, 1922197683, 1236885330, 804529405, 1537176289, -2027599556, -458492907, 1608381090, 163831003, -1615447726, -1274820794, 1707953402, -1336060908, 184493398, -626310061, -718922494, 900688229, 145076874, 1274085285, 2143390770, -1120961282, 1856852480, 1309456334, -935181838, -1937433962, -613585973, 70499843, -755785833, 1061712325, 1074753807, -1940225292, -2145869501, -16330535, -1786132242, -305145198, -1992650829, 1238230276, -1142688777, 1369626562, 2089310706, -75349927, -972154738, -1424897211, 1482457435, 1079238806, -324911591, 1082901525, 955930200, 293236256, 809152097, -2131596103, 1093544174, -1112039219, 1374452041, 1351684051, -573562797, -881716273, -1238407091, -1122410217, 870780410, -640935540, -889070049, -1166007496, -1724286533, -695828765, -1060783425, -128536849, 1669239678, 221060881, -1341921571, 1704399214, 78827965, 443395127, 1179376198, 2144800052, 487574884, -1771758568, -432095623, -397183917, 922149232, -1211879336, 53790367, 1120410368, -264900898, -282404383, -230469922, 1870257548, 508321073, 1289784367, -1918570138, 1117157497, -1376304473, -771552264, 833438273, -1379376138, 1699260031, 1271440008, -966037556, -1894942009, -1708287755, -1003084802, 1958708605, -173772578, -1020537720, -473398897, 302228833, 762683916, -1120805874, 694167953, 191065512, 268632470, 1551414776, -358271264, -1497852413, -1426303574, -1796771555, 378223399, -1617926489, 1378735765, -848668565, -219400523, -1084170512, -523921955, -1370133733, 1150370503, -2082651537, -1841241698, -1225080215, -503054446, 517256559, 1417040815, 82044029, 1133669002, -1801406606, 1169740119, -1602055148, 1655115421, 58315070, -967431088, -1085103055, 1169515807, -1809041965, 854628907, 1703980343, 806233828, -660617462, -239741610, 513472302, -1989553365, -2101126771, 910251799, 139985363, 917287403, 1982742964, -821924898, -8041424, 131772648, 509226060, 425047353, -1288296800, 31037981, 41632449, -1148940223, 971454204, -1274176825, 1317427490, -1702923457, -979940201};
-//            int[] pre = {440025818, -1034771247, 627919729, 1315612600, -318406083, -208017622, 423997791, 1560085865};
-//            int[] pre = {440025818, -1034771247, 627919729, 1315612600};
-//            int[] pre = {8,3,1,18,2};
-//return pre;
-            int dataSize = ThreadLocalRandom.current().nextInt(2,50000);
+            //            int[] pre = {440025818, -1034771247, 627919729, 1315612600, -318406083, -208017622, 423997791, 1560085865};
+            //            int[] pre = {440025818, -1034771247, 627919729, 1315612600};
+            //            int[] pre = {8,3,1,18,2};
+            //return pre;
+            int dataSize = ThreadLocalRandom.current().nextInt(2, 50000);
             int[] data = new int[dataSize];
             for (int i = 0; i < dataSize; i++) {
                 data[i] = ThreadLocalRandom.current().nextInt();
             }
             return data;
-//            return Arrays.stream(data).asLongStream().toArray();
+            //            return Arrays.stream(data).asLongStream().toArray();
 
         }
 
@@ -449,14 +453,14 @@ public class MergeSort {
         protected Integer standard(int[] data) {
             int count = 0;
             for (int i = 0; i < data.length; i++) {
-                for (int j = i+1; j < data.length; j++) {
-                    if((data[i]>>1) > data[j]){
+                for (int j = i + 1; j < data.length; j++) {
+                    if ((data[i] >> 1) > data[j]) {
                         count++;
                     }
                 }
             }
-//            whileMergeSort.test(data);
-//            log.info("标准归并排序结果:{}",data);
+            //            whileMergeSort.test(data);
+            //            log.info("标准归并排序结果:{}",data);
             return count;
         }
 
@@ -466,101 +470,271 @@ public class MergeSort {
             int count = 0;
 
             count = whileSort(data);
-//            count = mergeSort(data,0,data.length-1);
-//            log.info("测试归并排序结果:{}",data);
+            //            count = mergeSort(data,0,data.length-1);
+            //            log.info("测试归并排序结果:{}",data);
 
             return count;
         }
-        public int whileSort(int[] data){
+
+        public int whileSort(int[] data) {
             int count = 0;
             if (data == null || data.length < 2) {
                 return count;
             }
             int N = data.length;
             int step = 1;
-            while (step < N){
+            while (step < N) {
                 int L = 0;
-                while (L < N){
-                    int M = L + step-1;
-                    if(M >= N){
+                while (L < N) {
+                    int M = L + step - 1;
+                    if (M >= N) {
                         break;
                     }
-                    int R = Math.min(M+step,N-1);
-                    count+= merge(data,L,M,R);
-                    L = R+1;
+                    int R = Math.min(M + step, N - 1);
+                    count += merge(data, L, M, R);
+                    L = R + 1;
                 }
-                if(step > (N>>1)){
+                if (step > (N >> 1)) {
                     break;
                 }
                 step <<= 1;
             }
             return count;
         }
-        public int mergeSort(int[] data, int l,int r){
+
+        public int mergeSort(int[] data, int l, int r) {
             int count = 0;
-            if(data == null||data.length<2||l==r){
+            if (data == null || data.length < 2 || l == r) {
                 return count;
             }
-            int m = l+((r-l)>>1);
-            count+= mergeSort(data,l,m);
-            count+= mergeSort(data,m+1,r);
-            count+=merge(data,l,m,r);
+            int m = l + ((r - l) >> 1);
+            count += mergeSort(data, l, m);
+            count += mergeSort(data, m + 1, r);
+            count += merge(data, l, m, r);
             return count;
         }
-        public int merge(int[] data,int l,int m,int r){
+
+        public int merge(int[] data, int l, int m, int r) {
             int p1 = l;
-            int p2 = m+1;
-            int[] tmp = new int[r-l+1];
-            int i=0;
+            int p2 = m + 1;
+            int[] tmp = new int[r - l + 1];
+            int i = 0;
             int count = 0;
-            int windowR = m+1;
-            for(int j = l;j<=m;j++){
-                while(windowR <= r && (data[j]>>1) > (data[windowR])){
+            int windowR = m + 1;
+            for (int j = l; j <= m; j++) {
+                while (windowR <= r && (data[j] >> 1) > (data[windowR])) {
                     windowR++;
                 }
-                count += windowR -m -1;
+                count += windowR - m - 1;
             }
-            while (p1<=m && p2 <=r){
+            while (p1 <= m && p2 <= r) {
 
-                tmp[i++] = data[p1]<data[p2]?data[p1++]:data[p2++];
+                tmp[i++] = data[p1] < data[p2] ? data[p1++] : data[p2++];
             }
-            while (p1 <= m){
+            while (p1 <= m) {
                 tmp[i++] = data[p1++];
             }
-            while (p2 <= r){
+            while (p2 <= r) {
                 tmp[i++] = data[p2++];
             }
-            for(i=0;i<tmp.length;i++){
-                data[l+i] = tmp[i];
+            for (i = 0; i < tmp.length; i++) {
+                data[l + i] = tmp[i];
             }
             return count;
         }
     }
 
     /**
-     * 给定一个数组，和最大值、最小值，数组中有多少个子数组累加的和在[low,high]内
+     * 给定一个数组，和最大值、最小值，
+     * 数组中有多少个[子数组]累加的和在[low,high]内
+     * 解法：
+     * 1.
      */
     @AlgName("滑动范围子数组")
-    public static class CountOfRangeSum extends AlgCompImpl<Integer, Triple<int[], Integer, Integer>> {
+    public static class CountOfRangeSum extends AlgCompImpl<Integer, Triple<ArrayList<Integer>, Integer, Integer>> {
 
-        RecursionMergeSort recursionMergeSort = new RecursionMergeSort();
+        RecLeftMinSum recursionMergeSort = new RecLeftMinSum();
 
+        /**
+         * @return tripple
+         * left:array
+         * middle:begin
+         * right:end
+         */
         @Override
-        public Triple<int[], Integer, Integer> prepare() {
-            int[] arr = recursionMergeSort.prepare();
-            int low = ThreadLocalRandom.current().nextInt();
-            int high = ThreadLocalRandom.current().nextInt(low, arr.length + low);
+        public Triple<ArrayList<Integer>, Integer, Integer> prepare() {
+            //            ArrayList<Integer> arr =
+            //                    new ArrayList<>(Arrays.stream(new int[]{1, 2, 4, 8,-1,-9}).boxed().collect(Collectors.toList()));
+            //            return Triple.of(arr, 0, 20);
+            int dataSize = ThreadLocalRandom.current().nextInt(2, 500000);
+            int[] data = new int[dataSize];
+            for (int i = 0; i < dataSize; i++) {
+                data[i] = ThreadLocalRandom.current().nextInt();
+            }
+
+            ArrayList<Integer> arr = (ArrayList<Integer>) Arrays.stream(data).boxed().collect(Collectors.toList());
+            Integer low = ThreadLocalRandom.current().nextInt();
+            Integer high = ThreadLocalRandom.current().nextInt(low, arr.size() + low);
             return Triple.of(arr, low, high);
+
+
         }
 
+        /**
+         * @param data left:array
+         *             middle:begin
+         *             right:end
+         * @return 在窗口内的累加子数组
+         */
         @Override
-        protected Integer standard(Triple<int[], Integer, Integer> data) {
-            return null;
+        protected Integer standard(Triple<ArrayList<Integer>, Integer, Integer> data) {
+
+//            int[] arr = data.getLeft().stream().mapToInt(a -> a).toArray();
+//            int low = data.getMiddle();
+//            int high = data.getRight();
+//            int result = 0;
+//            if (arr == null || arr.length < 1) {
+//                return 0;
+//            }
+//            for (int i = 0; i < arr.length; i++) {
+//                for (int j = i; j <= arr.length; j++) {
+//                    int[] subArray = ArrayUtils.subarray(arr, i, j);
+//                    int sum = Arrays.stream(subArray).sum();
+//                    if (sum >= low && sum <= high && subArray.length > 0) {
+//                        log.debug("子数组:[{}],SUM:{}", ArrayUtils.subarray(arr, i, j), sum);
+//                        result++;
+//                    }
+//                }
+//            }
+//            return result;
+
+            int[] arr = data.getLeft().stream().mapToInt(a -> a).toArray();
+            int low = data.getMiddle();
+            int high = data.getRight();
+            int[] accumulateArray = new int[arr.length];
+            accumulateArray[0] = arr[0];
+            for (int i = 1; i < arr.length; i++) {
+                accumulateArray[i] = accumulateArray[i - 1] + arr[i];
+            }
+            return mergeSort(accumulateArray,low,high);
         }
 
+        /**
+         * 先做一遍累加和数组
+         * 根据累加和的特性，A-B区间的和=(0-A)的和减去(0-B)的和。
+         * merge时，右侧数据根据滑动窗口检索左侧符合范围的数据
+         *
+         * @param data left:array
+         *             middle:begin
+         *             right:end
+         * @return 在窗口内的累加子数组
+         */
+
         @Override
-        protected Integer test(Triple<int[], Integer, Integer> data) {
-            return null;
+        protected Integer test(Triple<ArrayList<Integer>, Integer, Integer> data) {
+            int[] arr = data.getLeft().stream().mapToInt(a -> a).toArray();
+            int low = data.getMiddle();
+            int high = data.getRight();
+            int[] accumulateArray = new int[arr.length];
+            accumulateArray[0] = arr[0];
+            for (int i = 1; i < arr.length; i++) {
+                accumulateArray[i] = accumulateArray[i - 1] + arr[i];
+            }
+//            return mergeSort(accumulateArray,low,high);
+            return recMergeSort(accumulateArray, 0, accumulateArray.length - 1, low, high);
+        }
+
+        /**
+         * 递归版本
+         *
+         * @param accumulateArray
+         * @param left
+         * @param right
+         * @param windowL
+         * @param windowR
+         * @return
+         */
+        public int recMergeSort(int[] accumulateArray, int left, int right, int windowL, int windowR) {
+            int count = 0;
+            if (accumulateArray == null) {
+                return count;
+            }
+            if (accumulateArray.length < 2) {
+                return accumulateArray[0] <= windowR && accumulateArray[0] > windowL ? 1 : 0;
+            }
+            if (left == right) {
+                return accumulateArray[left] <= windowR && accumulateArray[left] > windowL ? 1 : 0;
+            }
+            int M = left + ((right - left) >> 1);
+            count += recMergeSort(accumulateArray, left, M, windowL, windowR);
+            count += recMergeSort(accumulateArray, M + 1, right, windowL, windowR);
+            count += merge(accumulateArray, left, M, right, windowL, windowR);
+            return count;
+        }
+
+        /**
+         * 非递归版本
+         *
+         * @param accumulateArray
+         * @param windowL
+         * @param windowR
+         * @return
+         */
+        public int mergeSort(int[] accumulateArray, int windowL, int windowR) {
+            int N = accumulateArray.length;
+            int step = 1;
+            int count = 0;
+            while (step < N){
+                int L = 0;
+                while (L<N){
+                    int M = L + step;
+                    if(M >= N){
+                        break;
+                    }
+                    int R = Math.min(M+step,N-1);
+                    count += merge(accumulateArray,L,M,R,windowL,windowR);
+                    L = R+1;
+                }
+                if(step < N/2){
+                    break;
+                }
+                step <<= 1;
+            }
+            return count;
+
+        }
+
+        public int merge(int[] accumulateArray, int l, int m, int r, int windowL, int windowR) {
+            int i = 0;
+            int p1 = l;
+            int p2 = m + 1;
+            int count = 0;
+            int[] tmp = new int[r - l + 1];
+            for (int j = m + 1; j <= r; j++) {
+                int rVal = accumulateArray[j];
+                for (int k = l; k <= m; k++) {
+                    int lVal = accumulateArray[k];
+                    int rRange = rVal - lVal;
+                    if (rRange <= windowR && rRange >= windowL) {
+                        count++;
+                    }
+                }
+            }
+            while (p1 <= m && p2 <= r) {
+                tmp[i++] = accumulateArray[p1] <= accumulateArray[p2] ? accumulateArray[p1++] : accumulateArray[p2++];
+            }
+            while (p1 <= m) {
+                tmp[i++] = accumulateArray[p1++];
+            }
+            while (p2 <= r) {
+                tmp[i++] = accumulateArray[p2++];
+            }
+            for (i = 0; i < tmp.length; i++) {
+                accumulateArray[l + i] = tmp[i];
+            }
+            return count;
         }
     }
+
+
 }
