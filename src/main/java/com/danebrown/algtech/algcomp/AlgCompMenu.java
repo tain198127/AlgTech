@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.util.Integers;
+import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.Scanner;
  */
 @Log4j2
 public final class AlgCompMenu {
+    public static final String TEST_NAME_FLG="TEST_NAME_FLG";
     private static List<Triple<String, AlgCompImpl, Integer>> algCompList = new ArrayList<>();
     static {
         algCompList.add(0,null);
@@ -69,6 +71,7 @@ public final class AlgCompMenu {
                 printMeau();
                 continue;
             }
+
             runTest(i);
             printMeau();
         }
@@ -85,6 +88,7 @@ public final class AlgCompMenu {
         String name = triple.getLeft();
         AlgCompImpl impl = triple.getMiddle();
         int times = triple.getRight();
+        MDC.put(TEST_NAME_FLG,name);
         if(times <=1){
             log.info("第{}位对数器 :{},结果为:[{}]", idx, name, impl.compare(name));
         }
@@ -103,6 +107,7 @@ public final class AlgCompMenu {
 
                     ));
         }
+        MDC.remove(TEST_NAME_FLG);
     }
 
 }

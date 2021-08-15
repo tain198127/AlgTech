@@ -87,6 +87,12 @@
             <artifactId>disruptor</artifactId>
             <version>3.4.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.jctools</groupId>
+            <artifactId>jctools-core</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+
         <!--        disruptor-->
         <!--JMH-->
         <dependency>

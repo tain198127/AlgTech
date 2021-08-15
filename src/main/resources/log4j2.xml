@@ -1,14 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
+        <RollingFile name="AsyncLogProcess"
+                     fileName="log/${date:yyyy}/${date:MM}/${date:dd}/AlgCompImpl/error-info.log"
+                     filePattern="log/${date:yyyy}/%d{MM}/%d{dd}/AlgCompImpl/error-info-%i.log.gz"
+                     immediateFlush="false">
+            <Filters>
+                <!--如果是info\warn输出-->
+<!--                <ThresholdFilter level="info" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <!--如果是error级别拒绝，设置 onMismatch="NEUTRAL" 可以让日志经过后续的过滤器-->
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
 
+            </Filters>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger %L %M  - %msg%n"/>
+            <Policies>
+                <!--interval属性用来指定多久滚动一次，根据当前filePattern设置是1天滚动一次-->
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <!-- DefaultRolloverStrategy属性如不设置，则默认同一文件夹下最多保存7个文件-->
+            <DefaultRolloverStrategy max="15"/>
+        </RollingFile>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{16} %L %M  - %msg%n"/>
         </Console>
+        <Async name="Async" bufferSize="262144">
+            <AppenderRef ref="AsyncLogProcess"/>
+<!--            <JCToolsBlockingQueue/>-->
+        </Async>
     </Appenders>
+
     <Loggers>
-        <Root level="INFO">
+        <AsyncRoot level="INFO" includeLocation="true">
+
             <AppenderRef ref="Console"/>
-        </Root>
+            <AppenderRef ref="Async"/>
+        </AsyncRoot>
+<!--        <AsyncLogger name="com.danebrown.algtech" level="INFO" additivity="false" includeLocation="false">-->
+<!--            <AppenderRef ref="Async"></AppenderRef>-->
+<!--            <AppenderRef ref="Console"></AppenderRef>-->
+<!--        </AsyncLogger>-->
+
     </Loggers>
 </Configuration>
