@@ -563,15 +563,17 @@ public class MergeSort {
          */
         @Override
         public Triple<ArrayList<Integer>, Integer, Integer> prepare() {
-//            int dataSize = ThreadLocalRandom.current().nextInt(40000, 50000);
-//            int[] data = new int[dataSize];
-//            for (int i = 0; i < dataSize; i++) {
-//                data[i] = ThreadLocalRandom.current().nextInt();
-//            }
+            int dataSize = ThreadLocalRandom.current().nextInt(40000, 50000);
+            int[] data = new int[dataSize];
+            for (int i = 0; i < dataSize; i++) {
+                data[i] = ThreadLocalRandom.current().nextInt();
+            }
 //
-//            ArrayList<Integer> arr = (ArrayList<Integer>) Arrays.stream(data).boxed().collect(Collectors.toList());
+            ArrayList<Integer> arr = (ArrayList<Integer>) Arrays.stream(data).boxed().collect(Collectors.toList());
 //            Integer low = ThreadLocalRandom.current().nextInt();
 //            Integer high = ThreadLocalRandom.current().nextInt(low, arr.size() + low);
+            Integer low = Integer.MIN_VALUE;
+            Integer high = Integer.MAX_VALUE;
 //            return Triple.of(arr, low, high);
 
 //            int[] data = {563556667, -1012524672, 1491501694,
@@ -588,9 +590,9 @@ public class MergeSort {
              * 0
              */
 
-            int [] data = {-2,5,-1};
-            int low = -2;
-            int high = 2;
+//            int [] data = {-3, 1, 2, -2, 2, -1};
+//            int low = -3;
+//            int high = -1;
 
             /**
              * [-2147483647,0,-2147483647,2147483647]
@@ -600,7 +602,7 @@ public class MergeSort {
 //            int [] data = {-2147483647,0,-2147483647,2147483647};
 //            int low = -564;
 //            int high = 3864;
-            ArrayList<Integer> arr = (ArrayList<Integer>) Arrays.stream(data).boxed().collect(Collectors.toList());
+//            ArrayList<Integer> arr = (ArrayList<Integer>) Arrays.stream(data).boxed().collect(Collectors.toList());
             return Triple.of(arr, low, high);
 
 
@@ -628,11 +630,12 @@ public class MergeSort {
             for (int i = 1; i < arr.length; i++) {
                 accumulateArray[i] = accumulateArray[i - 1] + arr[i];
             }
+            log.debug("排序前:{}",accumulateArray);
             //            int count = mergeSort(accumulateArray,low,high);
             int count = recMergeSort(accumulateArray, 0,
                     accumulateArray.length - 1, low, high);
 
-            log.info("结果：{}",accumulateArray);
+            log.debug("排序后结果：{}",accumulateArray);
             return count;
 
         }
@@ -658,9 +661,10 @@ public class MergeSort {
             for (int i = 1; i < arr.length; i++) {
                 accumulateArray[i] = accumulateArray[i - 1] + arr[i];
             }
-            int result = mergeSort(accumulateArray,low,high);
-            log.info("结果：{}",accumulateArray);
-            return result;
+            int count = recMergeSort1(accumulateArray, 0,
+                    accumulateArray.length - 1, low, high);
+            log.debug("结果：{}",accumulateArray);
+            return count;
         }
 
         /**
@@ -738,18 +742,26 @@ public class MergeSort {
             int windowL = l;
             int windowR = l;
             long[] tmp = new long[r - l + 1];
+            //这里才是精髓，到底怎么算这个滑动的才是最大的精髓
+            //这里
             for (int j = m + 1; j <= r; j++) {
                 long min = accumulateArray[j]-high;
                 long max = accumulateArray[j]-lower;
                 while (windowR <= m && accumulateArray[windowR]<=max){
                     windowR++;
                 }
+                //为什么是左闭右开？
                 while (windowL <=m && accumulateArray[windowL] < min){
                     windowL++;
                 }
-                count += windowR-windowL;
+                count += Math.max(0,windowR-windowL);
 
             }
+            log.debug("windowL:[{}],windowR:[{}],count[{}],l[{}],m[{}],r[{}]",
+                    windowL,
+                    windowR,
+                    count,l,
+                    m,r);
             while (p1 <= m && p2 <= r) {
                 tmp[i++] = accumulateArray[p1] < accumulateArray[p2] ? accumulateArray[p1++] : accumulateArray[p2++];
             }
@@ -762,6 +774,65 @@ public class MergeSort {
             for (i = 0; i < tmp.length; i++) {
                 accumulateArray[l + i] = tmp[i];
             }
+            log.debug("each poch:{}",accumulateArray);
+            return count;
+        }
+        public int recMergeSort1(long[] accumulateArray, int left, int right,
+                                 int windowL, int windowR) {
+            int count = 0;
+            if (accumulateArray == null) {
+                return count;
+            }
+            if (accumulateArray.length < 2) {
+                return accumulateArray[0] <= windowR && accumulateArray[0] >= windowL ? 1 : 0;
+            }
+            if (left == right) {
+                return accumulateArray[left] <= windowR && accumulateArray[left] >= windowL ? 1 : 0;
+            }
+            int M = left + ((right - left) >> 1);
+            count += recMergeSort1(accumulateArray, left, M, windowL, windowR);
+            count += recMergeSort1(accumulateArray, M + 1, right, windowL,
+                    windowR);
+            count += merge1(accumulateArray, left, M, right, windowL, windowR);
+            return count;
+        }
+        public int merge1(long[] accumulateArray, int l, int m, int r,
+                          int lower,
+                         int high) {
+            int i = 0;
+            int p1 = l;
+            int p2 = m + 1;
+            int count = 0;
+            int windowL = l;
+            int windowR = l;
+            long[] tmp = new long[r - l + 1];
+            for (int j = m + 1; j <= r; j++) {
+                for(int k = l; k <= m;k++){
+                    long val = accumulateArray[j] - accumulateArray[k];
+                    if(val >= lower && val <= high){
+                        count++;
+                    }
+                }
+
+            }
+            log.debug("windowL:[{}],windowR:[{}],count[{}],l[{}],m[{}],r[{}]",
+                    windowL,
+                    windowR,
+                    count,l,
+                    m,r);
+            while (p1 <= m && p2 <= r) {
+                tmp[i++] = accumulateArray[p1] < accumulateArray[p2] ? accumulateArray[p1++] : accumulateArray[p2++];
+            }
+            while (p1 <= m) {
+                tmp[i++] = accumulateArray[p1++];
+            }
+            while (p2 <= r) {
+                tmp[i++] = accumulateArray[p2++];
+            }
+            for (i = 0; i < tmp.length; i++) {
+                accumulateArray[l + i] = tmp[i];
+            }
+            log.debug("each poch:{}",accumulateArray);
             return count;
         }
     }
