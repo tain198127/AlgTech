@@ -695,7 +695,7 @@ public class MergeSort {
                 return count;
             }
             if (accumulateArray.length < 2) {
-                return accumulateArray[0] <= windowR && accumulateArray[0] > windowL ? 1 : 0;
+                return accumulateArray[0] <= windowR && accumulateArray[0] >= windowL ? 1 : 0;
             }
             if (left == right) {
                 return accumulateArray[left] <= windowR && accumulateArray[left] >= windowL ? 1 : 0;
