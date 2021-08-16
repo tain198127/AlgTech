@@ -4,7 +4,6 @@ import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.ArrayList;
@@ -661,8 +660,10 @@ public class MergeSort {
             for (int i = 1; i < arr.length; i++) {
                 accumulateArray[i] = accumulateArray[i - 1] + arr[i];
             }
+//            int count = mergeSort(accumulateArray,low,high);
+
             int count = recMergeSort1(accumulateArray, 0,
-                    accumulateArray.length - 1, low, high);
+                                accumulateArray.length - 1, low, high);
             log.debug("结果：{}",accumulateArray);
             return count;
         }
@@ -760,7 +761,16 @@ public class MergeSort {
                 while (windowR <= m && accumulateArray[windowR]<=max){
                     windowR++;
                 }
-                //为什么是左闭右开？
+                //
+                //
+                /**
+                 *为什么是左闭右开？
+                 * 因为这样计算左闭右开，到后面相减的时候不用减1
+                 * 例如[1,2,3,4]
+                 * 要想渠道[1,2]这两个数，可以用
+                 * idx[0,2)，这样的好处是少一次-1计算
+                 * 而且可以用[x,x)来表示一个数也没有，但是左闭右闭的话，就比较麻烦还要减一
+                 */
                 while (windowL <=m && accumulateArray[windowL] < min){
                     windowL++;
                 }
