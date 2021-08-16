@@ -742,8 +742,18 @@ public class MergeSort {
             int windowL = l;
             int windowR = l;
             long[] tmp = new long[r - l + 1];
-            //这里才是精髓，到底怎么算这个滑动的才是最大的精髓
-            //这里
+            //
+            //
+            /**
+             * 这里才是精髓，到底怎么算这个滑动的才是最大的精髓
+             * 这里之所以这么写，是因为右组的数据是有序的，而且是越来越大的，那么
+             * 这个窗口的上限和下线其实也是越来越大的
+             * 例如[1,2,4,5]|[9,10,12,16] lower:-1,upper:10
+             * 那么右组第一个9，减去10等于-1，这个是最小值
+             * 减去-1位10，这个是最大值
+             * 那么winR = 4，winL = 0，也就表示 9 减去 1，2，4，5 都在范围[-1,10]里面
+             * 之所以要这么写，是为了保证循环排序不回退！！！
+             */
             for (int j = m + 1; j <= r; j++) {
                 long min = accumulateArray[j]-high;
                 long max = accumulateArray[j]-lower;
@@ -763,7 +773,8 @@ public class MergeSort {
                     count,l,
                     m,r);
             while (p1 <= m && p2 <= r) {
-                tmp[i++] = accumulateArray[p1] < accumulateArray[p2] ? accumulateArray[p1++] : accumulateArray[p2++];
+                tmp[i++] = accumulateArray[p1] <= accumulateArray[p2] ?
+                        accumulateArray[p1++] : accumulateArray[p2++];
             }
             while (p1 <= m) {
                 tmp[i++] = accumulateArray[p1++];
