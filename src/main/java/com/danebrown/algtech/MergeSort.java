@@ -592,9 +592,14 @@ public class MergeSort {
             int low = -2;
             int high = 2;
              */
-            int [] data = {0};
-            int low = 0;
-            int high = 0;
+            /**
+             * [-2147483647,0,-2147483647,2147483647]
+             * -564
+             * 3864
+             */
+            int [] data = {-2147483647,0,-2147483647,2147483647};
+            int low = -564;
+            int high = 3864;
             ArrayList<Integer> arr = (ArrayList<Integer>) Arrays.stream(data).boxed().collect(Collectors.toList());
             return Triple.of(arr, low, high);
 
@@ -628,7 +633,7 @@ public class MergeSort {
                 while (step < arr.length){
 
                         int[] subArray = ArrayUtils.subarray(arr, i, i+step);
-                        int sum = Arrays.stream(subArray).sum();
+                        long sum = Arrays.stream(subArray).sum();
                         if (sum >= low && sum <= high && subArray.length > 0) {
                             log.debug("子数组:[{}],SUM:{}", subArray, sum);
                             result++;
@@ -668,15 +673,17 @@ public class MergeSort {
             int[] arr = data.getLeft().stream().mapToInt(a -> a).toArray();
             int low = data.getMiddle();
             int high = data.getRight();
-            int[] accumulateArray = new int[arr.length];
+            long [] accumulateArray = new long[arr.length];
             accumulateArray[0] = arr[0];
             for (int i = 1; i < arr.length; i++) {
                 accumulateArray[i] = accumulateArray[i - 1] + arr[i];
             }
 //            int count = mergeSort(accumulateArray,low,high);
-//            log.info("结果：{}",accumulateArray);
-//            return count;
-                        return recMergeSort(accumulateArray, 0, accumulateArray.length - 1, low, high);
+            int count = recMergeSort(accumulateArray, 0,
+                    accumulateArray.length - 1, low, high);
+
+                        log.info("结果：{}",accumulateArray);
+            return count;
         }
 
         /**
@@ -689,7 +696,7 @@ public class MergeSort {
          * @param windowR
          * @return
          */
-        public int recMergeSort(int[] accumulateArray, int left, int right, int windowL, int windowR) {
+        public int recMergeSort(long[] accumulateArray, int left, int right, int windowL, int windowR) {
             int count = 0;
             if (accumulateArray == null) {
                 return count;
@@ -715,7 +722,7 @@ public class MergeSort {
          * @param windowR
          * @return
          */
-        public int mergeSort(int[] accumulateArray, int windowL, int windowR) {
+        public int mergeSort(long[] accumulateArray, int windowL, int windowR) {
             int N = accumulateArray.length;
             int step = 1;
             int count = 0;
@@ -739,7 +746,7 @@ public class MergeSort {
 
         }
 
-        public int merge(int[] accumulateArray, int l, int m, int r, int lower,
+        public int merge(long[] accumulateArray, int l, int m, int r, int lower,
                          int high) {
             int i = 0;
             int p1 = l;
@@ -747,14 +754,14 @@ public class MergeSort {
             int count = 0;
             int windowL = l;
             int windowR = l;
-            int[] tmp = new int[r - l + 1];
+            long[] tmp = new long[r - l + 1];
             for (int j = m + 1; j <= r; j++) {
                 long min = accumulateArray[j]-high;
                 long max = accumulateArray[j]-lower;
                 while (windowR <= m && accumulateArray[windowR]<=max){
                     windowR++;
                 }
-                while (windowL <=m && accumulateArray[windowL] < min){
+                while (windowL <=m && accumulateArray[windowL] <=min){
                     windowL++;
                 }
                 count += windowR-windowL;
