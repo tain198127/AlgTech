@@ -23,8 +23,11 @@ import java.util.Scanner;
  */
 @Log4j2
 public final class AlgCompMenu {
+    public static enum TestMode{
+        NORMAL,MULTI,WRONGBOOK
+    }
     public static final String TEST_NAME_FLG="TEST_NAME_FLG";
-    private static List<Triple<String, AlgCompImpl, Integer>> algCompList = new ArrayList<>();
+    private static List<Triple<String, AlgCompImpl, TestMode>> algCompList = new ArrayList<>();
     static {
         algCompList.add(0,null);
     }
@@ -41,8 +44,9 @@ public final class AlgCompMenu {
     }
     public static void addComp(AlgCompImpl comp, String name, Integer times) {
         int t = times == null ? 100 : times;
-        algCompList.add(Triple.of(name, comp, 1));
-        algCompList.add(Triple.of(name + ":多次循环", comp, t));
+        algCompList.add(Triple.of(name, comp, TestMode.NORMAL));
+        algCompList.add(Triple.of(name, comp, TestMode.WRONGBOOK));
+        algCompList.add(Triple.of(name, comp, TestMode.MULTI));
     }
 
     private static void printMeau() {
@@ -50,6 +54,18 @@ public final class AlgCompMenu {
         System.out.printf("[%3d]:[%s] \n", 0, "退出");
         for (int i = 1; i < algCompList.size(); i++) {
             String name = algCompList.get(i).getLeft();
+            TestMode mode = algCompList.get(i).getRight();
+            switch (mode){
+                case NORMAL:{
+                    name += ":单笔测试";
+                };break;
+                case WRONGBOOK:{
+                    name += ":错题训练";
+                };break;
+                case MULTI:{
+                    name+=":多次循环";
+                };break;
+            }
             System.out.printf("[%3d]:[%s] \n", i, name);
         }
         System.out.println("==============================");
@@ -79,7 +95,7 @@ public final class AlgCompMenu {
     }
 
     private static void runTest(int idx) {
-        Triple<String, AlgCompImpl, Integer> triple =
+        Triple<String, AlgCompImpl, TestMode> triple =
                 algCompList.get(idx);
         if (triple == null) {
             log.error("第{}项没有对数器,请重新选择", idx);
@@ -87,10 +103,15 @@ public final class AlgCompMenu {
         }
         String name = triple.getLeft();
         AlgCompImpl impl = triple.getMiddle();
-        int times = triple.getRight();
+        TestMode mode = triple.getRight();
+        int times  = 100;
         MDC.put(TEST_NAME_FLG,name);
-        if(times <=1){
+        if(mode ==TestMode.NORMAL){
             log.info("第{}位对数器 :{},结果为:[{}]", idx, name, impl.compare(name));
+        }
+        else if(mode == TestMode.WRONGBOOK){
+            log.info("第{}位对数器 :{},结果为:[{}]", idx, name, impl.multiCompareWrongBook(name));
+
         }
         else{
             log.info("第{}位对数器 :{},循环:[{}]次,结果为:[{}]", idx, name, times,

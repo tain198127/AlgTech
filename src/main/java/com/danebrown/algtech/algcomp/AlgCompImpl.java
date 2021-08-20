@@ -3,6 +3,7 @@ package com.danebrown.algtech.algcomp;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
+import com.danebrown.algtech.algcomp.wrongbook.JsonWrongBook;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.bag.UnmodifiableBag;
 import org.apache.commons.lang3.ObjectUtils;
@@ -20,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by danebrown on 2021/7/28
@@ -29,6 +32,18 @@ import java.util.function.Supplier;
  */
 @Log4j2
 public abstract class AlgCompImpl<T,R>{
+    private WrongBook<R> wrongBook = null;
+    protected WrongBook initWrongBook(){
+        if(wrongBook == null){
+            synchronized (this){
+                if(wrongBook == null){
+                    wrongBook = new JsonWrongBook();
+                }
+            }
+        }
+        return wrongBook;
+    }
+
     /**
      * 准备原始测试数据
      * @return
@@ -60,9 +75,9 @@ public abstract class AlgCompImpl<T,R>{
     public boolean compare(String testName, Consumer<Long> testTime,
                            Consumer<Long> standardTime ,
                            Supplier<R> prepareSupplier){
-
+        WrongBook wrongBook = initWrongBook();
         R setupData =prepareSupplier == null? prepare():prepareSupplier.get();
-        log.trace("原始数据:{}",setupData);
+        log.debug("原始数据:{}",setupData);
         R forTest = null;
         R forStandard = null;
         //直接clone
@@ -106,6 +121,7 @@ public abstract class AlgCompImpl<T,R>{
         }
         result = testEqual(testResult, standardResult);
         if (!result) {
+            wrongBook.write(testName, setupData);
             log.error("{}测试失败,原始数据:{}", testName,setupData
                     );
             log.error("{}测试失败,测试结果:{}",testName,testResult);
@@ -138,6 +154,24 @@ public abstract class AlgCompImpl<T,R>{
 
     public boolean multiCompare(String testName, int times){
         return multiCompare(testName,times,null);
+    }
+
+    /**
+     * 错题本
+     * @param testName
+     * @return
+     */
+    public boolean multiCompareWrongBook(String testName){
+        WrongBook wrongBook = initWrongBook();
+
+        List<R> testCase = wrongBook.load(testName);
+        boolean result = true;
+        for (R item:testCase){
+            log.info("错题集:{}",item);
+            result &= compare(testName, () -> item);
+        }
+        return result;
+
     }
     /**
      * 多次测试
