@@ -5,13 +5,10 @@ import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by danebrown on 2021/8/17
@@ -30,53 +27,51 @@ public class QuickSort {
     }
 
     @AlgName("荷兰国旗问题")
-    public static class NetherlandsFlag extends AlgCompImpl<ArrayList<Integer>, ArrayList<Double>> {
+    public static class NetherlandsFlag extends AlgCompImpl<int[], int[]> {
 
         @Override
-        public ArrayList<Double> prepare() {
+        public int[] prepare() {
             int dataSize = ThreadLocalRandom.current().nextInt(2, 10);
-            Double[] data = new Double[dataSize + 1];
+            int[] data = new int[dataSize + 1];
             for (int i = 0; i < dataSize; i++) {
-                data[i] = Double.valueOf(ThreadLocalRandom.current().nextInt(0, 10));
+                data[i] = ThreadLocalRandom.current().nextInt(0, 10);
             }
 
-            Double flag = data[ThreadLocalRandom.current().nextInt(0, dataSize - 1)];
+            int flag = data[ThreadLocalRandom.current().nextInt(0, dataSize - 1)];
             data[dataSize] = flag;
             //            int[] data = new int[]{0, 7, 6, 2, 9, 4, 9,7};
             //
             //            int flag = 7;
-            ArrayList<Double> arrayList = new ArrayList<>();
-            arrayList.addAll(Arrays.asList(data));
-            return arrayList;
+            return data;
         }
 
         @Override
-        protected ArrayList<Integer> standard(ArrayList<Double> inputData) {
+        protected int[] standard(int[] inputData) {
 
-            if (inputData == null || inputData.size() < 2) {
-                return (ArrayList<Integer>) Stream.of(-1, 1).collect(Collectors.toList());
+            if (inputData == null || inputData.length < 2) {
+                return new int[]{-1, -1};
             }
-            double flag = inputData.get(inputData.size() - 1);
-            inputData.sort(Comparator.comparingDouble(o -> o));
-            int firstIdx = inputData.indexOf(flag);
-            int lastIdx = inputData.lastIndexOf(flag);
+            int flag = inputData[inputData.length - 1];
+            Arrays.sort(inputData);
+
+            int firstIdx = Arrays.stream(inputData).boxed().collect(Collectors.toList()).indexOf(flag);
+            int lastIdx = Arrays.stream(inputData).boxed().collect(Collectors.toList()).lastIndexOf(flag);
 
             log.debug("flag:{},firstIdx:{},lastIdx:{},arr:[{}]", flag, firstIdx, lastIdx, inputData);
-            return (ArrayList<Integer>) Stream.of(firstIdx - 1, lastIdx).collect(Collectors.toList());
+            return new int[]{firstIdx - 1, lastIdx};
 
 
         }
 
         @Override
-        protected ArrayList<Integer> test(ArrayList<Double> inputData) {
-            int[] data = inputData.stream().mapToInt(Double::intValue).toArray();
+        protected int[] test(int[] data) {
             int flag = data[data.length - 1];
             int[] result = netherlandsFlag(data, 0, data.length - 1);
             int firstIdx = result[0];
             int lastIdx = result[1];
 
             log.debug("flag:{},firstIdx:{},lastIdx:{},arr:[{}]", flag, firstIdx, lastIdx, data);
-            return (ArrayList<Integer>) Stream.of(firstIdx - 1, lastIdx).collect(Collectors.toList());
+            return new int[]{firstIdx - 1, lastIdx};
 
 
         }
@@ -164,51 +159,53 @@ public class QuickSort {
 
         /**
          * 快排一定要有随机数，有了随机数，综合算法复杂度才是N LOG N
+         *
          * @param data
          * @return
          */
         @Override
         protected int[] test(int[] data) {
-            if(data == null || data.length<2){
+            if (data == null || data.length < 2) {
                 return data;
             }
             int N = data.length;
-            swap(data,ThreadLocalRandom.current().nextInt(0,N-1),N-1);
-            process(data,0, data.length-1);
+            swap(data, ThreadLocalRandom.current().nextInt(0, N - 1), N - 1);
+            process(data, 0, data.length - 1);
             return data;
         }
-        public void process(int[] data, int l, int r){
 
-            if(l >= r){
+        public void process(int[] data, int l, int r) {
+
+            if (l >= r) {
                 return;
             }
-            int[] equalArea = netherlandsFlag(data,l,r);
-            process(data,l,equalArea[0]-1);
-            process(data,equalArea[1]+1,r);
+            int[] equalArea = netherlandsFlag(data, l, r);
+            process(data, l, equalArea[0] - 1);
+            process(data, equalArea[1] + 1, r);
         }
-        public int[] netherlandsFlag(int[] data,int l, int r) {
+
+        public int[] netherlandsFlag(int[] data, int l, int r) {
             int i = l;
-            int low = l-1;
+            int low = l - 1;
             int high = r;
-            if(data ==null ||  l>r){
-                return new int[]{-1,-1};
+            if (data == null || l > r) {
+                return new int[]{-1, -1};
             }
-            if(l == r){
-                return new int[]{l,r};
+            if (l == r) {
+                return new int[]{l, r};
             }
 
-            while (i < high){//这里容易错，对比的high
-                if(data[i] < data[r]){
-                    swap(data,i++,++low);
-                }
-                else if(data[i] == data[r]){
+            while (i < high) {//这里容易错，对比的high
+                if (data[i] < data[r]) {
+                    swap(data, i++, ++low);
+                } else if (data[i] == data[r]) {
                     i++;
-                }else{
-                    swap(data,i,--high);
+                } else {
+                    swap(data, i, --high);
                 }
             }
-            swap(data,high,r);
-            return new int[]{low+1,high};
+            swap(data, high, r);
+            return new int[]{low + 1, high};
         }
 
         public void swap(int[] data, int l, int r) {
@@ -217,16 +214,20 @@ public class QuickSort {
             data[r] = tmp;
         }
     }
-    public static class Op{
-        int l,r;
-        public Op(int l, int r){
+
+    public static class Op {
+        int l, r;
+
+        public Op(int l, int r) {
             this.l = l;
             this.r = r;
         }
     }
+
     @AlgName("循环快排")
-    public static class WhileQuickSort extends AlgCompImpl<int[],int[]>{
+    public static class WhileQuickSort extends AlgCompImpl<int[], int[]> {
         RecQuickSort quickSort = new RecQuickSort();
+
         @Override
         public int[] prepare() {
             return quickSort.prepare();
@@ -239,55 +240,55 @@ public class QuickSort {
 
         @Override
         protected int[] test(int[] data) {
-            if(data == null || data.length < 2){
+            if (data == null || data.length < 2) {
                 return data;
             }
             int N = data.length;
-            swap(data,ThreadLocalRandom.current().nextInt(0,N-1),N-1);
-            int[] part = netherlandsFlag(data,0,N-1);
+            swap(data, ThreadLocalRandom.current().nextInt(0, N - 1), N - 1);
+            int[] part = netherlandsFlag(data, 0, N - 1);
             int l = part[0];
             int r = part[1];
             Stack<Op> stack = new Stack<>();
-            stack.push(new Op(0,l-1));
-            stack.push(new Op(r+1,N-1));
-            while (!stack.isEmpty()){
+            stack.push(new Op(0, l - 1));
+            stack.push(new Op(r + 1, N - 1));
+            while (!stack.isEmpty()) {
                 Op op = stack.pop();
-                if(op.l < op.r){
-                    swap(data,ThreadLocalRandom.current().nextInt(op.l,
-                            op.r),op.r);
-                    part = quickSort.netherlandsFlag(data,op.l,op.r);
+                if (op.l < op.r) {
+                    swap(data, ThreadLocalRandom.current().nextInt(op.l, op.r), op.r);
+                    part = quickSort.netherlandsFlag(data, op.l, op.r);
                     l = part[0];
                     r = part[1];
-                    stack.push(new Op(op.l,l-1));
-                    stack.push(new Op(r+1,op.r));
+                    stack.push(new Op(op.l, l - 1));
+                    stack.push(new Op(r + 1, op.r));
                 }
             }
             return data;
         }
 
-        public int[] netherlandsFlag(int[] data, int l,int r){
+        public int[] netherlandsFlag(int[] data, int l, int r) {
             int i = l;
-            int low = l-1;
-            int high =  r;
-            if(data == null ||l > r){
-                return new int[]{-1,-1};
+            int low = l - 1;
+            int high = r;
+            if (data == null || l > r) {
+                return new int[]{-1, -1};
             }
-            if(l == r){
-                return new int[]{l,r};
+            if (l == r) {
+                return new int[]{l, r};
             }
-            while (i < high){
-                if(data[i] == data[r]){
+            while (i < high) {
+                if (data[i] == data[r]) {
                     i++;
-                }else if(data[i] < data[r]){
-                    swap(data,i++,++low);
-                }else{
-                    swap(data,i,--high);
+                } else if (data[i] < data[r]) {
+                    swap(data, i++, ++low);
+                } else {
+                    swap(data, i, --high);
                 }
             }
-            swap(data,r,high);
-            return new int[]{low+1,high};
+            swap(data, r, high);
+            return new int[]{low + 1, high};
         }
-        public void swap(int[] data, int l, int r){
+
+        public void swap(int[] data, int l, int r) {
             int tmp = data[l];
             data[l] = data[r];
             data[r] = tmp;
