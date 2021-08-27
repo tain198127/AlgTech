@@ -45,7 +45,7 @@ public final class AlgCompMenu {
     public static void addComp(AlgCompImpl comp, String name, Integer times) {
         int t = times == null ? 100 : times;
         algCompList.add(Triple.of(name, comp, TestMode.NORMAL));
-        algCompList.add(Triple.of(name, comp, TestMode.WRONGBOOK));
+//        algCompList.add(Triple.of(name, comp, TestMode.WRONGBOOK));
         algCompList.add(Triple.of(name, comp, TestMode.MULTI));
     }
 
