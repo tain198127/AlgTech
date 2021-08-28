@@ -34,7 +34,7 @@ public class HeapSortStaf {
          */
         @Override
         public Integer[] prepare() {
-            int dataSize = ThreadLocalRandom.current().nextInt(2, 10);
+            int dataSize = ThreadLocalRandom.current().nextInt(20000, 1000000);
             Integer[] data = new Integer[dataSize + 1];
             for (int i = 0; i < dataSize; i++) {
                 if (ThreadLocalRandom.current().nextBoolean()) {
@@ -52,12 +52,7 @@ public class HeapSortStaf {
             PriorityQueue<Integer> queue = new PriorityQueue<>(new Comparator<Integer>() {
                 @Override
                 public int compare(Integer o1, Integer o2) {
-                    if (o1 > o2) {
-                        return -1;
-                    } else if (o1 < o2) {
-                        return 1;
-                    }
-                    return 0;
+                    return o2 - o1;
                 }
             });
             for (int i = 0; i < data.length; i++) {
@@ -76,9 +71,13 @@ public class HeapSortStaf {
             Integer[] heap = new Integer[data.length];
             for (int i = 0; i < data.length; i++) {
                 if (data[i] == null) {
-                    heapIfy(heap);
+                    heapIfy(heap, 0, heapSize);
+                    if (heapSize >= 1) {
+                        heapSize--;
+                    }
                 } else {
-                    heapInsert(heap, data[i]);
+                    heapInsert(heap, data[i], heapSize);
+                    heapSize++;
                 }
             }
 
@@ -92,15 +91,15 @@ public class HeapSortStaf {
          * @param data
          * @param insert
          */
-        public void heapInsert(Integer[] data, int insert) {
-            int curIdx = heapSize;
+        public void heapInsert(Integer[] data, int insert, int idx) {
+            int curIdx = idx;
             data[curIdx] = insert;
             while (data[curIdx] > data[(curIdx - 1) / 2]) {
                 swap(data, curIdx, (curIdx - 1) / 2);
                 curIdx = (curIdx - 1) / 2;
             }
 
-            heapSize++;
+
         }
 
         /**
@@ -109,11 +108,11 @@ public class HeapSortStaf {
          * @param data
          * @return
          */
-        public Integer heapIfy(Integer[] data) {
+        public Integer heapIfy(Integer[] data, int idx, int heapSize) {
             if (heapSize < 1) {
                 return null;
             }
-            int idx = 0;//堆顶
+            //            int idx = 0;//堆顶
             swap(data, idx, heapSize - 1);
             heapSize--;
             int ret = data[idx];
