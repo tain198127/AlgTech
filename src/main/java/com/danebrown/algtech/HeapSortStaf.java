@@ -20,6 +20,7 @@ public class HeapSortStaf {
     public static void main(String[] args) {
 
         AlgCompMenu.addComp(new HeapOp());
+        AlgCompMenu.addComp(new HeapSort());
         AlgCompMenu.run();
     }
 
@@ -34,13 +35,13 @@ public class HeapSortStaf {
          */
         @Override
         public Integer[] prepare() {
-            int dataSize = ThreadLocalRandom.current().nextInt(20000, 1000000);
+            int dataSize = ThreadLocalRandom.current().nextInt(200, 500);
             Integer[] data = new Integer[dataSize + 1];
             for (int i = 0; i < dataSize; i++) {
                 if (ThreadLocalRandom.current().nextBoolean()) {
                     data[i] = null;
                 } else {
-                    data[i] = ThreadLocalRandom.current().nextInt(0, 10);
+                    data[i] = ThreadLocalRandom.current().nextInt();
                 }
             }
             return data;
@@ -68,20 +69,20 @@ public class HeapSortStaf {
         @Override
         protected int[] test(Integer[] data) {
             heapSize = 0;
-            Integer[] heap = new Integer[data.length];
+//            Integer[] heap = new Integer[data.length];
             for (int i = 0; i < data.length; i++) {
                 if (data[i] == null) {
-                    heapIfy(heap, 0, heapSize);
+                    heapIfy(data, 0, heapSize);
                     if (heapSize >= 1) {
                         heapSize--;
                     }
                 } else {
-                    heapInsert(heap, data[i], heapSize);
+                    heapInsert(data, i);
                     heapSize++;
                 }
             }
 
-            return Arrays.stream(heap, 0, heapSize).mapToInt(Integer::intValue).toArray();
+            return Arrays.stream(data, 0, heapSize).mapToInt(Integer::intValue).toArray();
         }
         //这个本质上就是个优先级队列
 
@@ -89,11 +90,10 @@ public class HeapSortStaf {
          * 大根堆插入
          *
          * @param data
-         * @param insert
+         * @param curIdx
          */
-        public void heapInsert(Integer[] data, int insert, int idx) {
-            int curIdx = idx;
-            data[curIdx] = insert;
+        public void heapInsert(Integer[] data, int curIdx) {
+
             while (data[curIdx] > data[(curIdx - 1) / 2]) {
                 swap(data, curIdx, (curIdx - 1) / 2);
                 curIdx = (curIdx - 1) / 2;
@@ -108,14 +108,7 @@ public class HeapSortStaf {
          * @param data
          * @return
          */
-        public Integer heapIfy(Integer[] data, int idx, int heapSize) {
-            if (heapSize < 1) {
-                return null;
-            }
-            //            int idx = 0;//堆顶
-            swap(data, idx, heapSize - 1);
-            heapSize--;
-            int ret = data[idx];
+        public void heapIfy(Integer[] data, int idx, int heapSize) {
             int left = idx * 2 + 1;
             while (left < heapSize) {
                 int largest = left + 1 < heapSize && data[left + 1] > data[left] ? left + 1 : left;
@@ -126,15 +119,82 @@ public class HeapSortStaf {
                 swap(data, largest, idx);
                 idx = largest;
                 left = idx * 2 + 1;
-
             }
-
-            return ret;
 
         }
 
         public void swap(Integer[] data, int from, int to) {
             Integer tmp = data[from];
+            data[from] = data[to];
+            data[to] = tmp;
+        }
+    }
+    @AlgName("堆排序")
+    public static class HeapSort extends AlgCompImpl<int[], int[]> {
+        @Override
+        public int[] prepare() {
+            int dataSize = ThreadLocalRandom.current().nextInt(20000, 1000000);
+            int[] data = new int[dataSize + 1];
+            for (int i = 0; i < dataSize; i++) {
+                data[i] = ThreadLocalRandom.current().nextInt();
+            }
+            return data;
+
+//            return new int[]{3,1,2};
+        }
+
+        @Override
+        protected int[] standard(int[] data) {
+            Arrays.sort(data);
+            return data;
+        }
+
+        @Override
+        protected int[] test(int[] data) {
+            if(data == null || data.length < 2){
+                return data;
+            }
+            int heapSize = data.length;
+
+//            //自顶向下的建堆(N log N)时间复杂度
+//            for(int i = 0; i < data.length; i++){
+//                heapInsert(data,i);
+//            }
+            //自下向上建堆，O(N)时间复杂度
+            for(int i = data.length-1; i >=0; i--){
+                heapIfy(data,i,heapSize);
+            }
+            swap(data,0,--heapSize);
+            while (heapSize > 0){
+                //向下沉，(NlogN)时间复杂度
+                heapIfy(data,0,heapSize);
+                swap(data,0,--heapSize);
+            }
+            return data;
+
+        }
+        public void heapInsert(int[] data, int i){
+            while (data[i] > data[(i -1)/2]){
+                swap(data,i, (i -1)/2);
+                i = (i -1)/2;
+            }
+        }
+        public void heapIfy(int[] data, int idx, int heapSize) {
+            int left = idx * 2 + 1;
+            while (left < heapSize) {
+                int largest = left + 1 < heapSize && data[left + 1] > data[left] ? left + 1 : left;
+                largest = data[largest] > data[idx] ? largest : idx;
+                if (largest == idx) {
+                    break;
+                }
+                swap(data, largest, idx);
+                idx = largest;
+                left = idx * 2 + 1;
+            }
+
+        }
+        public void swap(int[] data, int from, int to){
+            int tmp = data[from];
             data[from] = data[to];
             data[to] = tmp;
         }
