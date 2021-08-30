@@ -4,10 +4,13 @@ import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 /**
  * Created by danebrown on 2021/8/23
@@ -21,6 +24,7 @@ public class HeapSortStaf {
 
         AlgCompMenu.addComp(new HeapOp());
         AlgCompMenu.addComp(new HeapSort());
+        AlgCompMenu.addComp(new MaxLineCoincidence());
         AlgCompMenu.run();
     }
 
@@ -200,5 +204,70 @@ public class HeapSortStaf {
         }
     }
 
+    /**
+     * 给了很多线段、每个线段都有两个数[START,END]，表示开始和结束
+     * 前提假设：线段开始和结束都是整数
+     * 线段重合度必须>=1
+     * 问：返回线段最多重合区域中，包含了几条线段
+     * 例如：[1,3],[2,7]，那么2-3之间就是重合的
+     * 再例如 [4,7],[7,9]，那么这两个线段就不是重合的
+     */
+    @AlgName("最大线段重合数")
+    public static class MaxLineCoincidence extends AlgCompImpl< Integer,int[][]>{
+        private static int ORIGIN=200;
+        private static int BOUND=3000;
+
+        @Override
+        public int[][] prepare() {
+            int dataSize = ThreadLocalRandom.current().nextInt(ORIGIN, BOUND);
+            int[][] data = new int[dataSize][2];
+            for (int i = 0; i < dataSize; i++) {
+                data[i][0] = ThreadLocalRandom.current().nextInt(0,BOUND);
+                data[i][1] =
+                        data[i][0] + ThreadLocalRandom.current().nextInt(1,
+                                BOUND);
+            }
+            return data;
+        }
+
+        @Override
+        protected Integer standard(int[][] data) {
+            List<Integer> list = new ArrayList<>();
+            for(int i=0;i < data.length;i++){
+                list.add(data[i][0]);
+                list.add(data[i][1]);
+            }
+            int min = list.stream().min(Comparator.comparingInt(o -> o)).get();
+            int max = list.stream().max(Comparator.comparingInt(o -> o)).get();
+            int maxLine = 0;
+            for(double i = min;i < max;i=i+0.5){
+                int tmpMax = 0;
+                for(int j = 0; j < data.length; j++){
+                    if(i > (double) data[j][0] && i < (double)data[j][1]){
+                        tmpMax++;
+                    }
+                }
+                maxLine = Math.max(maxLine,tmpMax);
+            }
+            return maxLine;
+        }
+
+        @Override
+        protected Integer test(int[][] data) {
+            List<int[]> tmp =
+                    Arrays.stream(data).sorted(Comparator.comparingInt(o -> o[0])).collect(Collectors.toList());
+            PriorityQueue<Integer> heap = new PriorityQueue<>();
+            int max = 0;
+            for(int[] line:tmp){
+                while (!heap.isEmpty() && heap.peek()<= line[0]){//这里很容易错
+                    heap.poll();
+                }
+                heap.add(line[1]);
+                max = Math.max(max,heap.size());
+            }
+            return max;
+        }
+
+    }
 
 }
