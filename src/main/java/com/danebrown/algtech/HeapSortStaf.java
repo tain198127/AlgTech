@@ -3,6 +3,7 @@ package com.danebrown.algtech;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
  *
  * @author danebrown
  */
+@Log4j2
 public class HeapSortStaf {
     public static void main(String[] args) {
 
