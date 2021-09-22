@@ -4,11 +4,13 @@ import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -17,11 +19,13 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @author danebrown
  */
+@Log4j2
 public class LinklistSort {
 
     public static void main(String[] args) {
         AlgCompMenu.addComp(new GetLoopNode());
         AlgCompMenu.addComp(new FastSlowPointer());
+        AlgCompMenu.addComp(new HuiWenLink());
         AlgCompMenu.run();
     }
 
@@ -52,7 +56,6 @@ public class LinklistSort {
 
 
     /**
-     * todo
      * 1:输入链表头节点，奇数长度返回中点，偶数长度返回上中点
      * 2:输入链表头节点，奇数长度返回中点，偶数长度返回下中点
      * 3:输入链表头节点，奇数长度返回中点前一个，偶数长度返回上中点前一个
@@ -86,8 +89,8 @@ public class LinklistSort {
             int oddmid = len / 2;
 
             Node midNode = list.get(oddmid);
-            Node preMidNode = list.get(oddmid-1);
-            return String.format("%d-%d",midNode.getValue(),preMidNode.getValue());
+            Node preMidNode = list.get(oddmid - 1);
+            return String.format("%d-%d", midNode.getValue(), preMidNode.getValue());
         }
 
         @Override
@@ -96,12 +99,12 @@ public class LinklistSort {
             Node preSlow = head;
             Node slow = head;
 
-            while (fast != null && fast.next!=null){
+            while (fast != null && fast.next != null) {
                 preSlow = slow;
                 slow = slow.next;
                 fast = fast.next.next;
             }
-            return String.format("%d-%d",slow.getValue(),preSlow.getValue());
+            return String.format("%d-%d", slow.getValue(), preSlow.getValue());
 
         }
     }
@@ -146,30 +149,153 @@ public class LinklistSort {
     }
 
     /**
-     * todo
      * 给定一个单链表的头节点head，请判断该链表是否为回文结构。
      */
+    @AlgName("回文链表")
     public static class HuiWenLink extends AlgCompImpl<Boolean, Node> {
+        private void printNode(Node head){
+            Node current = head;
+            StringBuilder stringBuilder = new StringBuilder();
+            while (current != null){
+                stringBuilder.append(String.format("%d\n",current.getValue()));
+                current = current.next;
+            }
+            log.debug("原始数据:\n{}",stringBuilder.toString());
 
+        }
         @Override
         public Node prepare() {
-            int length = ThreadLocalRandom.current().nextInt(70000, 800000);
-            LinkedList<Node> list = new LinkedList<>();
-            Node head = null;
+            int length = ThreadLocalRandom.current().nextInt(70000, 80000);
+            Stack<Integer> huiwenStack = new Stack<>();
+            Node current = new Node(-1);
+            huiwenStack.push(-1);
+            Node head = current;
             for (int i = 0; i < length; i++) {
-
+                int v = ThreadLocalRandom.current().nextInt();
+                current.next = new Node(v);
+                current = current.next;
+                huiwenStack.push(v);
             }
-            return null;
+            //处理奇数回文，认为判定length为偶数时，进行奇数回文
+            if (length % 2 == 0) {
+                int v = ThreadLocalRandom.current().nextInt();
+                current.next = new Node(v);
+                current = current.next;
+            }
+            while (!huiwenStack.isEmpty()) {
+                int v = huiwenStack.pop();
+                current.next = new Node(v);
+                current = current.next;
+            }
+            printNode(head);
+            return head;
         }
 
         @Override
-        protected Boolean standard(Node data) {
-            return null;
+        protected Boolean standard(Node head) {
+            if(head == null || head.next == null){
+                return true;
+            }
+            Node current = head;
+            Stack<Node> stack = new Stack<>();
+            while (current != null) {
+                stack.push(current);
+                current = current.next;
+            }
+            current = head;
+            while (current != null){
+                if(current.getValue() != stack.pop().getValue()){
+                    log.error("不是回文结构");
+                    return false;
+                }
+                current = current.next;
+            }
+            printNode(head);
+            return true;
+
+
         }
 
         @Override
-        protected Boolean test(Node data) {
-            return null;
+        protected Boolean test(Node head) {
+            Node fast = head;
+            Node slow = head;
+            while (fast != null && fast.next != null){
+                fast = fast.next.next;
+                slow = slow.next;
+            }
+            //到这里，slow应该是中点
+            //从头开始数
+            fast = head;//记录一下
+            //将后续slow之后的进行逆序连接
+            Node nextSlow = slow.next;//从nextSlow开始算
+            slow.setNext(null);
+            Node tmp = null;
+            //做翻转
+            while (nextSlow != null){
+                tmp = nextSlow.next;//临时记录一下
+                nextSlow.setNext(slow);//进行逆序
+                slow = nextSlow;//后移一位
+                nextSlow = tmp;//后移一位
+            }
+            boolean res = true;
+            Node lastNode = slow;//记录一下最后一位
+            while (nextSlow!=null && fast !=null){
+                if(nextSlow.value != fast.value){
+                    res = false;
+                    break;
+                }
+                nextSlow = nextSlow.next;
+                fast = fast.next;
+            }
+            //还要恢复回来
+            nextSlow = lastNode.next;
+            lastNode.setNext(null);
+            while (nextSlow != null){
+                tmp = nextSlow.next;
+                nextSlow.setNext(lastNode);
+                lastNode = nextSlow;
+                nextSlow = tmp;
+            }
+
+            printNode(head);
+            return res;
+
+
+            //循环完毕以后，slow一定是在中点
+            //完成以后，再将nextSlow之后的逆序回来
+        }
+
+        /**
+         * 只使用一半的stack
+         * @param head
+         * @return
+         */
+//        @Override
+        protected Boolean test1(Node head) {
+            if(head == null || head.next == null){
+                return true;
+            }
+            Node right = head.next;
+            Node cur = head;
+            while (cur.next != null && cur.next.next != null){
+                right = right.next;
+                cur = cur.next.next;
+            }
+            Stack<Node> stack = new Stack<>();
+            while (right != null){
+                stack.push(right);
+                right = right.next;
+            }
+            cur = head;
+            while (!stack.isEmpty()){
+                if(stack.pop().value != cur.value){
+                    return false;
+                }
+                cur = cur.next;
+            }
+            return true;
+
         }
     }
 
