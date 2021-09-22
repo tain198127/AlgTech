@@ -3,12 +3,12 @@ package com.danebrown.algtech;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
-import com.google.common.base.Objects;
 import lombok.Data;
-import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -21,15 +21,19 @@ public class LinklistSort {
 
     public static void main(String[] args) {
         AlgCompMenu.addComp(new GetLoopNode());
+        AlgCompMenu.addComp(new FastSlowPointer());
         AlgCompMenu.run();
     }
 
     @Data
-
     public static class Node {
         private int value;
 
         private Node next;
+
+        public Node(int value) {
+            this.value = value;
+        }
 
         @Override
         public String toString() {
@@ -42,25 +46,64 @@ public class LinklistSort {
                 return true;
             if (!(o instanceof Node))
                 return false;
-            Node node = (Node) o;
-            return getValue() == node.getValue();
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(getValue());
+            return false;
         }
     }
-    //TODO
+
 
     /**
+     * todo
      * 1:输入链表头节点，奇数长度返回中点，偶数长度返回上中点
      * 2:输入链表头节点，奇数长度返回中点，偶数长度返回下中点
      * 3:输入链表头节点，奇数长度返回中点前一个，偶数长度返回上中点前一个
      * 4:输入链表头节点，奇数长度返回中点前一个，偶数长度返回下中点前一个
      */
-    public static class FastSlowPointer {
+    @AlgName("快慢指针计算中点")
+    public static class FastSlowPointer extends AlgCompImpl<String, Node> {
 
+        @Override
+        public Node prepare() {
+            int length = ThreadLocalRandom.current().nextInt(70, 80);
+            Node head = new Node(0);
+            Node current = head;
+            for (int i = 0; i < length; i++) {
+                current.next = new Node(i + 1);
+                current = current.next;
+            }
+            return head;
+        }
+
+        @Override
+        protected String standard(Node head) {
+            List<Node> list = new ArrayList<>();
+            Node current = head;
+            while (current != null) {
+                list.add(current);
+                current = current.next;
+            }
+            int len = list.size();
+            //奇偶中点，偶数就直接除以2，奇数
+            int oddmid = len / 2;
+
+            Node midNode = list.get(oddmid);
+            Node preMidNode = list.get(oddmid-1);
+            return String.format("%d-%d",midNode.getValue(),preMidNode.getValue());
+        }
+
+        @Override
+        protected String test(Node head) {
+            Node fast = head;
+            Node preSlow = head;
+            Node slow = head;
+
+            while (fast != null && fast.next!=null){
+                preSlow = slow;
+                slow = slow.next;
+                fast = fast.next.next;
+            }
+            return String.format("%d-%d",slow.getValue(),preSlow.getValue());
+
+        }
     }
 
     /**
@@ -84,17 +127,38 @@ public class LinklistSort {
      * 【要求】
      * 时间复杂度O(N)，额外空间复杂度O(1)
      */
-    public static class DoubleCycleCrossLink {
+    public static class DoubleCycleCrossLink extends AlgCompImpl<Node[], Node[]> {
 
+        @Override
+        public Node[] prepare() {
+            return new Node[0];
+        }
+
+        @Override
+        protected Node[] standard(Node[] data) {
+            return new Node[0];
+        }
+
+        @Override
+        protected Node[] test(Node[] data) {
+            return new Node[0];
+        }
     }
 
     /**
+     * todo
      * 给定一个单链表的头节点head，请判断该链表是否为回文结构。
      */
     public static class HuiWenLink extends AlgCompImpl<Boolean, Node> {
 
         @Override
         public Node prepare() {
+            int length = ThreadLocalRandom.current().nextInt(70000, 800000);
+            LinkedList<Node> list = new LinkedList<>();
+            Node head = null;
+            for (int i = 0; i < length; i++) {
+
+            }
             return null;
         }
 
@@ -121,8 +185,7 @@ public class LinklistSort {
             int length = ThreadLocalRandom.current().nextInt(70000, 800000);
             LinkedList<Node> list = new LinkedList<>();
             for (int i = 0; i < length; i++) {
-                Node node = new Node();
-                node.setValue(i);
+                Node node = new Node(i);
                 if (!list.isEmpty()) {
                     list.getLast().setNext(node);
                 }
