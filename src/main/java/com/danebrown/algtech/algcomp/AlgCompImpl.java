@@ -69,7 +69,7 @@ public abstract class AlgCompImpl<T,R>{
      * @param testName 对数器名称
      * @param testTime 测试时间消费者
      * @param standardTime 标准程序时间消费者
-     * @param prepareSupplier 测试提供者
+     * @param prepareSupplier 测试数据提供者，默认使用基类中的prepare方法
      * @return
      */
     public boolean compare(String testName, Consumer<Long> testTime,
@@ -131,6 +131,14 @@ public abstract class AlgCompImpl<T,R>{
         }
         return result;
     }
+
+    /**
+     * 对数器
+     * @param testName 对数器算法名称
+     * @param testTime 测试耗时的callback
+     * @param standardTime 标准算法耗时callback
+     * @return
+     */
     public boolean compare(String testName, Consumer<Long> testTime,
                            Consumer<Long> standardTime){
         return this.compare(testName,testTime,standardTime,null);
