@@ -121,7 +121,7 @@ public abstract class AlgCompImpl<T,R>{
         }
         result = testEqual(testResult, standardResult);
         if (!result) {
-            wrongBook.write(testName, setupData);
+//            wrongBook.write(testName, setupData);
             log.error("{}测试失败,原始数据:{}", testName,setupData
                     );
             log.error("{}测试失败,测试结果:{}",testName,testResult);

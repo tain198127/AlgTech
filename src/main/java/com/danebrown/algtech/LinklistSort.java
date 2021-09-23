@@ -3,15 +3,19 @@ package com.danebrown.algtech;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
+import com.google.common.collect.Sets;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 /**
  * Created by danebrown on 2021/9/21
@@ -26,6 +30,7 @@ public class LinklistSort {
         AlgCompMenu.addComp(new GetLoopNode());
         AlgCompMenu.addComp(new FastSlowPointer());
         AlgCompMenu.addComp(new HuiWenLink());
+        AlgCompMenu.addComp(new DoubleCycleCrossLink());
         AlgCompMenu.run();
     }
 
@@ -130,21 +135,215 @@ public class LinklistSort {
      * 【要求】
      * 时间复杂度O(N)，额外空间复杂度O(1)
      */
+    @AlgName("判断链表相交")
     public static class DoubleCycleCrossLink extends AlgCompImpl<Node[], Node[]> {
+        GetLoopNode getLoopNode = new GetLoopNode();
+
+        /**
+         * 产生随机单向链表
+         *
+         * @param origin
+         * @param bound
+         * @return
+         */
+        private LinkedList<Node> generateLink(int origin, int bound, boolean isLoop) {
+            int length = ThreadLocalRandom.current().nextInt(origin, bound);
+            LinkedList<Node> list = new LinkedList<>();
+            for (int i = 0; i < length; i++) {
+                Node node = new Node(ThreadLocalRandom.current().nextInt());
+                if (!list.isEmpty()) {
+                    list.getLast().setNext(node);
+                }
+                list.add(node);
+            }
+            //是否产生环
+            if (isLoop) {
+                //交叉入环节点
+                int loopIdx = ThreadLocalRandom.current().nextInt(1, length - 1);
+                Node loopNode = list.get(loopIdx);
+                list.getLast().setNext(loopNode);
+            }
+            return list;
+        }
 
         @Override
         public Node[] prepare() {
-            return new Node[0];
+            Node[] heads = new Node[2];
+            LinkedList<Node> nodes1 = this.generateLink(7, 8, true);
+            LinkedList<Node> nodes2 = this.generateLink(7, 8, false);
+            heads[0] = nodes1.getFirst();
+            heads[1] = nodes2.getFirst();
+            //是否产生交集
+            //            if(ThreadLocalRandom.current().nextBoolean()){
+            if (true) {
+                int crossIdx = ThreadLocalRandom.current().nextInt(1, nodes1.size() - 1);
+                nodes2.getLast().setNext(nodes1.get(crossIdx));
+            }
+            return heads;
         }
 
         @Override
-        protected Node[] standard(Node[] data) {
-            return new Node[0];
+        protected boolean testEqual(Node[] standard, Node[] test) {
+            if (standard == null && test == null) {
+                return true;
+            }
+            if (standard != null && test != null) {
+                Set<Node> setStandard = Arrays.stream(standard).collect(Collectors.toSet());
+                Set<Node> setTest = Arrays.stream(test).collect(Collectors.toSet());
+                Set<Node> intersection = Sets.intersection(setStandard, setTest);
+                if (intersection == null) {
+                    return false;
+                }
+                return true;
+
+            }
+            return false;
         }
 
         @Override
-        protected Node[] test(Node[] data) {
-            return new Node[0];
+        protected Node[] standard(Node[] head) {
+            Set<Node> set = new HashSet<>();
+            Set<Node> set2 = new HashSet<>();
+            Node current = head[0];
+            //处理环
+            while (current != null && !set.contains(current)) {
+                set.add(current);
+                current = current.next;
+            }
+            current = head[1];
+            //处理环
+            while (current != null && !set2.contains(current)) {
+                set2.add(current);
+                current = current.next;
+            }
+            //取交集
+            Set<Node> intersection = Sets.intersection(set, set2);
+            //没交集，必然不相交
+            if (intersection == null) {
+                return null;
+            }
+            //有交集
+            Node[] ret = intersection.toArray(new Node[0]);
+            return ret;
+
+        }
+
+        /**
+         * 都没有环
+         *
+         * @param head1
+         * @param head2
+         * @return
+         */
+        private Node[] noLoop(Node head1, Node head2) {
+            int n = 0;
+            Node cur1 = head1;
+            Node cur2 = head2;
+            //计算两个链表差值
+            while (cur1 != null) {
+                n++;
+                cur1 = cur1.next;
+            }
+            while (cur2 != null) {
+                n--;
+                cur2 = cur2.next;
+            }
+
+            cur1 = n > 0 ? head1 : head2;
+            cur2 = cur1.equals(head1) ? head2 : head1;
+            n = Math.abs(n);
+            //调整长度，调整成为一样长
+            while (n > 0) {
+                cur1 = cur1.next;
+                n--;
+            }
+            while (cur1 == null || cur2 == null) {
+                if (cur1 == cur2) {
+                    return new Node[]{cur1, cur2};
+                }
+                cur1 = cur1.next;
+                cur2 = cur2.next;
+            }
+
+            return null;
+        }
+
+        /**
+         * 都有环
+         * @param head1 第一个链表的头节点
+         * @param loop1 第一个链表的环的相交节点
+         * @param head2 第二个链表的头节点
+         * @param loop2 第二个链表的环的相交节点
+         * @return
+         */
+        private Node[] bothLoop(Node head1, Node loop1, Node head2, Node loop2) {
+            Node cur1 = null;
+            Node cur2 = null;
+            //两个环的相交节点是一样的。表明一定相交了。那就找到最早的相交点就行了
+            if (loop1 == loop2) {
+                cur1 = head1;
+                cur2 = head2;
+                //计算差值
+                int n = 0;
+                //计算两个链表差值
+                while (cur1 != loop1) {
+                    cur1 = cur1.next;
+                    n++;
+                }
+
+                while (cur2 != loop2) {
+                    cur2 = cur2.next;
+                    n--;
+                }
+
+                cur1 = n > 0 ? head1 : head2;
+                cur2 = cur1.equals(head1) ? head2 : head1;
+                n = Math.abs(n);
+                //调整成一样长度
+                while (n > 0) {
+                    cur1 = cur1.next;
+                    n--;
+                }
+                while (cur1 != cur2) {
+                    cur1 = cur1.next;
+                    cur2 = cur2.next;
+                }
+                return new Node[]{cur1, cur2};
+            }
+            //两个环的相交节点不一样，那就找个环转一圈，看看能不能碰到另外一个环，能碰上就相交，碰不上就不相交
+            else {
+                cur1 = loop1.next;
+                while (cur1 != loop1) {
+                    cur1 = cur1.next;
+                    //转了一圈，如果相遇了表明这个两个环有相交
+                    if (cur1 == loop2) {
+                        return new Node[]{loop1, loop2};
+                    }
+                }
+                return null;
+            }
+        }
+
+        private Node[] test1(Node[] head) {
+            //判断是否有环，有环返回交点，无环返回null
+            Node loop1 = getLoopNode.test(head[0]);
+            Node loop2 = getLoopNode.test(head[1]);
+            //都无环
+            if (loop1 == null && loop2 == null) {
+                return noLoop(head[0], head[1]);
+            }
+            //都有环
+            else if (loop1 != null && loop2 != null) {
+                return bothLoop(head[0], loop1, head[1], loop2);
+            }
+            //一个无环一个有环，必然不相交
+            return null;
+
+        }
+
+        @Override
+        protected Node[] test(Node[] head) {
+            return test1(head);
         }
     }
 
@@ -153,16 +352,17 @@ public class LinklistSort {
      */
     @AlgName("回文链表")
     public static class HuiWenLink extends AlgCompImpl<Boolean, Node> {
-        private void printNode(Node head){
+        private void printNode(Node head) {
             Node current = head;
             StringBuilder stringBuilder = new StringBuilder();
-            while (current != null){
-                stringBuilder.append(String.format("%d\n",current.getValue()));
+            while (current != null) {
+                stringBuilder.append(String.format("%d\n", current.getValue()));
                 current = current.next;
             }
-            log.debug("原始数据:\n{}",stringBuilder.toString());
+            log.debug("原始数据:\n{}", stringBuilder.toString());
 
         }
+
         @Override
         public Node prepare() {
             int length = ThreadLocalRandom.current().nextInt(70000, 80000);
@@ -193,7 +393,7 @@ public class LinklistSort {
 
         @Override
         protected Boolean standard(Node head) {
-            if(head == null || head.next == null){
+            if (head == null || head.next == null) {
                 return true;
             }
             Node current = head;
@@ -203,8 +403,8 @@ public class LinklistSort {
                 current = current.next;
             }
             current = head;
-            while (current != null){
-                if(current.getValue() != stack.pop().getValue()){
+            while (current != null) {
+                if (current.getValue() != stack.pop().getValue()) {
                     log.error("不是回文结构");
                     return false;
                 }
@@ -220,7 +420,7 @@ public class LinklistSort {
         protected Boolean test(Node head) {
             Node fast = head;
             Node slow = head;
-            while (fast != null && fast.next != null){
+            while (fast != null && fast.next != null) {
                 fast = fast.next.next;
                 slow = slow.next;
             }
@@ -232,7 +432,7 @@ public class LinklistSort {
             slow.setNext(null);
             Node tmp = null;
             //做翻转
-            while (nextSlow != null){
+            while (nextSlow != null) {
                 tmp = nextSlow.next;//临时记录一下
                 nextSlow.setNext(slow);//进行逆序
                 slow = nextSlow;//后移一位
@@ -240,8 +440,8 @@ public class LinklistSort {
             }
             boolean res = true;
             Node lastNode = slow;//记录一下最后一位
-            while (nextSlow!=null && fast !=null){
-                if(nextSlow.value != fast.value){
+            while (nextSlow != null && fast != null) {
+                if (nextSlow.value != fast.value) {
                     res = false;
                     break;
                 }
@@ -251,7 +451,7 @@ public class LinklistSort {
             //还要恢复回来
             nextSlow = lastNode.next;
             lastNode.setNext(null);
-            while (nextSlow != null){
+            while (nextSlow != null) {
                 tmp = nextSlow.next;
                 nextSlow.setNext(lastNode);
                 lastNode = nextSlow;
@@ -261,35 +461,33 @@ public class LinklistSort {
             printNode(head);
             return res;
 
-
-            //循环完毕以后，slow一定是在中点
-            //完成以后，再将nextSlow之后的逆序回来
         }
 
         /**
          * 只使用一半的stack
+         *
          * @param head
          * @return
          */
-//        @Override
+        //        @Override
         protected Boolean test1(Node head) {
-            if(head == null || head.next == null){
+            if (head == null || head.next == null) {
                 return true;
             }
             Node right = head.next;
             Node cur = head;
-            while (cur.next != null && cur.next.next != null){
+            while (cur.next != null && cur.next.next != null) {
                 right = right.next;
                 cur = cur.next.next;
             }
             Stack<Node> stack = new Stack<>();
-            while (right != null){
+            while (right != null) {
                 stack.push(right);
                 right = right.next;
             }
             cur = head;
-            while (!stack.isEmpty()){
-                if(stack.pop().value != cur.value){
+            while (!stack.isEmpty()) {
+                if (stack.pop().value != cur.value) {
                     return false;
                 }
                 cur = cur.next;
