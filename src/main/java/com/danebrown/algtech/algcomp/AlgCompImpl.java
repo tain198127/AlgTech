@@ -65,6 +65,23 @@ public abstract class AlgCompImpl<T,R>{
     protected abstract T test(R data);
 
     /**
+     * 序列化原始测试数据，用于解决类似链表头结点问题
+     * @param setupData
+     * @return
+     */
+    protected Object formatSetupData(R setupData){
+        return setupData;
+    }
+
+    /**
+     * 序列换结果数据，用于解决类似链表头节点问题
+     * @param result
+     * @return
+     */
+    protected Object formatResultData(T result){
+        return result;
+    }
+    /**
      * 对数
      * @param testName 对数器名称
      * @param testTime 测试时间消费者
@@ -122,10 +139,11 @@ public abstract class AlgCompImpl<T,R>{
         result = testEqual(testResult, standardResult);
         if (!result) {
 //            wrongBook.write(testName, setupData);
-            log.error("{}测试失败,原始数据:{}", testName,setupData
+
+            log.error("{}测试失败,原始数据:{}", testName,formatSetupData(setupData)
                     );
-            log.error("{}测试失败,测试结果:{}",testName,testResult);
-            log.error("{}测试失败,标准结果:{}",testName,standardResult);
+            log.error("{}测试失败,测试结果:{}",testName,formatResultData(testResult));
+            log.error("{}测试失败,标准结果:{}",testName,formatResultData(standardResult));
         } else {
             log.debug("{}测试成功", testName);
         }

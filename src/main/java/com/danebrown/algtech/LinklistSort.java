@@ -39,23 +39,34 @@ public class LinklistSort {
         private int value;
 
         private Node next;
-
+        private int index = this.hashCode();
         public Node(int value) {
             this.value = value;
+        }
+        public Node(int value,int index){
+            this.value = value;
+            this.index = index;
         }
 
         @Override
         public String toString() {
-            return "Node{" + "value=" + value + '}';
+            return "Node("+ value + "," + index + ")";
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o)
                 return true;
+
             if (!(o instanceof Node))
                 return false;
-            return false;
+            else{
+                Node compNode = (Node)o;
+                if(compNode == null){
+                    return false;
+                }
+                return this.index ==compNode.index;
+            }
         }
     }
 
@@ -142,8 +153,9 @@ public class LinklistSort {
         /**
          * 产生随机单向链表
          *
-         * @param origin
-         * @param bound
+         * @param origin 随机长度开始
+         * @param bound 随机长度边界
+         * @param isLoop 是否产生环
          * @return
          */
         private LinkedList<Node> generateLink(int origin, int bound, boolean isLoop) {
@@ -166,17 +178,89 @@ public class LinklistSort {
             return list;
         }
 
+        private String formatNode(Node node){
+            StringBuilder strB = new StringBuilder();
+            Node n1 = node;
+            Set<Node> set1 = new HashSet<>();
+            while (n1 != null){
+                strB.append(n1.toString()+",");
+                if(set1.contains(n1)){
+                    break;
+                }
+                set1.add(n1);
+                n1 = n1.next;
+            }
+            strB.append("\n");
+            return strB.toString();
+        }
+        @Override
+        protected Object formatSetupData(Node[] setupData) {
+            StringBuilder strB = new StringBuilder();
+            strB.append(formatNode(setupData[0]));
+            strB.append(formatNode(setupData[1]));
+            return strB.toString();
+        }
+//        @Override
+        public Node[] prepare1(){
+            Node n1 = new  Node(1048224807,475603167);
+            n1.next = new Node(-41007412,402249858);
+            n1.next.next = new Node(1038040274,2045036434);
+            n1.next.next.next = new Node(-1420784352,426394307);
+            n1.next.next.next.next = new Node(2094460877,1281414889);
+            n1.next.next.next.next.next = new Node(746000008,352598575);
+            n1.next.next.next.next.next.next = new Node(-1975244088,1250142026);
+            n1.next.next.next.next.next.next.next = n1.next.next;
+
+            Node n2 = new Node(-684301003,20224131);
+            n2.next = new Node(-199860696,1261031890);
+            n2.next.next = new Node(-65489388,2135449562);
+            n2.next.next.next = new Node(-1507930544,673586830);
+            n2.next.next.next.next = new Node(1370434071,225672073);
+            n2.next.next.next.next.next = new Node(1193984173,139566260);
+            n2.next.next.next.next.next.next = new Node(-506506863,903525611);
+            n2.next.next.next.next.next.next.next = n1.next.next.next;
+
+            return new Node[]{n1,n2};
+
+        }
+//        @Override
+        public Node[] prepare3(){
+            Node n1 = new Node(-1967626114,1498438472);
+            n1.next = new Node(-381167257,1325056130);
+            n1.next.next = new Node(157617306,1809194904);
+            n1.next.next.next = new Node(-1710114370,1219273867);
+            n1.next.next.next.next = new Node(-651615869,335359181);
+            n1.next.next.next.next.next = new Node(-1062456093,194707680);
+
+            Node n2 = new Node(-1828684168,2102368942);
+            n2.next = new Node(-1452649942,120478350);
+            n2.next.next = new Node(1144152484,1424082571);
+            n2.next.next.next = new Node(1113809841,1403700359);
+            n2.next.next.next.next = new Node(927335654,1387380406);
+            n2.next.next.next.next.next = new Node(-588104358,658404420);
+            n2.next.next.next.next.next.next = new Node(-184424216,2108763062);
+            n2.next.next.next.next.next.next.next = n1.next.next.next.next.next;
+
+            return new Node[]{n1,n2};
+        }
         @Override
         public Node[] prepare() {
             Node[] heads = new Node[2];
-            LinkedList<Node> nodes1 = this.generateLink(7, 8, true);
+            boolean createLoop = false;
+            LinkedList<Node> nodes1 = this.generateLink(7, 8, createLoop);
+
             LinkedList<Node> nodes2 = this.generateLink(7, 8, false);
+
             heads[0] = nodes1.getFirst();
             heads[1] = nodes2.getFirst();
             //是否产生交集
-            //            if(ThreadLocalRandom.current().nextBoolean()){
-            if (true) {
+            if (ThreadLocalRandom.current().nextBoolean()) {
+//            if (true) {
+                log.warn("产生了交集");
                 int crossIdx = ThreadLocalRandom.current().nextInt(1, nodes1.size() - 1);
+                log.info("node1：{}",formatNode(heads[0]));
+                log.info("node2：{}",formatNode(heads[1]));
+                log.info("交集节点:{}",nodes1.get(crossIdx));
                 nodes2.getLast().setNext(nodes1.get(crossIdx));
             }
             return heads;
@@ -219,7 +303,7 @@ public class LinklistSort {
             //取交集
             Set<Node> intersection = Sets.intersection(set, set2);
             //没交集，必然不相交
-            if (intersection == null) {
+            if (intersection == null||intersection.isEmpty()) {
                 return null;
             }
             //有交集
@@ -257,7 +341,7 @@ public class LinklistSort {
                 cur1 = cur1.next;
                 n--;
             }
-            while (cur1 == null || cur2 == null) {
+            while (cur1 != null || cur2 != null) {
                 if (cur1 == cur2) {
                     return new Node[]{cur1, cur2};
                 }
@@ -270,6 +354,7 @@ public class LinklistSort {
 
         /**
          * 都有环
+         *
          * @param head1 第一个链表的头节点
          * @param loop1 第一个链表的环的相交节点
          * @param head2 第二个链表的头节点
@@ -314,11 +399,11 @@ public class LinklistSort {
             else {
                 cur1 = loop1.next;
                 while (cur1 != loop1) {
-                    cur1 = cur1.next;
                     //转了一圈，如果相遇了表明这个两个环有相交
                     if (cur1 == loop2) {
                         return new Node[]{loop1, loop2};
                     }
+                    cur1 = cur1.next;
                 }
                 return null;
             }

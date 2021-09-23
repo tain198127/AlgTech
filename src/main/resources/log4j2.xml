@@ -31,15 +31,17 @@
     </Appenders>
 
     <Loggers>
-        <AsyncRoot level="INFO" includeLocation="true">
 
-            <AppenderRef ref="Console"/>
+        <AsyncRoot level="INFO" includeLocation="true">
             <AppenderRef ref="Async"/>
         </AsyncRoot>
 <!--        <AsyncLogger name="com.danebrown.algtech" level="INFO" additivity="false" includeLocation="false">-->
 <!--            <AppenderRef ref="Async"></AppenderRef>-->
 <!--            <AppenderRef ref="Console"></AppenderRef>-->
 <!--        </AsyncLogger>-->
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
 
     </Loggers>
 </Configuration>
