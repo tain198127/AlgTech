@@ -591,7 +591,7 @@ public class LinklistSort {
 
         @Override
         public Node prepare() {
-            int length = ThreadLocalRandom.current().nextInt(70000, 800000);
+            int length = ThreadLocalRandom.current().nextInt(70000, 80000);
             LinkedList<Node> list = new LinkedList<>();
             for (int i = 0; i < length; i++) {
                 Node node = new Node(i);
