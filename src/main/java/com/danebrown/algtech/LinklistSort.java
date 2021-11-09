@@ -130,8 +130,8 @@ public class LinklistSort {
      * 用快慢指针求中点
      * 还可以用快慢指针用来判断一个链表是否存在环。
      * 如果快指针先到NULL，证明没有环，
-     * 如果快指针跑到慢指针相遇了，那证明有环
-     * 如何找到入环节点：快指针回到起始点，然后一次走一步，慢指针依旧一次走一步。当他两再次相遇的时候，那个节点
+     * 如果快指针与慢指针相遇了，那证明有环
+     * 如何找到入环节点：相遇后，快指针回到起始点，然后一次走一步，慢指针依旧一次走一步。当他两再次相遇的时候，那个节点
      * 就是入环节点！！！
      * --------------------------以上是核心逻辑。下面是题目
      * 一种特殊的单链表节点类描述如下
@@ -313,7 +313,7 @@ public class LinklistSort {
         }
 
         /**
-         * 都没有环
+         * 都没有环，判断是否有环
          *
          * @param head1
          * @param head2
@@ -332,11 +332,12 @@ public class LinklistSort {
                 n--;
                 cur2 = cur2.next;
             }
-
+            //N>0表示head1长，否则表示head2长
             cur1 = n > 0 ? head1 : head2;
+            //cur2是另外一个链表
             cur2 = cur1.equals(head1) ? head2 : head1;
             n = Math.abs(n);
-            //调整长度，调整成为一样长
+            //调整长度，调整成为一样长，对齐长度，把长的那个调整成短的
             while (n > 0) {
                 cur1 = cur1.next;
                 n--;
@@ -648,8 +649,8 @@ public class LinklistSort {
                 slow = slow.next;
             }
             //能到这里证明fast和slow第一次相遇了,fast回到头节点
-            fast = head;
-            while (fast != slow) {//第二次相遇后，fast和slow都每次走一步，
+            fast = head;//一旦相遇，fast从头开始走，而且fast每次只走一步
+            while (fast != slow) {//第二次相遇后，fast和slow都每次走一步，如果不一样，就一直走
                 fast = fast.next;
                 slow = slow.next;
             }
