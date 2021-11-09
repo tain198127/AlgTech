@@ -3,8 +3,7 @@ package com.danebrown.algtech;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
-import com.github.sh0nk.matplotlib4j.NumpyUtils;
-import com.github.sh0nk.matplotlib4j.Plot;
+
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -115,17 +114,23 @@ public class TreeStaff {
                 System.out.println(sb.toString());
             }
         }
-        public TreeNode prepare1() {
+        public TreeNode stackBinaryTreeGenerator(int times) {
             TreeNode root = new TreeNode("root");
             TreeNode cur = root;
             Stack<TreeNode> treeNodeStack = new Stack<>();
             treeNodeStack.push(root);
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < times; i++) {
                 //0表示后退，1表示左，2表示右
-                int direction = ThreadLocalRandom.current().nextInt(i,1000)%3;
+                int direction = ThreadLocalRandom.current().nextInt(i,times)%3;
                 switch (direction){
                     case 0:{
-                        while(!treeNodeStack.isEmpty()){
+                        if(treeNodeStack.isEmpty()){
+                            continue;
+                        }
+                        int popUpper = ThreadLocalRandom.current().nextInt(1,
+                                treeNodeStack.size()+1);
+                        while(!treeNodeStack.isEmpty() && popUpper >0){
+                            popUpper--;
                             cur = treeNodeStack.pop();
                         }
                     };break;
@@ -135,19 +140,29 @@ public class TreeStaff {
                             //左移
                             cur = cur.left;
                         }
-                        cur.left = new TreeNode(String.valueOf(i));
-                        treeNodeStack.push(cur.left);
+                        if(ThreadLocalRandom.current().nextBoolean()){
+                            cur.left = new TreeNode(String.valueOf(i));
+                            treeNodeStack.push(cur.left);
+                        }else{
+                            cur.right = new TreeNode(String.valueOf(i));
+                            treeNodeStack.push(cur.right);
+                        }
 
 
                     };break;
                     case 2:{
-                        if(cur.right != null){
+                        while (cur.right != null){
                             treeNodeStack.push(cur.right);
                             cur = cur.right;
 
                         }
-                        cur.right =
-                                new TreeNode(String.valueOf(i));
+                        if(ThreadLocalRandom.current().nextBoolean()){
+                            cur.left = new TreeNode(String.valueOf(i));
+                            treeNodeStack.push(cur.left);
+                        }else{
+                            cur.right = new TreeNode(String.valueOf(i));
+                            treeNodeStack.push(cur.right);
+                        }
 
                     };break;
                 }
@@ -157,7 +172,9 @@ public class TreeStaff {
         volatile AtomicInteger integer = new AtomicInteger(0);
         @Override
         public TreeNode prepare() {
-            TreeNode node = binaryTreeGenerator(1000,0);
+//            TreeNode node = binaryTreeGenerator(1000,0);
+            TreeNode node = stackBinaryTreeGenerator(10000);
+//            show(node);
             return node;
         }
         public TreeNode binaryTreeGenerator(int n,int integer){
@@ -187,12 +204,15 @@ public class TreeStaff {
 //            show(data);
             List<String> preNodes = new ArrayList<>();
             pre(data, s -> preNodes.add(s));
+            preNodes.add("|");
             log.debug("preNodes:{}",preNodes);
             List<String> midNodes = new ArrayList<>();
             mid(data,s -> midNodes.add(s));
+            midNodes.add("|");
             log.debug("midNodes:{}",midNodes);
             List<String> lastNodes = new ArrayList<>();
             last(data,s->lastNodes.add(s));
+            lastNodes.add("|");
             log.debug("lastNodes:{}",lastNodes);
             preNodes.addAll(midNodes);
             preNodes.addAll(lastNodes);
@@ -200,6 +220,7 @@ public class TreeStaff {
             preNodes.forEach(item->{
                 result[0] += item;
             });
+            log.info("{}",result[0]);
             return result[0];
         }
 
@@ -252,12 +273,15 @@ public class TreeStaff {
         protected String test(TreeNode data) {
             List<String> preNodes = new ArrayList<>();
             preStack(data, s -> preNodes.add(s));
+            preNodes.add("|");
             log.debug("preStackNodes:{}",preNodes);
             List<String> midNodes = new ArrayList<>();
             midStack(data,s -> midNodes.add(s));
+            midNodes.add("|");
             log.debug("midStackNodes:{}",midNodes);
             List<String> lastNodes = new ArrayList<>();
             lastStack(data,s->lastNodes.add(s));
+            lastNodes.add("|");
             log.debug("lastStackNodes:{}",lastNodes);
             preNodes.addAll(midNodes);
             preNodes.addAll(lastNodes);
@@ -265,6 +289,7 @@ public class TreeStaff {
             preNodes.forEach(item->{
                 result[0] += item;
             });
+            log.info("{}",result[0]);
             return result[0];
 
         }
@@ -274,7 +299,7 @@ public class TreeStaff {
          * @param node
          * @param c
          */
-        private void preStack(TreeNode node, Consumer<String> c){
+        private void preStack1(TreeNode node, Consumer<String> c){
             if(node == null){
                 return;
             }
@@ -291,9 +316,35 @@ public class TreeStaff {
                 }
             }
         }
+        private void preStack(TreeNode node, Consumer<String> c){
+            if(node == null){
+                return;
+            }
+            TreeNode cur = node;
+            Stack<TreeNode> stack = new Stack<>();
+            while (!stack.isEmpty() || cur != null){
+                if(cur!= null){
+                    c.accept(cur.value);//放在left赋值之前，就是先序
+                    stack.push(cur);
+                    cur = cur.left;
+                }
+                else{
+                    cur = stack.pop();
+
+                    cur = cur.right;
+                }
+            }
+        }
 
         /**
          * 非递归中序
+         * 任何二叉树，都可以被左边界分解掉的。即：一直打印左边界，到头以后再打印右子树的第一个节点。
+         * 在继续他的左边界，一直打印到头。
+         *                   A
+         *               B      C
+         *            D    E  F
+         *  分解左边界，A,B,D到头了，再退回到B，去找右子树(E)：重复左边界分解。
+         *  这个过程本质上还是递归序。每个节点要进入三次。关键就看你的打印是在哪个步骤完成的
          * @param node
          * @param c
          */
@@ -322,7 +373,7 @@ public class TreeStaff {
          * @param node
          * @param c
          */
-        private void lastStack(TreeNode node,Consumer<String> c){
+        private void lastStack1(TreeNode node,Consumer<String> c){
             if(node== null){
                 return;
             }
@@ -343,6 +394,38 @@ public class TreeStaff {
             while (!result.isEmpty()){
                 TreeNode n = result.pop();
                 c.accept(n.value);
+            }
+        }
+
+        /**
+         * 同一个方法用切分的方法，先切右边界，右边界切完，找右边界中的左子树。
+         * 在找到的左子树中，继续切有边界。
+         * 在第一个右边界的左子树进入的时候，压栈。
+         * 最后全部都吐出来，就是后序遍历了
+         * 先序中序后续都可以用一套思路：左边界切分、右边界切分的思路来搞。
+         * @param node
+         * @param c
+         */
+        private void lastStack(TreeNode node,Consumer<String> c) {
+            if(node == null){
+                return;
+            }
+            TreeNode cur = node;
+            Stack<TreeNode> stack = new Stack<>();
+            Stack<String> result = new Stack<>();
+            while (!stack.isEmpty() || cur != null){
+                if(cur!= null){
+                    result.push(cur.value);
+                    stack.push(cur);
+                    cur = cur.right;
+                }
+                else{
+                    cur = stack.pop();
+                    cur = cur.left;
+                }
+            }
+            while (!result.isEmpty()){
+                c.accept(result.pop());
             }
         }
     }

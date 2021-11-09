@@ -116,6 +116,18 @@ public abstract class AlgCompImpl<T,R>{
             forStandard = ObjectUtil.cloneIfPossible(setupData);
         }
         StopWatch stopWatch = new StopWatch();
+
+
+        stopWatch.start();
+        T standardResult = standard(forStandard);
+        stopWatch.stop();
+        log.debug("标准结果:{}", standardResult);
+        log.debug("标准计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
+        if(standardTime != null){
+            standardTime.accept(stopWatch.getTime(TimeUnit.MILLISECONDS));
+        }
+
+        stopWatch.reset();
         stopWatch.start();
         T testResult = test(forTest);
         stopWatch.stop();
@@ -126,16 +138,7 @@ public abstract class AlgCompImpl<T,R>{
         }
 
         boolean result = true;
-        stopWatch.reset();
-        stopWatch.start();
-        T standardResult = standard(forStandard);
-        stopWatch.stop();
-        log.debug("标准结果:{}", standardResult);
 
-        log.debug("标准计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
-        if(standardTime != null){
-            standardTime.accept(stopWatch.getTime(TimeUnit.MILLISECONDS));
-        }
         result = testEqual(testResult, standardResult);
         if (!result) {
 //            wrongBook.write(testName, setupData);
