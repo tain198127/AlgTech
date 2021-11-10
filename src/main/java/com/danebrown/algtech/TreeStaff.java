@@ -4,82 +4,91 @@ import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
 
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import org.checkerframework.checker.units.qual.C;
 
-import java.sql.Array;
+import java.io.PrintStream;
+import java.util.AbstractQueue;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Queue;
 import java.util.Stack;
-import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * Created by danebrown on 2021/9/24
  * mail: tain198127@163.com
- * 树相关算法
+ * 树相关算法：
+ * 总体来说，用栈是深度遍历；用队列是宽度遍历（图遍历）
  * @author danebrown
  */
 @Log4j2
 public class TreeStaff {
     public static void main(String[] args) {
-        AlgCompMenu.addComp(new TreeWalking());
+        AlgCompMenu.addComp(new TreeDeepWalking());
+        AlgCompMenu.addComp(new TreeWideWalking());
         AlgCompMenu.run();
     }
-    //六种序：左头右，左右头，右左头，右头左，头左右，头右左
-    //先序：头左右，中序：左头右，后续：左右头
-    //可是先序、中序、后续的本质是：递归序
-    //某个数X，其先序数组，A，后续数组B，X在A的左边A[0,X) 相交 B(X,N]，其交集是且仅是X的祖先节点。这是结论，如何证明？
-    //要能证明
-    @Data
-    public static class TreeNode{
-        private String value;
-        private TreeNode left;
-        private TreeNode right;
-        public TreeNode(String value){
-            this.value = value;
-        }
-    }
-    @AlgName("树遍历")
-    public static class TreeWalking extends AlgCompImpl<String,
-            TreeNode>{
-        public static int getTreeDepth(TreeNode root) {
-            return root == null ? 0 : (1 + Math.max(getTreeDepth(root.left), getTreeDepth(root.right)));
-        }
+    //表示空节点
+    public static final String NULL_NODE = "#";
+    //表示数的分隔符
+    public static final String TREE_SPIN="|";
+    //表示节点之间的分隔符
+    public static final String NODE_SPAIN=",";
+    public static class BTreePrinter {
+        /////////=====================
 
-        private static void writeArray(TreeNode currNode, int rowIndex, int columnIndex, String[][] res, int treeDepth) {
-            // 保证输入的树不为空
-            if (currNode == null) return;
-            // 先将当前节点保存到二维数组中
-            res[rowIndex][columnIndex] = String.valueOf(currNode.value);
+        private static void traverseNodes(StringBuilder sb, String padding,
+                                  String pointer, TreeNode node,
+                                  boolean hasRightSibling) {
+            if (node != null) {
+                sb.append("\n");
+                sb.append(padding);
+                sb.append(pointer);
+                sb.append(node.getValue());
 
-            // 计算当前位于树的第几层
-            int currLevel = ((rowIndex + 1) / 2);
-            // 若到了最后一层，则返回
-            if (currLevel == treeDepth) return;
-            // 计算当前行到下一行，每个元素之间的间隔（下一行的列索引与当前元素的列索引之间的间隔）
-            int gap = treeDepth - currLevel - 1;
+                StringBuilder paddingBuilder = new StringBuilder(padding);
+                if (hasRightSibling) {
+                    paddingBuilder.append("│  ");
+                } else {
+                    paddingBuilder.append("   ");
+                }
 
-            // 对左儿子进行判断，若有左儿子，则记录相应的"/"与左儿子的值
-            if (currNode.left != null) {
-                res[rowIndex + 1][columnIndex - gap] = "/";
-                writeArray(currNode.left, rowIndex + 2, columnIndex - gap * 2, res, treeDepth);
-            }
+                String paddingForBoth = paddingBuilder.toString();
+                String pointerRight = "└──";
+                String pointerLeft = (node.getRight() != null) ? "├──" : "└──";
 
-            // 对右儿子进行判断，若有右儿子，则记录相应的"\"与右儿子的值
-            if (currNode.right != null) {
-                res[rowIndex + 1][columnIndex + gap] = "\\";
-                writeArray(currNode.right, rowIndex + 2, columnIndex + gap * 2, res, treeDepth);
+                traverseNodes(sb, paddingForBoth, pointerLeft, node.getLeft(), node.getRight() != null);
+                traverseNodes(sb, paddingForBoth, pointerRight, node.getRight(), false);
             }
         }
+        public static void traversePreOrder(TreeNode root){
+            if (root == null) {
 
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(root.getValue());
+
+            String pointerRight = "└──";
+            String pointerLeft = (root.getRight() != null) ? "├──" : "└──";
+
+            traverseNodes(sb, "", pointerLeft, root.getLeft(), root.getRight() != null);
+            traverseNodes(sb, "", pointerRight, root.getRight(), false);
+            System.out.println(sb);
+
+
+        }
+
+//=============
         public static void show(TreeNode root) {
             if (root == null) System.out.println("EMPTY!");
             // 得到树的深度
@@ -114,6 +123,74 @@ public class TreeStaff {
                 System.out.println(sb.toString());
             }
         }
+
+        private static int getTreeDepth(TreeNode root) {
+            return root == null ? 0 : (1 + Math.max(getTreeDepth(root.left), getTreeDepth(root.right)));
+        }
+
+        private static void writeArray(TreeNode currNode, int rowIndex, int columnIndex, String[][] res, int treeDepth) {
+            // 保证输入的树不为空
+            if (currNode == null) return;
+            // 先将当前节点保存到二维数组中
+            res[rowIndex][columnIndex] = String.valueOf(currNode.value);
+
+            // 计算当前位于树的第几层
+            int currLevel = ((rowIndex + 1) / 2);
+            // 若到了最后一层，则返回
+            if (currLevel == treeDepth) return;
+            // 计算当前行到下一行，每个元素之间的间隔（下一行的列索引与当前元素的列索引之间的间隔）
+            int gap = treeDepth - currLevel - 1;
+
+            // 对左儿子进行判断，若有左儿子，则记录相应的"/"与左儿子的值
+            if (currNode.left != null) {
+                res[rowIndex + 1][columnIndex - gap] = "/";
+                writeArray(currNode.left, rowIndex + 2, columnIndex - gap * 2, res, treeDepth);
+            }
+
+            // 对右儿子进行判断，若有右儿子，则记录相应的"\"与右儿子的值
+            if (currNode.right != null) {
+                res[rowIndex + 1][columnIndex + gap] = "\\";
+                writeArray(currNode.right, rowIndex + 2, columnIndex + gap * 2, res, treeDepth);
+            }
+        }
+
+        public static String list2string(List<String> list){
+            StringBuilder stringBuilder = new StringBuilder();
+            list.forEach(item->{
+                stringBuilder.append(item);
+                stringBuilder.append(NODE_SPAIN);
+            });
+            if(stringBuilder.length() >0){
+                stringBuilder.deleteCharAt(stringBuilder.length()-1);
+                stringBuilder.append(TREE_SPIN);
+            }
+            return stringBuilder.toString();
+
+        }
+        public static List<String> string2list(String str){
+             return Arrays.stream(str.split(NODE_SPAIN)).collect(Collectors.toList());
+
+        }
+
+    }
+    //六种序：左头右，左右头，右左头，右头左，头左右，头右左
+    //先序：头左右，中序：左头右，后续：左右头
+    //可是先序、中序、后续的本质是：递归序
+    //某个数X，其先序数组，A，后续数组B，X在A的左边A[0,X) 相交 B(X,N]，其交集是且仅是X的祖先节点。这是结论，如何证明？
+    //要能证明
+    @Data
+    public static class TreeNode{
+        private String value;
+        private TreeNode left;
+        private TreeNode right;
+        public TreeNode(String value){
+            this.value = value;
+        }
+    }
+    @AlgName("树深度遍历")
+    public static class TreeDeepWalking extends AlgCompImpl<String,
+            TreeNode>{
+
         public TreeNode stackBinaryTreeGenerator(int times) {
             TreeNode root = new TreeNode("root");
             TreeNode cur = root;
@@ -173,8 +250,11 @@ public class TreeStaff {
         @Override
         public TreeNode prepare() {
 //            TreeNode node = binaryTreeGenerator(1000,0);
-            TreeNode node = stackBinaryTreeGenerator(10000);
-//            show(node);
+            int nodeCount = 10000;
+            TreeNode node = stackBinaryTreeGenerator(nodeCount);
+            if(nodeCount<=10)
+                BTreePrinter.show(node);
+
             return node;
         }
         public TreeNode binaryTreeGenerator(int n,int integer){
@@ -201,36 +281,31 @@ public class TreeStaff {
          */
         @Override
         protected String standard(TreeNode data) {
-//            show(data);
+            StringBuilder stringBuilder = new StringBuilder();
             List<String> preNodes = new ArrayList<>();
             pre(data, s -> preNodes.add(s));
-            preNodes.add("|");
+            stringBuilder.append(BTreePrinter.list2string(preNodes));
             log.debug("preNodes:{}",preNodes);
             List<String> midNodes = new ArrayList<>();
             mid(data,s -> midNodes.add(s));
-            midNodes.add("|");
+            stringBuilder.append(BTreePrinter.list2string(midNodes));
             log.debug("midNodes:{}",midNodes);
             List<String> lastNodes = new ArrayList<>();
             last(data,s->lastNodes.add(s));
-            lastNodes.add("|");
+            stringBuilder.append(BTreePrinter.list2string(lastNodes));
             log.debug("lastNodes:{}",lastNodes);
-            preNodes.addAll(midNodes);
-            preNodes.addAll(lastNodes);
-            final String[] result = {""};
-            preNodes.forEach(item->{
-                result[0] += item;
-            });
-            log.info("{}",result[0]);
-            return result[0];
+
+            return stringBuilder.toString();
         }
 
         /**
-         * 先序递归
+         * 先序递归,#表示null
          * @param node
          * @param f
          */
         private void pre(TreeNode node, Consumer<String> f){
             if(node == null){
+                f.accept(NULL_NODE);
                 return;
             }
 //            System.out.println(node.value);
@@ -247,6 +322,7 @@ public class TreeStaff {
          */
         private void mid(TreeNode node,Consumer<String> c){
             if(node == null){
+                c.accept(NULL_NODE);
                 return;
             }
             mid(node.left,c);
@@ -261,6 +337,7 @@ public class TreeStaff {
          */
         private void last(TreeNode node,Consumer<String> c){
             if(node == null){
+                c.accept(NULL_NODE);
                 return;
             }
             last(node.left,c);
@@ -271,27 +348,20 @@ public class TreeStaff {
         @SneakyThrows
         @Override
         protected String test(TreeNode data) {
+            StringBuilder stringBuilder = new StringBuilder();
             List<String> preNodes = new ArrayList<>();
             preStack(data, s -> preNodes.add(s));
-            preNodes.add("|");
+            stringBuilder.append(BTreePrinter.list2string(preNodes));
             log.debug("preStackNodes:{}",preNodes);
             List<String> midNodes = new ArrayList<>();
             midStack(data,s -> midNodes.add(s));
-            midNodes.add("|");
+            stringBuilder.append(BTreePrinter.list2string(midNodes));
             log.debug("midStackNodes:{}",midNodes);
             List<String> lastNodes = new ArrayList<>();
             lastStack(data,s->lastNodes.add(s));
-            lastNodes.add("|");
+            stringBuilder.append(BTreePrinter.list2string(lastNodes));
             log.debug("lastStackNodes:{}",lastNodes);
-            preNodes.addAll(midNodes);
-            preNodes.addAll(lastNodes);
-            final String[] result = {""};
-            preNodes.forEach(item->{
-                result[0] += item;
-            });
-            log.info("{}",result[0]);
-            return result[0];
-
+            return stringBuilder.toString();
         }
 
         /**
@@ -321,30 +391,49 @@ public class TreeStaff {
                 return;
             }
             TreeNode cur = node;
+            if(cur == null){
+                c.accept(NULL_NODE);
+            }
             Stack<TreeNode> stack = new Stack<>();
             while (!stack.isEmpty() || cur != null){
                 if(cur!= null){
                     c.accept(cur.value);//放在left赋值之前，就是先序
                     stack.push(cur);
                     cur = cur.left;
+                    if(cur == null){
+                        c.accept(NULL_NODE);
+                    }
                 }
                 else{
                     cur = stack.pop();
 
                     cur = cur.right;
+                    if(cur == null){
+                        c.accept(NULL_NODE);
+                    }
                 }
             }
         }
 
         /**
          * 非递归中序
-         * 任何二叉树，都可以被左边界分解掉的。即：一直打印左边界，到头以后再打印右子树的第一个节点。
+         * 任何二叉树，都可以被左边界分解掉的。即：一直打印左边界，到头以后再打印左边界上最后一个右子树的第一个节点。
          * 在继续他的左边界，一直打印到头。
          *                   A
+         *                 /    \
          *               B      C
+         *              /  \   /
          *            D    E  F
-         *  分解左边界，A,B,D到头了，再退回到B，去找右子树(E)：重复左边界分解。
+         *                     \
+         *                       G
+         *
+         *  分解左边界: A,B,D到头了，发现D的左子孩子和右孩子都没了没了，就退回到B，去找右子树(E)：重复进行左边界分解。
+         *  注意：C-F的时候，发现F的左孩子没了。那就找F的右孩子（G）做上述操作
          *  这个过程本质上还是递归序。每个节点要进入三次。关键就看你的打印是在哪个步骤完成的
+         *  同样，用右边界分解的方式也可以遍历树。每次边界分解都要入栈。
+         *  先序：左边界分解，入栈前打印就是先序
+         *  中序：左边界分解，左子树没了，遍历右子树（pop时）打印就是中序
+         *  后续：右边界分解，入栈（遍历栈）前放入另外一个临时栈（结果栈），等遍历完以后，再挨个pop临时栈并打印就是后续
          * @param node
          * @param c
          */
@@ -352,17 +441,27 @@ public class TreeStaff {
             if(node == null){
                 return;
             }
+
             TreeNode cur = node;
+            if(cur == null){
+                c.accept(NULL_NODE);
+            }
             Stack<TreeNode> stack = new Stack<>();
             while (!stack.isEmpty() || cur != null){
                 if(cur!= null){
                     stack.push(cur);
                     cur = cur.left;
+                    if(cur == null){
+                        c.accept(NULL_NODE);
+                    }
                 }
                 else{
                     cur = stack.pop();
                     c.accept(cur.value);
                     cur = cur.right;
+                    if(cur == null){
+                        c.accept(NULL_NODE);
+                    }
                 }
             }
 
@@ -375,25 +474,31 @@ public class TreeStaff {
          */
         private void lastStack1(TreeNode node,Consumer<String> c){
             if(node== null){
+                c.accept(NULL_NODE);
                 return;
             }
             Stack<TreeNode> stack = new Stack<>();
-            Stack<TreeNode> result = new Stack<>();
+            Stack<String> result = new Stack<>();
             stack.push(node);
 
             while (!stack.isEmpty()){
                 TreeNode cur = stack.pop();
-                result.push(cur);
+                result.push(cur.value);
                 if(cur.left != null){
                     stack.push(cur.left);
                 }
+                if(cur.left == null){
+                    result.push(NULL_NODE);                }
                 if(cur.right!=null){
                     stack.push(cur.right);
                 }
+                if(cur.right == null){
+                    result.push(NULL_NODE);
+                }
             }
             while (!result.isEmpty()){
-                TreeNode n = result.pop();
-                c.accept(n.value);
+                String n = result.pop();
+                c.accept(n);
             }
         }
 
@@ -418,10 +523,16 @@ public class TreeStaff {
                     result.push(cur.value);
                     stack.push(cur);
                     cur = cur.right;
+                    if(cur == null){
+                        result.push(NULL_NODE);
+                    }
                 }
                 else{
                     cur = stack.pop();
                     cur = cur.left;
+                    if(cur == null){
+                        result.push(NULL_NODE);
+                    }
                 }
             }
             while (!result.isEmpty()){
@@ -429,5 +540,42 @@ public class TreeStaff {
             }
         }
     }
-    
+    @AlgName("数宽度遍历")
+    public static class TreeWideWalking extends AlgCompImpl<String,TreeNode>{
+        TreeDeepWalking treeDeepWalking = new TreeDeepWalking();
+        @Override
+        public TreeNode prepare() {
+            TreeNode node = treeDeepWalking.stackBinaryTreeGenerator(10);
+            BTreePrinter.show(node);
+            BTreePrinter.traversePreOrder(node);
+            return node;
+        }
+
+        @Override
+        protected String standard(TreeNode data) {
+            Queue<TreeNode> queue = new ConcurrentLinkedQueue<>();
+
+            StringBuilder stringBuilder = new StringBuilder();
+            queue.add(data);
+            while (!queue.isEmpty()){
+               TreeNode  cur = queue.poll();
+                if(cur == null){
+                    break;
+                }
+                stringBuilder.append(cur.value+";");
+                if(cur.left != null){
+                    queue.add(cur.left);
+                }
+                if(cur.right != null){
+                    queue.add(cur.right);
+                }
+            }
+            return stringBuilder.toString();
+        }
+
+        @Override
+        protected String test(TreeNode data) {
+            return null;
+        }
+    }
 }
