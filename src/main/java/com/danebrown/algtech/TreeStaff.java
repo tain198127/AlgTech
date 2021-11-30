@@ -5,6 +5,7 @@ import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Queues;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -13,10 +14,12 @@ import java.io.PrintStream;
 import java.util.AbstractQueue;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,11 +38,12 @@ public class TreeStaff {
     public static void main(String[] args) {
         AlgCompMenu.addComp(new TreeDeepWalking());
         AlgCompMenu.addComp(new TreeWideWalking());
+        AlgCompMenu.addComp(new PreOrder());
         AlgCompMenu.run();
     }
     //表示空节点
     public static final String NULL_NODE = "#";
-    //表示数的分隔符
+    //表示树的分隔符
     public static final String TREE_SPIN="|";
     //表示节点之间的分隔符
     public static final String NODE_SPAIN=",";
@@ -154,7 +158,7 @@ public class TreeStaff {
             }
         }
 
-        public static String list2string(List<String> list){
+        public static String list2string(Collection<String> list){
             StringBuilder stringBuilder = new StringBuilder();
             list.forEach(item->{
                 stringBuilder.append(item);
@@ -162,7 +166,6 @@ public class TreeStaff {
             });
             if(stringBuilder.length() >0){
                 stringBuilder.deleteCharAt(stringBuilder.length()-1);
-                stringBuilder.append(TREE_SPIN);
             }
             return stringBuilder.toString();
 
@@ -285,14 +288,17 @@ public class TreeStaff {
             List<String> preNodes = new ArrayList<>();
             pre(data, s -> preNodes.add(s));
             stringBuilder.append(BTreePrinter.list2string(preNodes));
+            stringBuilder.append(TREE_SPIN);
             log.debug("preNodes:{}",preNodes);
             List<String> midNodes = new ArrayList<>();
             mid(data,s -> midNodes.add(s));
             stringBuilder.append(BTreePrinter.list2string(midNodes));
+            stringBuilder.append(TREE_SPIN);
             log.debug("midNodes:{}",midNodes);
             List<String> lastNodes = new ArrayList<>();
             last(data,s->lastNodes.add(s));
             stringBuilder.append(BTreePrinter.list2string(lastNodes));
+            stringBuilder.append(TREE_SPIN);
             log.debug("lastNodes:{}",lastNodes);
 
             return stringBuilder.toString();
@@ -352,14 +358,17 @@ public class TreeStaff {
             List<String> preNodes = new ArrayList<>();
             preStack(data, s -> preNodes.add(s));
             stringBuilder.append(BTreePrinter.list2string(preNodes));
+            stringBuilder.append(TREE_SPIN);
             log.debug("preStackNodes:{}",preNodes);
             List<String> midNodes = new ArrayList<>();
             midStack(data,s -> midNodes.add(s));
             stringBuilder.append(BTreePrinter.list2string(midNodes));
+            stringBuilder.append(TREE_SPIN);
             log.debug("midStackNodes:{}",midNodes);
             List<String> lastNodes = new ArrayList<>();
             lastStack(data,s->lastNodes.add(s));
             stringBuilder.append(BTreePrinter.list2string(lastNodes));
+            stringBuilder.append(TREE_SPIN);
             log.debug("lastStackNodes:{}",lastNodes);
             return stringBuilder.toString();
         }
@@ -540,7 +549,7 @@ public class TreeStaff {
             }
         }
     }
-    @AlgName("数宽度遍历")
+    @AlgName("树宽度遍历")
     public static class TreeWideWalking extends AlgCompImpl<String,TreeNode>{
         TreeDeepWalking treeDeepWalking = new TreeDeepWalking();
         @Override
@@ -551,21 +560,35 @@ public class TreeStaff {
             return node;
         }
 
+        /**
+         * 	1. 头节点进队列
+         * 	2. 弹出队列时，有左孩子就左孩子进队列。然后有右孩子就右孩子进队列。
+         * 	3. 都没有了，就继续从队列的头弹出。循环第二步
+         * 	4. 直到所有节点都弹出。
+         * @param data
+         * @return
+         */
         @Override
         protected String standard(TreeNode data) {
+            if(data == null)
+                return "";
             Queue<TreeNode> queue = new ConcurrentLinkedQueue<>();
 
             StringBuilder stringBuilder = new StringBuilder();
+            //进队列
             queue.add(data);
             while (!queue.isEmpty()){
+                //每弹出一次
                TreeNode  cur = queue.poll();
                 if(cur == null){
                     break;
                 }
                 stringBuilder.append(cur.value+";");
+                //如果有左孩子就左孩子进队列
                 if(cur.left != null){
                     queue.add(cur.left);
                 }
+                //如果有右孩子就右孩子进队列
                 if(cur.right != null){
                     queue.add(cur.right);
                 }
@@ -576,6 +599,76 @@ public class TreeStaff {
         @Override
         protected String test(TreeNode data) {
             return null;
+        }
+    }
+
+    @AlgName("先序序列化")
+    public static class PreOrder extends AlgCompImpl<String,TreeNode>{
+        TreeDeepWalking treeDeepWalking = new TreeDeepWalking();
+
+        @Override
+        public TreeNode prepare() {
+            TreeNode node = treeDeepWalking.stackBinaryTreeGenerator(10);
+            BTreePrinter.show(node);
+            BTreePrinter.traversePreOrder(node);
+            return node;
+        }
+
+        @Override
+        protected String standard(TreeNode data) {
+
+            Queue<String> preNodes = Queues.newConcurrentLinkedQueue();
+            treeDeepWalking.pre(data,s->{
+                preNodes.add(s);
+            });
+            log.info("先序遍历：{}",preNodes);
+            //完成序列化
+            String nodes1 = BTreePrinter.list2string(preNodes);
+
+            return nodes1;
+        }
+
+        /**
+         * 递归先序反序列化，是队列的方式进行处理
+         * 1. 先判空
+         * 2. 如果poll的节点是空，则返回null
+         * 3. 先左节点 等于递归调用
+         * 4. 在右节点 等于递归调用
+         * 5. 中间传递的递归是Queue
+         * @param queue
+         * @return
+         */
+        public TreeNode preDeserNode(Queue<String> queue){
+            if(queue == null || queue.isEmpty()){
+                return null;
+            }
+            String val = queue.poll();
+            if(val.equals(NULL_NODE)){
+                return null;
+            }
+            TreeNode node = new TreeNode(val);
+            node.left = preDeserNode(queue);
+            node.right = preDeserNode(queue);
+            return node;
+        }
+
+        @Override
+        protected String test(TreeNode data) {
+            Queue<String> preNodes = Queues.newConcurrentLinkedQueue();
+            treeDeepWalking.pre(data,s->{
+                preNodes.add(s);
+            });
+            log.info("先序遍历：{}",preNodes);
+            //完成反序列化
+            TreeNode rootNode = preDeserNode(preNodes);
+            Queue<String> printNodes = Queues.newConcurrentLinkedQueue();
+            treeDeepWalking.pre(rootNode,s->{
+                printNodes.add(s);
+            });
+            //反序列化结果
+            String deSerNodeStr = BTreePrinter.list2string(printNodes);
+            return deSerNodeStr;
+
         }
     }
 }
