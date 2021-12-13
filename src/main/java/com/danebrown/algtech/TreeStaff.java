@@ -789,7 +789,6 @@ public class TreeStaff {
             Queue<String> wideDescNodes = Queues.newConcurrentLinkedQueue();
             wideWalking.wideSer(wideNodeRoot,n->wideDescNodes.add(n));
             String wideNodeSerStr = BTreePrinter.list2string(wideDescNodes);
-
             return deSerNodeStr+TREE_SPIN+deSerPostNodeStr+TREE_SPIN+wideNodeSerStr;
 
         }
@@ -817,6 +816,28 @@ public class TreeStaff {
 
         @Override
         protected String test(Integer data) {
+            return null;
+        }
+    }
+
+    /**
+     * 多叉树序列化成二叉树，然后二叉树还能转换回去。
+     */
+    @AlgName("NaryTree2BTree-Leetcode431")
+    public static class NaryTreeToBTree extends AlgCompImpl<String,String>{
+
+        @Override
+        public String prepare() {
+            return null;
+        }
+
+        @Override
+        protected String standard(String data) {
+            return null;
+        }
+
+        @Override
+        protected String test(String data) {
             return null;
         }
     }
