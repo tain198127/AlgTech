@@ -856,25 +856,26 @@ public class TreeStaff {
      * 多叉树序列化成二叉树，然后二叉树还能转换回去。
      * 思路，用左树右边界代表多叉树的孩子。本质上是用左树做深度下一层节点，右边界做同一层的兄弟节点
      * 简单来说，第一个孩子是左子树，然后剩下的所有孩子是左子树的右边的孩子。然后
-     * A
-     * /   \
-     * B       C
-     * / / \   / \ \ \
+     *          A
+     *       /   \
+     *    B       C
+     *  / / \   / \ \ \
      * D E  F   G H I J
      * 转化为
-     * A
-     * /
-     * B
-     * /  \
-     * D    C
-     * \    /
-     * E   G
-     * \   \
-     * F   H
-     * \
-     * I
-     * \
-     * J
+     *          A
+     *        /
+     *       B
+     *     /  \
+     *    D    C
+     *    \    /
+     *    E   G
+     *     \   \
+     *      F  H
+     *          \
+     *           I
+     *            \
+     *             J
+     *             采用的是深度优先策略。
      */
     @AlgName("NaryTree2BTree-Leetcode431")
     public static class NaryTreeToBTree extends AlgCompImpl<String, MultiTreeNode> {
