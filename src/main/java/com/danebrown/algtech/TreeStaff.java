@@ -884,7 +884,7 @@ public class TreeStaff {
         @Override
         public MultiTreeNode prepare() {
 
-            MultiTreeNode root = new MultiTreeNode(-1);
+            MultiTreeNode root = new MultiTreeNode("-1");
                     prepare(root);
             return root;
         }
@@ -898,7 +898,7 @@ public class TreeStaff {
                 for (int j = 0; j < child; j++) {
                     int val = ThreadLocalRandom.current().nextInt(1, 100000);
                     count.incrementAndGet();
-                    childNodes.add(j, new MultiTreeNode(val));
+                    childNodes.add(j, new MultiTreeNode(String.valueOf(val)));
                 }
                 for(MultiTreeNode m:childNodes){
                     prepare(m);
@@ -914,23 +914,80 @@ public class TreeStaff {
             return JSONUtil.toJsonStr(root);
         }
 
+        /**
+         * 多叉树转化成二叉树
+         */
+        public TreeNode encode(MultiTreeNode multiTreeNode){
+            if(multiTreeNode == null){
+                return null;
+            }
+            TreeNode root = new TreeNode(multiTreeNode.val);
+            root.left = en(multiTreeNode.child);
+            return root;
+        }
+        private TreeNode en(List<MultiTreeNode> child){
+            if(child == null || child.isEmpty()){
+                return null;
+            }
+            TreeNode head = null;
+            TreeNode cur = null;
+            for (MultiTreeNode n: child){
+                TreeNode tNode = new TreeNode(n.val);
+                if(head == null){
+                    head = tNode;
+                }
+                else{
+                    cur.right = tNode;
+                }
+                cur = tNode;
+                cur.left = en(n.child);
+            }
+            return head;
+        }
+
+        /**
+         * 二叉树转化为多叉树
+         */
+        public MultiTreeNode decode(TreeNode root){
+            if(root == null){
+                return null;
+            }
+            return new MultiTreeNode(root.value, de(root.left));
+        }
+        private List<MultiTreeNode> de(TreeNode root){
+            List<MultiTreeNode> child = new ArrayList<>();
+            while (root!= null){
+                MultiTreeNode cur = new MultiTreeNode(root.value, de(root.left));
+                child.add(cur);
+                root = root.right;
+            }
+            if(child == null || child.isEmpty()){
+                return null;
+            }
+            return child;
+        }
+
         @Override
         protected String test(MultiTreeNode root) {
-             return JSONUtil.toJsonStr(root);
+            TreeNode binTreeRoot = encode(root);
+            log.info("二叉树:{}",JSONUtil.toJsonStr(binTreeRoot));
+            MultiTreeNode decodeMultiRoot = decode(binTreeRoot);
+            log.info("多叉树:{}",JSONUtil.toJsonStr(decodeMultiRoot));
+             return JSONUtil.toJsonStr(decodeMultiRoot);
         }
     }
 
     @Data
     public static class MultiTreeNode {
         //-1表示这个是根节点
-        private int val;
+        private String val;
         private List<MultiTreeNode> child;
 
-        public MultiTreeNode(int val) {
+        public MultiTreeNode(String val) {
             this.val = val;
         }
 
-        public MultiTreeNode(int val, List<MultiTreeNode> child) {
+        public MultiTreeNode(String val, List<MultiTreeNode> child) {
             this.val = val;
             this.child = child;
         }
