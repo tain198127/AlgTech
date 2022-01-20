@@ -925,6 +925,12 @@ public class TreeStaff {
             root.left = en(multiTreeNode.child);
             return root;
         }
+
+        /**
+         *
+         * @param child
+         * @return
+         */
         private TreeNode en(List<MultiTreeNode> child){
             if(child == null || child.isEmpty()){
                 return null;
