@@ -835,12 +835,32 @@ public class TreeStaff {
     @AlgName("折纸测试")
     //TODO
     public static class PaperFloading extends AlgCompImpl<String, Integer> {
-
+        /**
+         * 折叠次数
+         * @return
+         */
         @Override
         public Integer prepare() {
             return ThreadLocalRandom.current().nextInt(0, 100);
         }
 
+        /**
+         * 从上到下的顺序是
+         * 用用0表示凹，用1表示凸。那么折1次，结果是0，折2次结果是001，折3次是0010011
+         * 逻辑是
+         *                                  0           折第一次
+         *                                / ↓  \
+         *                               0  ↓   1        折第二次
+         *                              /↓\ ↓  /↓ \
+         *                             0 ↓ 1↓ 0 ↓  1      折第三次
+         *                             ↓ ↓ ↓↓ ↓ ↓  ↓
+         *                             0 0 1 0 0 1 1    这是打开后看到的
+         *                  所以，本质上是左0右1的二叉树。然后按照先序遍历
+         *
+         *
+         * @param data
+         * @return
+         */
         @Override
         protected String standard(Integer data) {
             return null;
