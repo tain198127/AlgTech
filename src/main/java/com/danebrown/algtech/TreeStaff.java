@@ -1058,13 +1058,49 @@ public class TreeStaff {
             TreeDeepWalking treeDeepWalking = new TreeDeepWalking();
             TreeNode node =  treeDeepWalking.prepare();
 
+            if(ThreadLocalRandom.current().nextBoolean()){
+                return initCBT();
+            }
             return node;
+            /*
+            root
+          3
+        7
+       8
+             */
+//            TreeNode wrongNode = new TreeNode("root");
+//            wrongNode.left = new TreeNode("3");
+//            wrongNode.left.left = new TreeNode("7");
+//            wrongNode.left.left.left = new TreeNode("8");
+//            return wrongNode;
+        }
+        private TreeNode initCBT(){
+            int length = ThreadLocalRandom.current().nextInt(100000);
+            if (length <=0){
+                return null;
+            }
+            if(length == 1) {
+                return new TreeNode("root");
+            }
+            List<TreeNode> nodeList = new ArrayList<>();
+            for(int i = 0; i < length; i++) {
+                nodeList.add(new TreeNode(String.valueOf(i)));
+            }
+            int temp = 0;
+            while(temp <= (length - 2) / 2) { //注意这里，数组的下标是从零开始的
+                if(2 * temp + 1 < length)
+                    nodeList.get(temp).left = nodeList.get(2 * temp + 1);
+                if(2 * temp + 2 < length)
+                    nodeList.get(temp).right = nodeList.get(2 * temp + 2);
+                temp++;
+            }
+            return nodeList.get(0);
         }
 
         @Override
         protected Boolean standard(TreeNode data) {
             if(null == data) {
-                return false;
+                return true;
             }
             TreeNode leftChild = null;
             TreeNode rightChild = null;
@@ -1115,10 +1151,10 @@ public class TreeStaff {
                 TreeNode leftNode = curNode.left;
                 TreeNode rightNode = curNode.right;
                 if(leftNode != null){
-                    queue.add(leftNode);
+                    queue.offer(leftNode);
                 }
                 if(rightNode != null){
-                    queue.add(rightNode);
+                    queue.offer(rightNode);
                 }
                 if(leftNode == null && rightNode!=null){
                     //左子树没节点，右子树有节点，肯定不是完全二叉树
@@ -1128,7 +1164,7 @@ public class TreeStaff {
                 if(hasMeetingLeaf && (leftNode!= null || rightNode != null)){
                     return false;
                 }
-                if(leftNode == null && rightNode == null){
+                if(leftNode == null || rightNode == null){
                     //表示当前节点是叶子节点，因此将遇到过叶子节点设置为true
                     hasMeetingLeaf=true;
                 }
@@ -1144,8 +1180,25 @@ public class TreeStaff {
      * 搜索二叉树的定义：左节点比中小，右节点比中大。不存在相同值
      */
     @AlgName("判断是否为搜索二叉树")
-    public static class IsSBT{
+    public static class IsSBT extends AlgCompImpl<Boolean,TreeNode>{
 
+        @Override
+        public TreeNode prepare() {
+            TreeDeepWalking treeDeepWalking = new TreeDeepWalking();
+            TreeNode node =  treeDeepWalking.prepare();
+
+            return node;
+        }
+
+        @Override
+        protected Boolean standard(TreeNode data) {
+            return null;
+        }
+
+        @Override
+        protected Boolean test(TreeNode data) {
+            return null;
+        }
     }
 
     /**
