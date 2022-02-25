@@ -1,1 +1,0 @@
-FROM springci/graalvm-ce

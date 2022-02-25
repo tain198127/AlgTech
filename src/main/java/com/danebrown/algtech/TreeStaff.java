@@ -6,6 +6,8 @@ import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
 import com.google.common.collect.Queues;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -46,6 +48,7 @@ public class TreeStaff {
         AlgCompMenu.addComp(new TreeWideWalking());
         AlgCompMenu.addComp(new NodeSer());
         AlgCompMenu.addComp(new NaryTreeToBTree());
+        AlgCompMenu.addComp(new IsCBT());
         AlgCompMenu.run();
     }
 
@@ -1019,4 +1022,165 @@ public class TreeStaff {
         }
 
     }
+
+    /**
+     * 判断是否是完全二叉树
+     * 完全二叉树的检查——按层遍历+某些原则：
+     * 原则：
+     * 	1. 某个节点有右孩子，没有左孩子。肯定不是完全二叉树。
+     * 	2. 第一个孩子不双全的情况下，那么后面的节点必须是叶节点，否则肯定不是完全二叉树。
+     *
+     * 边界：null算作完全二叉树。
+     * 针对原则1：有右无左，肯定不是完全二叉树。
+     * 针对原则2：曾经遇到叶子节点，且当前节点有孩子，肯定不是完全二叉树。
+     * 左孩不空左进队，右孩不空右进队。
+     * 左右任空，就是叶子节点（影响原则2）
+     */
+    @AlgName("判断是否为完全二叉树")
+    public static class IsCBT extends AlgCompImpl<Boolean, TreeNode>{
+
+        @Data
+        @AllArgsConstructor
+        public static class PopInfo{
+
+            /**
+             * 是否是叶子
+             */
+            private boolean isLeaf;
+            /**
+             * 该节点下面是否全都是完全二叉树
+             */
+            private boolean isCBT;
+        }
+
+        @Override
+        public TreeNode prepare() {
+            TreeDeepWalking treeDeepWalking = new TreeDeepWalking();
+            TreeNode node =  treeDeepWalking.prepare();
+
+            return node;
+        }
+
+        @Override
+        protected Boolean standard(TreeNode data) {
+            if(null == data) {
+                return false;
+            }
+            TreeNode leftChild = null;
+            TreeNode rightChild = null;
+            boolean left = false;
+            Queue<TreeNode> queue = new LinkedList<TreeNode>();
+            queue.offer(data);
+            while(!queue.isEmpty()) {
+                TreeNode head = queue.poll();
+                leftChild = head.left;
+                rightChild = head.right;
+                if((null != rightChild && null == leftChild) //右孩子不等于空，左孩子等于空  -> false
+                        ||
+                        (left && (null != rightChild || null != leftChild)) //开启叶节点判断标志位时，如果层次遍历中的后继结点不是叶节点 -> false
+                ) {
+                    return false;
+                }
+                if(null != leftChild) {
+                    queue.offer(leftChild);
+                }
+                if(null != rightChild) {
+                    queue.offer(rightChild);
+                }else {
+                    left = true;
+                }
+            }
+
+            return true;
+
+        }
+
+        @Override
+        protected Boolean test(TreeNode data) {
+            return process(data);
+        }
+
+
+        public boolean process(TreeNode node){
+            Queue<TreeNode> queue =  Queues.newLinkedBlockingQueue();
+            boolean hasMeetingLeaf = false;
+            //base case
+            if(node == null){
+                return true;
+            }
+            queue.add(node);
+
+            while (!queue.isEmpty()){
+                TreeNode curNode = queue.poll();
+                TreeNode leftNode = curNode.left;
+                TreeNode rightNode = curNode.right;
+                if(leftNode != null){
+                    queue.add(leftNode);
+                }
+                if(rightNode != null){
+                    queue.add(rightNode);
+                }
+                if(leftNode == null && rightNode!=null){
+                    //左子树没节点，右子树有节点，肯定不是完全二叉树
+                    return false;
+                }
+                //如果曾经遇到过叶子节点
+                if(hasMeetingLeaf && (leftNode!= null || rightNode != null)){
+                    return false;
+                }
+                if(leftNode == null && rightNode == null){
+                    //表示当前节点是叶子节点，因此将遇到过叶子节点设置为true
+                    hasMeetingLeaf=true;
+                }
+            }
+
+            return true;
+
+        }
+    }
+
+    /**
+     * 判断是否为搜索二叉树
+     * 搜索二叉树的定义：左节点比中小，右节点比中大。不存在相同值
+     */
+    @AlgName("判断是否为搜索二叉树")
+    public static class IsSBT{
+
+    }
+
+    /**
+     * 最大距离：指的是树中路径的path
+     * 几种可能：
+     * 假设X是子树根节点
+     * 情况1：最大路径不经过X：X的左子树的最大距离最大
+     * 情况2：最大路径不经过X：X的右子树的最大距离最大
+     * 情况3：最大路径经过X：左子树高度+右子树高度+1
+     *
+     * 因此若用递归则需要考虑最后的叶子节点的left或right，此时X为null，可以定义为高度为0，最大距离为0
+     * 因此需要向上传导两个信息，分别是当前节点X的高度和最大距离
+     * 当前节点的高度=MAX(左节点高度，右子树高度）
+     * 当前节点最大距离=MAX(当前节点高度，左子树最大距离，右子树最大距离）
+     * 计算下一层节点时，使用上述逻辑
+     */
+    @AlgName("计算树中的最大距离")
+    public static class TreeMaxPath{
+
+    }
+
+    /**
+     * 满二叉树定义：每一个非叶子节点，都有左右两个子节点
+     * 满二叉树判定：满二叉树的高度为H， 则所有节点个数应为 2^H -1
+     *
+     *
+     */
+    @AlgName("判断一棵树是不是满二叉树")
+    public static class IsFullBT{
+
+    }
+    @AlgName("找到一棵树中最大的搜索二叉树子树")
+    public static class FindMaxSBT{
+
+    }
 }
+
+
