@@ -5,6 +5,8 @@ import cn.hutool.json.JSONUtil;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
+import com.danebrown.algtech.algcomp.base.tree.BinTreeNode;
+import com.danebrown.algtech.algcomp.base.tree.SimpleNormalBinTreeGenerator;
 import com.google.common.collect.Queues;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,6 +52,7 @@ public class TreeStaff {
         AlgCompMenu.addComp(new NodeSer());
         AlgCompMenu.addComp(new NaryTreeToBTree());
         AlgCompMenu.addComp(new IsCBT());
+        AlgCompMenu.addComp(new IsSBT());
         AlgCompMenu.run();
     }
 
@@ -1181,24 +1185,41 @@ public class TreeStaff {
      * 搜索二叉树的定义：左节点比中小，右节点比中大。不存在相同值
      */
     @AlgName("判断是否为搜索二叉树")
-    public static class IsSBT extends AlgCompImpl<Boolean,TreeNode>{
+    public static class IsSBT extends AlgCompImpl<Boolean,
+            BinTreeNode<Integer,String>>{
 
         @Override
-        public TreeNode prepare() {
-            TreeDeepWalking treeDeepWalking = new TreeDeepWalking();
-            TreeNode node =  treeDeepWalking.prepare();
+        public BinTreeNode<Integer,String> prepare() {
+            SimpleNormalBinTreeGenerator generator =
+                    new SimpleNormalBinTreeGenerator();
 
-            return node;
+            return generator.generate();
         }
 
         @Override
-        protected Boolean standard(TreeNode data) {
+        protected Boolean standard(BinTreeNode<Integer,String> data) {
             return null;
         }
 
         @Override
-        protected Boolean test(TreeNode data) {
+        protected Boolean test(BinTreeNode<Integer,String> data) {
             return null;
+        }
+        private SBTPopInfo process(BinTreeNode<Integer,String> node){
+            if(node == null){
+                return null;
+            }
+
+
+            SBTPopInfo leftInfo = process(node.getLeftNode());
+            SBTPopInfo rightInfo  = process(node.getRightNode());
+
+            return new SBTPopInfo();
+        }
+        @Data
+        public static class SBTPopInfo{
+            private int max;
+            private int min;
         }
     }
 
