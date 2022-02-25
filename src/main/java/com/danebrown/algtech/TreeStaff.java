@@ -1164,6 +1164,7 @@ public class TreeStaff {
                 if(hasMeetingLeaf && (leftNode!= null || rightNode != null)){
                     return false;
                 }
+                //注意这里，有任何一个节点是空的，就判定为叶子。这里是大坑
                 if(leftNode == null || rightNode == null){
                     //表示当前节点是叶子节点，因此将遇到过叶子节点设置为true
                     hasMeetingLeaf=true;
