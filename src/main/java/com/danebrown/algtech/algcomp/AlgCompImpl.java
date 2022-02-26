@@ -94,7 +94,7 @@ public abstract class AlgCompImpl<T,R>{
                            Supplier<R> prepareSupplier){
         WrongBook wrongBook = initWrongBook();
         R setupData =prepareSupplier == null? prepare():prepareSupplier.get();
-        log.debug("原始数据:{}",setupData);
+        log.debug("原始数据:\n{}",setupData);
         R forTest = null;
         R forStandard = null;
         //直接clone
@@ -111,7 +111,7 @@ public abstract class AlgCompImpl<T,R>{
         }
         //尽力序列化
         else {
-            log.warn("尽力序列化，可能导致出错");
+            log.debug("尽力序列化，可能导致出错");
             forTest = ObjectUtil.cloneIfPossible(setupData);
             forStandard = ObjectUtil.cloneIfPossible(setupData);
         }
@@ -143,10 +143,13 @@ public abstract class AlgCompImpl<T,R>{
         if (!result) {
 //            wrongBook.write(testName, setupData);
 
-            log.error("{}测试失败,原始数据:{}", testName,formatSetupData(setupData)
+            log.error("{}测试失败,原始数据:\n{}", testName,
+                    formatSetupData(setupData)
                     );
-            log.error("{}测试失败,测试结果:{}",testName,formatResultData(testResult));
-            log.error("{}测试失败,标准结果:{}",testName,formatResultData(standardResult));
+            log.error("{}测试失败,测试结果:{}",testName,
+                    formatResultData(testResult));
+            log.error("{}测试失败,标准结果:{}",testName,
+                    formatResultData(standardResult));
         } else {
             log.debug("{}测试成功", testName);
         }

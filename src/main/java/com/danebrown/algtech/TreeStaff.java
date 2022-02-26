@@ -1,15 +1,16 @@
 package com.danebrown.algtech;
 
-import cn.hutool.json.JSON;
+import cn.hutool.core.lang.Pair;
 import cn.hutool.json.JSONUtil;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
+import com.danebrown.algtech.algcomp.base.tree.BalanceSearchBinTreeGenerator;
 import com.danebrown.algtech.algcomp.base.tree.BinTreeNode;
+import com.danebrown.algtech.algcomp.base.tree.CompleteBinTreeGenerator;
 import com.danebrown.algtech.algcomp.base.tree.SimpleNormalBinTreeGenerator;
 import com.google.common.collect.Queues;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -22,7 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -209,8 +209,16 @@ public class TreeStaff {
         }
     }
 
+    public static abstract class TreeAlgComImpl<T, R> extends AlgCompImpl<T, R> {
+        @Override
+        protected Object formatSetupData(R setupData) {
+            return JSONUtil.toJsonPrettyStr(setupData);
+        }
+
+    }
+
     @AlgName("树深度遍历")
-    public static class TreeDeepWalking extends AlgCompImpl<String, TreeNode> {
+    public static class TreeDeepWalking extends TreeAlgComImpl<String, TreeNode> {
 
         volatile AtomicInteger integer = new AtomicInteger(0);
 
@@ -844,6 +852,7 @@ public class TreeStaff {
     public static class PaperFloading extends AlgCompImpl<String, Integer> {
         /**
          * 折叠次数
+         *
          * @return
          */
         @Override
@@ -855,15 +864,14 @@ public class TreeStaff {
          * 从上到下的顺序是
          * 用用0表示凹，用1表示凸。那么折1次，结果是0，折2次结果是001，折3次是0010011
          * 逻辑是
-         *                                  0           折第一次
-         *                                / ↓  \
-         *                               0  ↓   1        折第二次
-         *                              /↓\ ↓  /↓ \
-         *                             0 ↓ 1↓ 0 ↓  1      折第三次
-         *                             ↓ ↓ ↓↓ ↓ ↓  ↓
-         *                             0 0 1 0 0 1 1    这是打开后看到的
-         *                  所以，本质上是左0右1的二叉树。然后按照先序遍历
-         *
+         * 0           折第一次
+         * / ↓  \
+         * 0  ↓   1        折第二次
+         * /↓\ ↓  /↓ \
+         * 0 ↓ 1↓ 0 ↓  1      折第三次
+         * ↓ ↓ ↓↓ ↓ ↓  ↓
+         * 0 0 1 0 0 1 1    这是打开后看到的
+         * 所以，本质上是左0右1的二叉树。然后按照先序遍历
          *
          * @param data
          * @return
@@ -883,26 +891,26 @@ public class TreeStaff {
      * 多叉树序列化成二叉树，然后二叉树还能转换回去。
      * 思路，用左树右边界代表多叉树的孩子。本质上是用左树做深度下一层节点，右边界做同一层的兄弟节点
      * 简单来说，第一个孩子是左子树，然后剩下的所有孩子是左子树的右边的孩子。然后
-     *          A
-     *       /   \
-     *    B       C
-     *  / / \   / \ \ \
+     * A
+     * /   \
+     * B       C
+     * / / \   / \ \ \
      * D E  F   G H I J
      * 转化为
-     *          A
-     *        /
-     *       B
-     *     /  \
-     *    D    C
-     *    \    /
-     *    E   G
-     *     \   \
-     *      F  H
-     *          \
-     *           I
-     *            \
-     *             J
-     *             采用的是深度优先策略。
+     * A
+     * /
+     * B
+     * /  \
+     * D    C
+     * \    /
+     * E   G
+     * \   \
+     * F  H
+     * \
+     * I
+     * \
+     * J
+     * 采用的是深度优先策略。
      */
     @AlgName("NaryTree2BTree-Leetcode431")
     public static class NaryTreeToBTree extends AlgCompImpl<String, MultiTreeNode> {
@@ -912,7 +920,7 @@ public class TreeStaff {
         public MultiTreeNode prepare() {
 
             MultiTreeNode root = new MultiTreeNode("-1");
-                    prepare(root);
+            prepare(root);
             return root;
         }
 
@@ -920,14 +928,14 @@ public class TreeStaff {
 
             //每层有多少个孩子
             int child = ThreadLocalRandom.current().nextInt(1, 5);
-            if (count.incrementAndGet()< 20) {
+            if (count.incrementAndGet() < 20) {
                 List<MultiTreeNode> childNodes = new ArrayList<>(child);
                 for (int j = 0; j < child; j++) {
                     int val = ThreadLocalRandom.current().nextInt(1, 100000);
                     count.incrementAndGet();
                     childNodes.add(j, new MultiTreeNode(String.valueOf(val)));
                 }
-                for(MultiTreeNode m:childNodes){
+                for (MultiTreeNode m : childNodes) {
                     prepare(m);
                 }
                 node.setChild(childNodes);
@@ -937,15 +945,15 @@ public class TreeStaff {
 
         @Override
         protected String standard(MultiTreeNode root) {
-            log.info("{}",JSONUtil.toJsonStr(root));
+            log.info("{}", JSONUtil.toJsonStr(root));
             return JSONUtil.toJsonStr(root);
         }
 
         /**
          * 多叉树转化成二叉树
          */
-        public TreeNode encode(MultiTreeNode multiTreeNode){
-            if(multiTreeNode == null){
+        public TreeNode encode(MultiTreeNode multiTreeNode) {
+            if (multiTreeNode == null) {
                 return null;
             }
             TreeNode root = new TreeNode(multiTreeNode.val);
@@ -954,22 +962,20 @@ public class TreeStaff {
         }
 
         /**
-         *
          * @param child
          * @return
          */
-        private TreeNode en(List<MultiTreeNode> child){
-            if(child == null || child.isEmpty()){
+        private TreeNode en(List<MultiTreeNode> child) {
+            if (child == null || child.isEmpty()) {
                 return null;
             }
             TreeNode head = null;
             TreeNode cur = null;
-            for (MultiTreeNode n: child){
+            for (MultiTreeNode n : child) {
                 TreeNode tNode = new TreeNode(n.val);
-                if(head == null){
+                if (head == null) {
                     head = tNode;
-                }
-                else{
+                } else {
                     cur.right = tNode;
                 }
                 cur = tNode;
@@ -981,20 +987,21 @@ public class TreeStaff {
         /**
          * 二叉树转化为多叉树
          */
-        public MultiTreeNode decode(TreeNode root){
-            if(root == null){
+        public MultiTreeNode decode(TreeNode root) {
+            if (root == null) {
                 return null;
             }
             return new MultiTreeNode(root.value, de(root.left));
         }
-        private List<MultiTreeNode> de(TreeNode root){
+
+        private List<MultiTreeNode> de(TreeNode root) {
             List<MultiTreeNode> child = new ArrayList<>();
-            while (root!= null){
+            while (root != null) {
                 MultiTreeNode cur = new MultiTreeNode(root.value, de(root.left));
                 child.add(cur);
                 root = root.right;
             }
-            if(child == null || child.isEmpty()){
+            if (child == null || child.isEmpty()) {
                 return null;
             }
             return child;
@@ -1003,10 +1010,10 @@ public class TreeStaff {
         @Override
         protected String test(MultiTreeNode root) {
             TreeNode binTreeRoot = encode(root);
-            log.info("二叉树:{}",JSONUtil.toJsonStr(binTreeRoot));
+            log.info("二叉树:{}", JSONUtil.toJsonStr(binTreeRoot));
             MultiTreeNode decodeMultiRoot = decode(binTreeRoot);
-            log.info("多叉树:{}",JSONUtil.toJsonStr(decodeMultiRoot));
-             return JSONUtil.toJsonStr(decodeMultiRoot);
+            log.info("多叉树:{}", JSONUtil.toJsonStr(decodeMultiRoot));
+            return JSONUtil.toJsonStr(decodeMultiRoot);
         }
     }
 
@@ -1031,9 +1038,9 @@ public class TreeStaff {
      * 判断是否是完全二叉树
      * 完全二叉树的检查——按层遍历+某些原则：
      * 原则：
-     * 	1. 某个节点有右孩子，没有左孩子。肯定不是完全二叉树。
-     * 	2. 第一个孩子不双全的情况下，那么后面的节点必须是叶节点，否则肯定不是完全二叉树。
-     *
+     * 1. 某个节点有右孩子，没有左孩子。肯定不是完全二叉树。
+     * 2. 第一个孩子不双全的情况下，那么后面的节点必须是叶节点，否则肯定不是完全二叉树。
+     * <p>
      * 边界：null算作完全二叉树。
      * 针对原则1：有右无左，肯定不是完全二叉树。
      * 针对原则2：曾经遇到叶子节点，且当前节点有孩子，肯定不是完全二叉树。
@@ -1041,11 +1048,136 @@ public class TreeStaff {
      * 左右任空，就是叶子节点（影响原则2）
      */
     @AlgName("判断是否为完全二叉树")
-    public static class IsCBT extends AlgCompImpl<Boolean, TreeNode>{
+    public static class IsCBT extends AlgCompImpl<Boolean,
+            BinTreeNode<Integer,String>> {
+
+        @Override
+        public BinTreeNode<Integer,String> prepare() {
+            int size = 10000;
+            SimpleNormalBinTreeGenerator simpleNormalBinTreeGenerator =
+                    new SimpleNormalBinTreeGenerator();
+
+            CompleteBinTreeGenerator completeBinTreeGenerator  =
+                    new CompleteBinTreeGenerator();
+            return ThreadLocalRandom.current().nextBoolean()?
+                    simpleNormalBinTreeGenerator.generate(size):
+                    completeBinTreeGenerator.generate(size);
+
+            /*
+            root
+          3
+        7
+       8
+             */
+            //            TreeNode wrongNode = new TreeNode("root");
+            //            wrongNode.left = new TreeNode("3");
+            //            wrongNode.left.left = new TreeNode("7");
+            //            wrongNode.left.left.left = new TreeNode("8");
+            //            return wrongNode;
+        }
+
+        private TreeNode initCBT() {
+            int length = ThreadLocalRandom.current().nextInt(100000);
+            if (length <= 0) {
+                return null;
+            }
+            if (length == 1) {
+                return new TreeNode("root");
+            }
+            List<TreeNode> nodeList = new ArrayList<>();
+            for (int i = 0; i < length; i++) {
+                nodeList.add(new TreeNode(String.valueOf(i)));
+            }
+            int temp = 0;
+            while (temp <= (length - 2) / 2) { //注意这里，数组的下标是从零开始的
+                if (2 * temp + 1 < length)
+                    nodeList.get(temp).left = nodeList.get(2 * temp + 1);
+                if (2 * temp + 2 < length)
+                    nodeList.get(temp).right = nodeList.get(2 * temp + 2);
+                temp++;
+            }
+            return nodeList.get(0);
+        }
+
+        @Override
+        protected Boolean standard(BinTreeNode<Integer,String> data) {
+            if (null == data) {
+                return true;
+            }
+            BinTreeNode<Integer,String> leftChild = null;
+            BinTreeNode<Integer,String> rightChild = null;
+            boolean left = false;
+            Queue<BinTreeNode<Integer,String>> queue = new LinkedList<>();
+            queue.offer(data);
+            while (!queue.isEmpty()) {
+                BinTreeNode<Integer,String> head = queue.poll();
+                leftChild = head.getLeftNode();
+                rightChild = head.getRightNode();
+                if ((null != rightChild && null == leftChild) //右孩子不等于空，左孩子等于空  -> false
+                        || (left && (null != rightChild || null != leftChild)) //开启叶节点判断标志位时，如果层次遍历中的后继结点不是叶节点 -> false
+                ) {
+                    return false;
+                }
+                if (null != leftChild) {
+                    queue.offer(leftChild);
+                }
+                if (null != rightChild) {
+                    queue.offer(rightChild);
+                } else {
+                    left = true;
+                }
+            }
+
+            return true;
+
+        }
+
+        @Override
+        protected Boolean test(BinTreeNode<Integer,String> data) {
+            return process(data);
+        }
+
+        public boolean process(BinTreeNode<Integer,String> node) {
+            Queue<BinTreeNode<Integer,String>> queue = Queues.newLinkedBlockingQueue();
+            boolean hasMeetingLeaf = false;
+            //base case
+            if (node == null) {
+                return true;
+            }
+            queue.add(node);
+
+            while (!queue.isEmpty()) {
+                BinTreeNode<Integer,String> curNode = queue.poll();
+                BinTreeNode<Integer,String> leftNode = curNode.getLeftNode();
+                BinTreeNode<Integer,String> rightNode = curNode.getRightNode();
+                if (leftNode != null) {
+                    queue.offer(leftNode);
+                }
+                if (rightNode != null) {
+                    queue.offer(rightNode);
+                }
+                if (leftNode == null && rightNode != null) {
+                    //左子树没节点，右子树有节点，肯定不是完全二叉树
+                    return false;
+                }
+                //如果曾经遇到过叶子节点
+                if (hasMeetingLeaf && (leftNode != null || rightNode != null)) {
+                    return false;
+                }
+                //注意这里，有任何一个节点是空的，就判定为叶子。这里是大坑
+                if (leftNode == null || rightNode == null) {
+                    //表示当前节点是叶子节点，因此将遇到过叶子节点设置为true
+                    hasMeetingLeaf = true;
+                }
+            }
+
+            return true;
+
+        }
 
         @Data
         @AllArgsConstructor
-        public static class PopInfo{
+        public static class PopInfo {
 
             /**
              * 是否是叶子
@@ -1056,128 +1188,6 @@ public class TreeStaff {
              */
             private boolean isCBT;
         }
-
-        @Override
-        public TreeNode prepare() {
-            TreeDeepWalking treeDeepWalking = new TreeDeepWalking();
-            TreeNode node =  treeDeepWalking.prepare();
-
-            if(ThreadLocalRandom.current().nextBoolean()){
-                return initCBT();
-            }
-            return node;
-            /*
-            root
-          3
-        7
-       8
-             */
-//            TreeNode wrongNode = new TreeNode("root");
-//            wrongNode.left = new TreeNode("3");
-//            wrongNode.left.left = new TreeNode("7");
-//            wrongNode.left.left.left = new TreeNode("8");
-//            return wrongNode;
-        }
-        private TreeNode initCBT(){
-            int length = ThreadLocalRandom.current().nextInt(100000);
-            if (length <=0){
-                return null;
-            }
-            if(length == 1) {
-                return new TreeNode("root");
-            }
-            List<TreeNode> nodeList = new ArrayList<>();
-            for(int i = 0; i < length; i++) {
-                nodeList.add(new TreeNode(String.valueOf(i)));
-            }
-            int temp = 0;
-            while(temp <= (length - 2) / 2) { //注意这里，数组的下标是从零开始的
-                if(2 * temp + 1 < length)
-                    nodeList.get(temp).left = nodeList.get(2 * temp + 1);
-                if(2 * temp + 2 < length)
-                    nodeList.get(temp).right = nodeList.get(2 * temp + 2);
-                temp++;
-            }
-            return nodeList.get(0);
-        }
-
-        @Override
-        protected Boolean standard(TreeNode data) {
-            if(null == data) {
-                return true;
-            }
-            TreeNode leftChild = null;
-            TreeNode rightChild = null;
-            boolean left = false;
-            Queue<TreeNode> queue = new LinkedList<TreeNode>();
-            queue.offer(data);
-            while(!queue.isEmpty()) {
-                TreeNode head = queue.poll();
-                leftChild = head.left;
-                rightChild = head.right;
-                if((null != rightChild && null == leftChild) //右孩子不等于空，左孩子等于空  -> false
-                        ||
-                        (left && (null != rightChild || null != leftChild)) //开启叶节点判断标志位时，如果层次遍历中的后继结点不是叶节点 -> false
-                ) {
-                    return false;
-                }
-                if(null != leftChild) {
-                    queue.offer(leftChild);
-                }
-                if(null != rightChild) {
-                    queue.offer(rightChild);
-                }else {
-                    left = true;
-                }
-            }
-
-            return true;
-
-        }
-
-        @Override
-        protected Boolean test(TreeNode data) {
-            return process(data);
-        }
-
-
-        public boolean process(TreeNode node){
-            Queue<TreeNode> queue =  Queues.newLinkedBlockingQueue();
-            boolean hasMeetingLeaf = false;
-            //base case
-            if(node == null){
-                return true;
-            }
-            queue.add(node);
-
-            while (!queue.isEmpty()){
-                TreeNode curNode = queue.poll();
-                TreeNode leftNode = curNode.left;
-                TreeNode rightNode = curNode.right;
-                if(leftNode != null){
-                    queue.offer(leftNode);
-                }
-                if(rightNode != null){
-                    queue.offer(rightNode);
-                }
-                if(leftNode == null && rightNode!=null){
-                    //左子树没节点，右子树有节点，肯定不是完全二叉树
-                    return false;
-                }
-                //如果曾经遇到过叶子节点
-                if(hasMeetingLeaf && (leftNode!= null || rightNode != null)){
-                    return false;
-                }
-                //注意这里，有任何一个节点是空的，就判定为叶子。这里是大坑
-                if(leftNode == null || rightNode == null){
-                    //表示当前节点是叶子节点，因此将遇到过叶子节点设置为true
-                    hasMeetingLeaf=true;
-                }
-            }
-
-            return true;
-
-        }
     }
 
     /**
@@ -1185,41 +1195,85 @@ public class TreeStaff {
      * 搜索二叉树的定义：左节点比中小，右节点比中大。不存在相同值
      */
     @AlgName("判断是否为搜索二叉树")
-    public static class IsSBT extends AlgCompImpl<Boolean,
-            BinTreeNode<Integer,String>>{
+    public static class IsSBT extends TreeAlgComImpl<Boolean, BinTreeNode<Integer, String>> {
 
         @Override
-        public BinTreeNode<Integer,String> prepare() {
-            SimpleNormalBinTreeGenerator generator =
-                    new SimpleNormalBinTreeGenerator();
+        public BinTreeNode<Integer, String> prepare() {
+            SimpleNormalBinTreeGenerator generator = new SimpleNormalBinTreeGenerator();
+            int size = 10000;
+            BalanceSearchBinTreeGenerator bstGenerator =
+                    new BalanceSearchBinTreeGenerator();
 
-            return generator.generate();
+
+                        return ThreadLocalRandom.current().nextBoolean()?
+                                bstGenerator.generate(size):
+                                generator.generate(size);
         }
 
         @Override
-        protected Boolean standard(BinTreeNode<Integer,String> data) {
-            return null;
+        protected Boolean standard(BinTreeNode<Integer, String> data) {
+            return this.preorder(data, Long.MIN_VALUE, Long.MAX_VALUE);
         }
 
-        @Override
-        protected Boolean test(BinTreeNode<Integer,String> data) {
-            return null;
+        public boolean preorder(BinTreeNode<Integer, String> root, long min, long max) {
+            if (root == null) {
+                return true;
+            } else if (root.getKey() <= min || root.getKey() >= max) {
+                return false;
+            } else {
+                boolean b1 = this.preorder(root.getLeftNode(), min, root.getKey());
+                boolean b2 = this.preorder(root.getRightNode(), root.getKey(), max);
+
+                return b1 && b2;
+            }
         }
-        private SBTPopInfo process(BinTreeNode<Integer,String> node){
-            if(node == null){
+
+
+        @Override
+        protected Boolean test(BinTreeNode<Integer, String> data) {
+
+            SBTPopInfo info = process(data);
+            if (info == null) {
+                return true;
+            }
+            return info.isSBT();
+        }
+
+        private SBTPopInfo process(BinTreeNode<Integer, String> node) {
+            if (node == null) {
                 return null;
             }
 
-
             SBTPopInfo leftInfo = process(node.getLeftNode());
-            SBTPopInfo rightInfo  = process(node.getRightNode());
+            SBTPopInfo rightInfo = process(node.getRightNode());
 
-            return new SBTPopInfo();
+            boolean isSbt = true;
+            int min = node.getKey();
+            int max = node.getKey();
+            //分为经过当前节点和不经过当前节点的
+            if (leftInfo != null) {
+                isSbt =
+                        isSbt && leftInfo.isSBT && leftInfo.getMax() < node.getKey();
+                min = leftInfo.getMin();
+            }
+            if (rightInfo != null) {
+                isSbt =
+                        isSbt && rightInfo.isSBT && rightInfo.getMin() > node.getKey();
+                max = rightInfo.getMax();
+            }
+
+            SBTPopInfo result = new SBTPopInfo();
+            result.setSBT(isSbt);
+            result.setMax(max);
+            result.setMin(min);
+            return result;
         }
+
         @Data
-        public static class SBTPopInfo{
+        public static class SBTPopInfo {
             private int max;
             private int min;
+            private boolean isSBT;
         }
     }
 
@@ -1230,7 +1284,7 @@ public class TreeStaff {
      * 情况1：最大路径不经过X：X的左子树的最大距离最大
      * 情况2：最大路径不经过X：X的右子树的最大距离最大
      * 情况3：最大路径经过X：左子树高度+右子树高度+1
-     *
+     * <p>
      * 因此若用递归则需要考虑最后的叶子节点的left或right，此时X为null，可以定义为高度为0，最大距离为0
      * 因此需要向上传导两个信息，分别是当前节点X的高度和最大距离
      * 当前节点的高度=MAX(左节点高度，右子树高度）
@@ -1238,22 +1292,21 @@ public class TreeStaff {
      * 计算下一层节点时，使用上述逻辑
      */
     @AlgName("计算树中的最大距离")
-    public static class TreeMaxPath{
+    public static class TreeMaxPath {
 
     }
 
     /**
      * 满二叉树定义：每一个非叶子节点，都有左右两个子节点
      * 满二叉树判定：满二叉树的高度为H， 则所有节点个数应为 2^H -1
-     *
-     *
      */
     @AlgName("判断一棵树是不是满二叉树")
-    public static class IsFullBT{
+    public static class IsFullBT {
 
     }
+
     @AlgName("找到一棵树中最大的搜索二叉树子树")
-    public static class FindMaxSBT{
+    public static class FindMaxSBT {
 
     }
 }

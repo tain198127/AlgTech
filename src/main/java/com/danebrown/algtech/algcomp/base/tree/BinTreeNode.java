@@ -13,12 +13,17 @@ import java.util.Map;
  */
 @Data
 public class BinTreeNode<K,V> {
-    private BinTreeNode<K,V> leftNode;
-    private BinTreeNode<K,V> rightNode;
     private K key;
     private V value;
+    private BinTreeNode<K,V> leftNode;
+    private BinTreeNode<K,V> rightNode;
+
     public BinTreeNode(Pair<K,V> entry){
         this.key = entry.getKey();
         this.value = entry.getValue();
+    }
+    public BinTreeNode(K key, V value){
+        this.key = key;
+        this.value = value;
     }
 }
