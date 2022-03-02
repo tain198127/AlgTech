@@ -1,6 +1,5 @@
 package com.danebrown.algtech;
 
-import cn.hutool.core.lang.Pair;
 import cn.hutool.json.JSONUtil;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
@@ -19,11 +18,14 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -57,6 +59,7 @@ public class TreeStaff {
         AlgCompMenu.addComp(new IsAVLTree());
         AlgCompMenu.addComp(new IsFullBT());
         AlgCompMenu.addComp(new FindMaxSBT());
+        AlgCompMenu.addComp(new LowestAncestors());
         AlgCompMenu.run();
     }
 
@@ -1436,6 +1439,136 @@ public class TreeStaff {
         @Override
         protected Boolean test(BinTreeNode<Integer, String> data) {
             return null;
+        }
+    }
+
+    /**
+     * 给定一个节点X，以及A,B两个节点，返回他们的高度最低的祖先节点。
+     * 注意，这里的节点X，可能不是头节点。所以有一种可能是X节点下面，可能不包含A节点或者B节点
+     */
+    @AlgName("找到AB节点最低祖先节点")
+    public static class LowestAncestors extends TreeAlgComImpl<BinTreeNode<Integer, String>,
+            BinTreeNode<Integer,String>[]>{
+
+        /**
+         * BinTreeNode<Integer,String>[]中0表示X节点，1表示A，2表示B
+         * @return
+         */
+        @Override
+        public BinTreeNode<Integer, String>[] prepare() {
+            int size = 100000;
+            BalanceSearchBinTreeGenerator bstGenerator =
+                    new BalanceSearchBinTreeGenerator();
+            BinTreeNode<Integer,String> root = bstGenerator.generate(size);
+            LinkedBlockingQueue<BinTreeNode<Integer,String>> queue =
+                    new LinkedBlockingQueue<>();
+            ArrayList<BinTreeNode<Integer, String>> result = new ArrayList<>();
+            queue.add(root);
+            while (!queue.isEmpty()){
+                BinTreeNode<Integer, String> node =   queue.poll();
+                if(node.getLeftNode() != null){
+                    queue.add(node.getLeftNode());
+                    result.add(node.getLeftNode());
+                }
+                if(node.getRightNode() != null){
+                    queue.add(node.getRightNode());
+                    result.add(node.getRightNode());
+                }
+            }
+            int left = ThreadLocalRandom.current().nextInt(0,result.size()-1);
+            int right = ThreadLocalRandom.current().nextInt(0,result.size()-1);
+            while (left == right){
+                right = ThreadLocalRandom.current().nextInt(0,result.size()-1);
+            }
+            return new BinTreeNode[]{root,result.get(left),result.get(right)};
+        }
+
+        @Override
+        protected BinTreeNode<Integer, String> standard(BinTreeNode<Integer, String>[] data) {
+            return lowestAncestor1(data[0],data[1],data[2]);
+        }
+
+        public static BinTreeNode<Integer, String> lowestAncestor1(BinTreeNode<Integer, String> head, BinTreeNode<Integer, String> o1, BinTreeNode<Integer, String> o2) {
+
+            if (head == null) {
+                return null;
+            }
+            // key的父节点是value
+            HashMap<BinTreeNode<Integer, String>, BinTreeNode<Integer, String>> parentMap = new HashMap<>();
+            parentMap.put(head, null);
+            fillParentMap(head, parentMap);
+            HashSet<BinTreeNode<Integer, String>> o1Set = new HashSet<>();
+            BinTreeNode<Integer, String> cur = o1;
+            o1Set.add(cur);
+            while (parentMap.get(cur) != null) {
+                cur = parentMap.get(cur);
+                o1Set.add(cur);
+            }
+            cur = o2;
+            while (!o1Set.contains(cur)) {
+                cur = parentMap.get(cur);
+            }
+            return cur;
+        }
+
+        public static void fillParentMap(BinTreeNode<Integer, String> head, HashMap<BinTreeNode<Integer, String>, BinTreeNode<Integer, String>> parentMap) {
+            if (head.getLeftNode() != null) {
+                parentMap.put(head.getLeftNode(), head);
+                fillParentMap(head.getLeftNode(), parentMap);
+            }
+            if (head.getRightNode() != null) {
+                parentMap.put(head.getRightNode(), head);
+                fillParentMap(head.getRightNode(), parentMap);
+            }
+        }
+
+        @Override
+        protected BinTreeNode<Integer, String> test(BinTreeNode<Integer, String>[] data) {
+            LowestAncestorsInfo info = find(data);
+            return info.crossNode;
+        }
+        public LowestAncestorsInfo find(BinTreeNode<Integer, String>[] data){
+            BinTreeNode<Integer, String> x = data[0];
+            BinTreeNode<Integer, String> A = data[1];
+            BinTreeNode<Integer, String> B = data[2];
+            if(x == null){
+                return new LowestAncestorsInfo(false,false,0,false,null);
+            }
+            LowestAncestorsInfo leftInfo =
+                    find(new BinTreeNode[]{x.getLeftNode(),A,
+                            B});
+            LowestAncestorsInfo rightInfo =
+                    find(new BinTreeNode[]{x.getRightNode(),A,B});
+            if (leftInfo.cross){
+                return leftInfo;
+            }
+            if(rightInfo.cross){
+                return rightInfo;
+            }
+            boolean isContainA =
+                    leftInfo.isContainA || rightInfo.isContainA ||x.getKey().equals(A.getKey());
+            boolean isContainB =
+                    leftInfo.isContainB || rightInfo.isContainB || x.getKey().equals(B.getKey());
+            boolean cross = isContainA && isContainB;
+            int height = Math.max(leftInfo.height,rightInfo.height)+1;
+            BinTreeNode<Integer, String> crossNode = null;
+            if(cross){
+                crossNode = x;
+            }
+            return new LowestAncestorsInfo(isContainA,isContainB,height,cross
+                    ,crossNode);
+
+
+        }
+        @Data
+        @AllArgsConstructor
+        public static class LowestAncestorsInfo{
+            private boolean isContainA;
+            private boolean isContainB;
+            private int height;
+            private boolean cross;
+            private BinTreeNode<Integer, String> crossNode;
+
         }
     }
 }
