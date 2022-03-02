@@ -1477,15 +1477,20 @@ public class TreeStaff {
             }
             int left = ThreadLocalRandom.current().nextInt(0,result.size()-1);
             int right = ThreadLocalRandom.current().nextInt(0,result.size()-1);
+            int head = ThreadLocalRandom.current().nextInt(0,result.size()-1);
             while (left == right){
                 right = ThreadLocalRandom.current().nextInt(0,result.size()-1);
             }
-            return new BinTreeNode[]{root,result.get(left),result.get(right)};
+            BinTreeNode x =
+                    ThreadLocalRandom.current().nextBoolean()?root:
+                    result.get(head);
+            return new BinTreeNode[]{x,result.get(left),result.get(right)};
         }
 
         @Override
         protected BinTreeNode<Integer, String> standard(BinTreeNode<Integer, String>[] data) {
             return lowestAncestor1(data[0],data[1],data[2]);
+//            return null;
         }
 
         public static BinTreeNode<Integer, String> lowestAncestor1(BinTreeNode<Integer, String> head, BinTreeNode<Integer, String> o1, BinTreeNode<Integer, String> o2) {
@@ -1505,7 +1510,7 @@ public class TreeStaff {
                 o1Set.add(cur);
             }
             cur = o2;
-            while (!o1Set.contains(cur)) {
+            while (!o1Set.contains(cur) && cur != null) {
                 cur = parentMap.get(cur);
             }
             return cur;
