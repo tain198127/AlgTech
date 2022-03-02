@@ -53,6 +53,10 @@ public class TreeStaff {
         AlgCompMenu.addComp(new NaryTreeToBTree());
         AlgCompMenu.addComp(new IsCBT());
         AlgCompMenu.addComp(new IsSBT());
+        AlgCompMenu.addComp(new TreeMaxPath());
+        AlgCompMenu.addComp(new IsAVLTree());
+        AlgCompMenu.addComp(new IsFullBT());
+        AlgCompMenu.addComp(new FindMaxSBT());
         AlgCompMenu.run();
     }
 
@@ -1053,7 +1057,7 @@ public class TreeStaff {
 
         @Override
         public BinTreeNode<Integer,String> prepare() {
-            int size = 10000;
+            int size = 100000;
             SimpleNormalBinTreeGenerator simpleNormalBinTreeGenerator =
                     new SimpleNormalBinTreeGenerator();
 
@@ -1076,62 +1080,75 @@ public class TreeStaff {
             //            return wrongNode;
         }
 
-        private TreeNode initCBT() {
-            int length = ThreadLocalRandom.current().nextInt(100000);
-            if (length <= 0) {
-                return null;
-            }
-            if (length == 1) {
-                return new TreeNode("root");
-            }
-            List<TreeNode> nodeList = new ArrayList<>();
-            for (int i = 0; i < length; i++) {
-                nodeList.add(new TreeNode(String.valueOf(i)));
-            }
-            int temp = 0;
-            while (temp <= (length - 2) / 2) { //注意这里，数组的下标是从零开始的
-                if (2 * temp + 1 < length)
-                    nodeList.get(temp).left = nodeList.get(2 * temp + 1);
-                if (2 * temp + 2 < length)
-                    nodeList.get(temp).right = nodeList.get(2 * temp + 2);
-                temp++;
-            }
-            return nodeList.get(0);
-        }
+
 
         @Override
         protected Boolean standard(BinTreeNode<Integer,String> data) {
-            if (null == data) {
-                return true;
-            }
-            BinTreeNode<Integer,String> leftChild = null;
-            BinTreeNode<Integer,String> rightChild = null;
-            boolean left = false;
-            Queue<BinTreeNode<Integer,String>> queue = new LinkedList<>();
-            queue.offer(data);
-            while (!queue.isEmpty()) {
-                BinTreeNode<Integer,String> head = queue.poll();
-                leftChild = head.getLeftNode();
-                rightChild = head.getRightNode();
-                if ((null != rightChild && null == leftChild) //右孩子不等于空，左孩子等于空  -> false
-                        || (left && (null != rightChild || null != leftChild)) //开启叶节点判断标志位时，如果层次遍历中的后继结点不是叶节点 -> false
-                ) {
-                    return false;
-                }
-                if (null != leftChild) {
-                    queue.offer(leftChild);
-                }
-                if (null != rightChild) {
-                    queue.offer(rightChild);
-                } else {
-                    left = true;
-                }
-            }
-
-            return true;
+            return process2(data).isCBT;
+//            if (null == data) {
+//                return true;
+//            }
+//            BinTreeNode<Integer,String> leftChild = null;
+//            BinTreeNode<Integer,String> rightChild = null;
+//            boolean left = false;
+//            Queue<BinTreeNode<Integer,String>> queue = new LinkedList<>();
+//            queue.offer(data);
+//            while (!queue.isEmpty()) {
+//                BinTreeNode<Integer,String> head = queue.poll();
+//                leftChild = head.getLeftNode();
+//                rightChild = head.getRightNode();
+//                if ((null != rightChild && null == leftChild) //右孩子不等于空，左孩子等于空  -> false
+//                        || (left && (null != rightChild || null != leftChild)) //开启叶节点判断标志位时，如果层次遍历中的后继结点不是叶节点 -> false
+//                ) {
+//                    return false;
+//                }
+//                if (null != leftChild) {
+//                    queue.offer(leftChild);
+//                }
+//                if (null != rightChild) {
+//                    queue.offer(rightChild);
+//                } else {
+//                    left = true;
+//                }
+//            }
+//
+//            return true;
 
         }
 
+        /**
+         * 采用递归方式
+         * 	1. 左边是满二叉树，右边是满二叉树，左边高度=右边高度。
+         * 	2. 左边是完全二叉树，右边是满二叉树，左边高度 = 右边高度+1
+         * 	3. 左边是满二叉树，右边是满二叉树，左边高度 = 右边高度+1
+         * 	4. 左边是满二叉树，右边是完全二叉树，左边高度=右边高度
+         * @param node
+         * @return
+         */
+        public NodeInfo4CBT process2(BinTreeNode<Integer,String >node){
+            if(node == null){
+                return new NodeInfo4CBT(0,true,true);
+            }
+            NodeInfo4CBT leftInfo = process2(node.getLeftNode());
+            NodeInfo4CBT rightInfo = process2(node.getRightNode());
+            boolean isFBT =
+                    leftInfo.isFBT && rightInfo.isFBT && leftInfo.height == rightInfo.height;
+            boolean isCBT = isFBT;
+            //左边是完全二叉树，右边是满二叉树，左边高度 = 右边高度+1
+            if(leftInfo.isCBT && rightInfo.isFBT && leftInfo.height ==
+                    rightInfo.height+1){
+                isCBT = true;
+            }
+            else if(leftInfo.isFBT && rightInfo.isFBT && leftInfo.height == rightInfo.height+1){
+                isCBT = true;
+            }
+            else if(leftInfo.isFBT && rightInfo.isCBT && leftInfo.height == rightInfo.height){
+                isCBT = true;
+            }
+            int height = Math.max(leftInfo.height,rightInfo.height)+1;
+            return new NodeInfo4CBT(height,isCBT,isFBT);
+
+        }
         @Override
         protected Boolean test(BinTreeNode<Integer,String> data) {
             return process(data);
@@ -1187,6 +1204,18 @@ public class TreeStaff {
              * 该节点下面是否全都是完全二叉树
              */
             private boolean isCBT;
+        }
+        @Data
+        @AllArgsConstructor
+        public static class NodeInfo4CBT{
+            //树的高度
+            private int height;
+            //是否为完全二叉树
+            private boolean isCBT;
+            /**
+             * 是否是满二叉树，满二叉树是完全二叉树中一种特殊情况。
+             */
+            private boolean isFBT;
         }
     }
 
@@ -1278,6 +1307,28 @@ public class TreeStaff {
     }
 
     /**
+     * 判断为搜索平衡二叉树
+     */
+    @AlgName("判断是否为平衡搜索二叉树")
+    public static class IsAVLTree extends TreeAlgComImpl<Boolean,
+            BinTreeNode<Integer,String>>{
+
+        @Override
+        public BinTreeNode<Integer, String> prepare() {
+            return null;
+        }
+
+        @Override
+        protected Boolean standard(BinTreeNode<Integer, String> data) {
+            return null;
+        }
+
+        @Override
+        protected Boolean test(BinTreeNode<Integer, String> data) {
+            return null;
+        }
+    }
+    /**
      * 最大距离：指的是树中路径的path
      * 几种可能：
      * 假设X是子树根节点
@@ -1292,22 +1343,100 @@ public class TreeStaff {
      * 计算下一层节点时，使用上述逻辑
      */
     @AlgName("计算树中的最大距离")
-    public static class TreeMaxPath {
+    public static class TreeMaxPath extends TreeAlgComImpl<Boolean,
+            BinTreeNode<Integer,String>>{
 
+        @Override
+        public BinTreeNode<Integer, String> prepare() {
+            return null;
+        }
+
+        @Override
+        protected Boolean standard(BinTreeNode<Integer, String> data) {
+            return null;
+        }
+
+        @Override
+        protected Boolean test(BinTreeNode<Integer, String> data) {
+            return null;
+        }
     }
 
     /**
      * 满二叉树定义：每一个非叶子节点，都有左右两个子节点
      * 满二叉树判定：满二叉树的高度为H， 则所有节点个数应为 2^H -1
+     * 判断一棵树是不是满二叉树
+     * 在做状态分析，可能性分析，设计递归的时候，要先分析问题。分析问题时，可以根据问题的（性质）、特点、边界作为分析的依据。
+     *
+     * 满二叉树的特点：满二叉树的节点一定是 2h-1 个节点，其中h是树的高度。节点数指的是所有该高度下所有的子节点数量
+     *
+     * 递归返回的数据是： 树的高度和树的节点数。
+     *
+     * 	树的高度：max(左树高度,右树高度)+1
+     * 	树的节点数： 左树节点数 + 右树节点数 +1
+     *
+     * base case： 节点类型为null 则此时数高度是0，树节点数是0
      */
     @AlgName("判断一棵树是不是满二叉树")
-    public static class IsFullBT {
+    public static class IsFullBT extends TreeAlgComImpl<Boolean,
+            BinTreeNode<Integer,String>>{
 
+        @Override
+        public BinTreeNode<Integer, String> prepare() {
+            return null;
+        }
+
+        @Override
+        protected Boolean standard(BinTreeNode<Integer, String> data) {
+            return null;
+        }
+
+        @Override
+        protected Boolean test(BinTreeNode<Integer, String> data) {
+            return null;
+        }
     }
 
+    /**
+     * 	1. 设定目标：X作为树头节点上，最大的搜索二叉树节点个数
+     * 	2. 分析问题特征：搜索二叉树特点：
+     * 	► X的左树是搜索二叉树
+     * 	► X的右树是搜索二叉树
+     * 	► X的左树的最大值必须比X的值小
+     * 	► X的右树的最小值必须比X的值大
+     *
+     * 	3. 条件和状态：（这步是关键）
+     * 		a. 假如X不做头：
+     * 			i. 左子树的MaxSBTSize
+     * 			ii. 右子树的MaxSBTSize
+     * 			iii. 求上面两个MaxBSTSize的最大值，就是这个子树的最大搜索二叉树的节点个数
+     * 		b. 假如X做头：
+     * 			i. 左子树必须是SBT
+     * 			ii. 右子树必须是SBT
+     * 			iii. 左子树的最大值小于X的值
+     * 			iv. 右子树的最小值大于X的值
+     * 			v. 知道左子树和右子树的size，然后再加1，就是这个子树的最大搜索二叉树的节点个数
+     * 	4. 状态之间的关系，max(x做头的情况 vs x不做头的情况) --->向上传递，递归。
+     * 	5. base case 节点为null的时候，
+     */
     @AlgName("找到一棵树中最大的搜索二叉树子树")
-    public static class FindMaxSBT {
+    public static class FindMaxSBT extends TreeAlgComImpl<Boolean,
+            BinTreeNode<Integer,String>>{
 
+        @Override
+        public BinTreeNode<Integer, String> prepare() {
+            return null;
+        }
+
+        @Override
+        protected Boolean standard(BinTreeNode<Integer, String> data) {
+            return null;
+        }
+
+        @Override
+        protected Boolean test(BinTreeNode<Integer, String> data) {
+            return null;
+        }
     }
 }
 
