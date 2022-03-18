@@ -6,13 +6,15 @@ import com.danebrown.algtech.algcomp.AlgName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.RegExUtils;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Stack;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -34,6 +36,7 @@ public class GreedProblem {
 
         AlgCompMenu.addComp(new MinDic());
         AlgCompMenu.addComp(new MeetingRoom());
+        AlgCompMenu.addComp(new LightProb());
         AlgCompMenu.run();
     }
 
@@ -194,6 +197,7 @@ public class GreedProblem {
      * 给你每一个项目开始的时间和结束的时间
      * 你来安排宣讲的日程，要求会议室进行的宣讲的场次最多。
      * 返回最多的宣讲场次。
+     * 思路：按照最晚结束时间排序。然后按照开始时间比较。
      */
     @AlgName("项目排程")
     public static class MeetingRoom extends AlgCompImpl<Integer, List<Project>> {
@@ -261,6 +265,14 @@ public class GreedProblem {
             return bestArrange1(data.toArray(new Project[]{}));
         }
 
+        /**
+         * 以结束时间进行排序。谁的结束时间早，谁在前面。
+         * 然后以会议开始的时间，对比最后一个会议的结束时间。如果
+         * 下一个会议的开始时间比 lastTimeLine（最后一个会议结束时间）晚，那么
+         * 就把会议数加一。并且跟新lastTimeLine
+         * @param data
+         * @return
+         */
         @Override
         protected Integer test(List<Project> data) {
             data.sort(new Comparator<Project>() {
@@ -283,9 +295,130 @@ public class GreedProblem {
         }
     }
 
-    public static class RegexTest{
-        public static void main(String[] args) {
-            System.out.println(",?".matches("\\p{L}+"));
+    /**
+     * 投资汇报对象
+     */
+    @Data
+    public static class Portfolio {
+        /**
+         * 成本
+         */
+        private long cost;
+        /**
+         * 利润，注意，这个是利润，不是收入。因此只要成本能cover的住，利润就是纯利。这里面已经
+         * 把成本算过了
+         */
+        private long profit;
+
+    }
+
+    /**
+     * 输入: 正数数组costs、正数数组profits、正数K、正数M
+     * costs[i]表示i号项目的花费
+     * profits[i]表示i号项目在扣除花费之后还能挣到的钱(利润)
+     * K表示你只能串行的最多做k个项目
+     * M表示你初始的资金
+     * 说明: 每做完一个项目，马上获得的收益，可以支持你去做下一个项目。不能并行的做项目。
+     * 输出：你最后获得的最大钱数。
+     *
+     * 思路：按照cost正排（从小到大），再按照利润倒排（从大到小）
+     *
+     * 具体实现：建立一个按照cost建立的小根堆。再建立一个按照利润组织的大根堆。大根堆里一开始是空的。把所有项目都扔到小根堆里去
+     * 步骤1：M，把小根堆中能做的项目，弹出来放到大根堆里（只要cost小于M，就弹出。不用管加一起是否超过）。
+     * 步骤2：然后选择大根堆里堆顶的元素的利润。（K次数减一）
+     * 步骤3：更新M的初始资金，重复步骤1，2
+     * 步骤1,2,3完成一次，K次数减一。直至K次数减完
+     *
+     * Triple<Integer,Integer,List<Portfolio>>
+     *     第一个int是原始资金
+     *     第二个int是次数
+     */
+    public static class MaxProfilo extends AlgCompImpl<Long, Triple<Integer,Integer,List<Portfolio>>>{
+
+        @Override
+        public Triple<Integer,Integer,List<Portfolio>> prepare() {
+            return null;
+        }
+
+        @Override
+        protected Long standard(Triple<Integer, Integer, List<Portfolio>> data) {
+            return null;
+        }
+
+        @Override
+        protected Long test(Triple<Integer, Integer, List<Portfolio>> data) {
+            PriorityQueue<Portfolio> minCost = new PriorityQueue<>((t0, t1) -> (int) (t0.getCost() - t1.getCost()));
+            PriorityQueue<Portfolio> maxProfit =
+                    new PriorityQueue<>((t0,t1)->(int)(t1.getProfit() - t0.getProfit()));
+            minCost.addAll(data.getRight());
+            int M = data.getLeft();
+            int K = data.getMiddle();
+            for(int i=0;i < K;i++){
+                while (!minCost.isEmpty() && minCost.peek().getCost()<=M){
+                    //选出一堆可以投资的项目，放到大根堆
+                    maxProfit.add(minCost.poll());
+                }
+                if(maxProfit.isEmpty()){
+                    //这里可能是一个合适的项目都没有，或者说已经都消费完了。
+                    return Long.valueOf(M);
+                }
+                //每次从大根堆拿一个出来，把M修改一下
+                M += maxProfit.poll().profit;
+            }
+
+            return null;
+        }
+
+
+    }
+
+    /**
+     * 给定一个字符串str，只由‘X’和‘.’两种字符构成。
+     * ‘X’表示墙，不能放灯，也不需要点亮
+     * ‘.’表示居民点，可以放灯，需要点亮
+     * 如果灯放在i位置，可以让i-1，i和i+1三个位置被点亮
+     * 返回如果点亮str中所有需要点亮的位置，至少需要几盏灯
+     * 这道题有动态规划的解，有暴力解，有贪心解
+     */
+    @AlgName("路灯安排")
+    public static class LightProb extends AlgCompImpl<Integer,String>{
+
+
+        @Override
+        public String prepare() {
+            return "XX..XX.X....XX...XX.....X.";
+        }
+
+        @Override
+        protected Integer standard(String data) {
+            return 8;
+        }
+
+        @Override
+        protected Integer test(String data) {
+            int count = 0;
+            char[] array = data.toCharArray();
+            Stack<Character> stack = new Stack<>();
+            for(int i=0;i < array.length;i++){
+                if(array[i] == 'X'){
+                    if(!stack.isEmpty()){
+                        count++;
+                    }
+                    stack.clear();
+                    continue;
+                }
+                stack.push(array[i]);
+                if(stack.size() == 3){
+                    count++;
+                    stack.clear();
+                    continue;
+                }
+            }
+            if(!stack.isEmpty()){
+                count++;
+                stack.clear();
+            }
+            return count;
         }
     }
 }
