@@ -26,12 +26,12 @@ public class UnionSetAlg {
     }
 
     @Data
-    @AllArgsConstructor
     public static class UnionSetNode<V> {
         private V v;
-
+        public UnionSetNode(V v){
+            this.v = v;
+        }
     }
-
     public static class UnionSet<V> {
         //存储某个节点的最终祖先节点
         Map<UnionSetNode<V>, UnionSetNode<V>> parentMap = new HashMap();
@@ -192,26 +192,26 @@ public class UnionSetAlg {
 
         @Override
         public int[][] prepare() {
-            //            int len = ThreadLocalRandom.current().nextInt(0,100);
-            //            int[][] matrix = new int[len][len];
-            //
-            //            for(int i=0; i < len; i++){
-            //                for (int j=i; j<len;j++){
-            //                    if(i == j){
-            //                        matrix[i][j] = 1;
-            //                    }
-            //                    else {
-            //                        boolean isConnect =
-            //                                ThreadLocalRandom.current().nextBoolean();
-            //                        matrix[i][j] = isConnect?1:0;
-            //                        matrix[j][i] = isConnect?1:0;
-            //                    }
-            //
-            //                }
-            //            }
-            //            return matrix;
+                        int len = ThreadLocalRandom.current().nextInt(0,100);
+                        int[][] matrix = new int[len][len];
 
-            return new int[][]{{1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0}, {0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1}, {1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0}, {0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1}, {1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1}, {1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0}, {0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0}, {0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1}};
+                        for(int i=0; i < len; i++){
+                            for (int j=i; j<len;j++){
+                                if(i == j){
+                                    matrix[i][j] = 1;
+                                }
+                                else {
+                                    boolean isConnect =
+                                            ThreadLocalRandom.current().nextBoolean();
+                                    matrix[i][j] = isConnect?1:0;
+                                    matrix[j][i] = isConnect?1:0;
+                                }
+
+                            }
+                        }
+                        return matrix;
+
+//            return new int[][]{{1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0}, {0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1}, {1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0}, {0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1}, {1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1}, {1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0}, {0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0}, {0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1}};
 
 
             //            return new int[][] {{1}};
@@ -222,23 +222,31 @@ public class UnionSetAlg {
 
         @Override
         protected Integer standard(int[][] data) {
-            if (data.length == 1) {
-                return 1;
-            }
-            if (data.length <= 0) {
+            UnionSet<Integer> integerUnionSet = new UnionSet<>();
+            Set<Integer> strings = new HashSet<>();
+            if(data.length <=0){
                 return 0;
             }
-            Set<Integer> strings = new HashSet<>();
+            if (data.length == 1){
+                return 1;
+            }
+
+
             for (int i = 0; i < data.length; i++) {
                 strings.add(i);
+                integerUnionSet.init(strings.stream().collect(Collectors.toList()));
+
                 for (int j = i + 1; j < data.length; j++) {
                     strings.add(j);
                     integerUnionSet.init(strings.stream().collect(Collectors.toList()));
                     if (data[i][j] == 1) {
-                        integerUnionSet.union(integerUnionSet.nodes.get(i), integerUnionSet.nodes.get(j));
+                        integerUnionSet.union(integerUnionSet.nodes.get(i),
+                                integerUnionSet.nodes.get(j));
                     }
+
                 }
             }
+
             return integerUnionSet.size();
         }
 
@@ -248,7 +256,7 @@ public class UnionSetAlg {
             int N = M.length;
             UnionFind unionFind = new UnionFind(N);
             for (int i = 0; i < N; i++) {
-                for (int j = i + i; j < N; j++) {
+                for (int j = i + 1; j < N; j++) {
                     if (M[i][j] == 1) {
                         unionFind.union(i, j);
                     }
