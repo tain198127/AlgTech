@@ -192,41 +192,40 @@ public class UnionSetAlg {
 
         @Override
         public int[][] prepare() {
-//            int len = ThreadLocalRandom.current().nextInt(0,100);
-//            int[][] matrix = new int[len][len];
-//
-//            for(int i=0; i < len; i++){
-//                for (int j=i; j<len;j++){
-//                    if(i == j){
-//                        matrix[i][j] = 1;
-//                    }
-//                    else {
-//                        boolean isConnect =
-//                                ThreadLocalRandom.current().nextBoolean();
-//                        matrix[i][j] = isConnect?1:0;
-//                        matrix[j][i] = isConnect?1:0;
-//                    }
-//
-//                }
-//            }
-//            return matrix;
+            //            int len = ThreadLocalRandom.current().nextInt(0,100);
+            //            int[][] matrix = new int[len][len];
+            //
+            //            for(int i=0; i < len; i++){
+            //                for (int j=i; j<len;j++){
+            //                    if(i == j){
+            //                        matrix[i][j] = 1;
+            //                    }
+            //                    else {
+            //                        boolean isConnect =
+            //                                ThreadLocalRandom.current().nextBoolean();
+            //                        matrix[i][j] = isConnect?1:0;
+            //                        matrix[j][i] = isConnect?1:0;
+            //                    }
+            //
+            //                }
+            //            }
+            //            return matrix;
 
-            return new int[][]  {{1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0}, {0, 1, 0, 0,
-                    1, 0, 1, 1, 0, 0, 1}, {1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0}, {0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1}, {1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1}, {1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0}, {0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0}, {0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1}};
+            return new int[][]{{1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0}, {0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1}, {1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0}, {0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1}, {1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1}, {1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0}, {0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0}, {0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1}};
 
 
             //            return new int[][] {{1}};
 
-//            return new int[][] {{1,0,0},{0,1,0},{0,0,1}};
-//            return new int[][]{{1, 1, 0}, {1, 1, 0}, {0, 0, 1}};
+            //            return new int[][] {{1,0,0},{0,1,0},{0,0,1}};
+            //            return new int[][]{{1, 1, 0}, {1, 1, 0}, {0, 0, 1}};
         }
 
         @Override
         protected Integer standard(int[][] data) {
-            if(data.length == 1){
+            if (data.length == 1) {
                 return 1;
             }
-            if(data.length <=0){
+            if (data.length <= 0) {
                 return 0;
             }
             Set<Integer> strings = new HashSet<>();
@@ -235,9 +234,8 @@ public class UnionSetAlg {
                 for (int j = i + 1; j < data.length; j++) {
                     strings.add(j);
                     integerUnionSet.init(strings.stream().collect(Collectors.toList()));
-                    if(data[i][j] == 1){
-                        integerUnionSet.union(integerUnionSet.nodes.get(i),
-                                integerUnionSet.nodes.get(j));
+                    if (data[i][j] == 1) {
+                        integerUnionSet.union(integerUnionSet.nodes.get(i), integerUnionSet.nodes.get(j));
                     }
                 }
             }
@@ -249,10 +247,10 @@ public class UnionSetAlg {
 
             int N = M.length;
             UnionFind unionFind = new UnionFind(N);
-            for(int i=0;i< N;i++){
-                for(int j=i+i;j<N;j++){
-                    if(M[i][j] == 1){
-                        unionFind.union(i,j);
+            for (int i = 0; i < N; i++) {
+                for (int j = i + i; j < N; j++) {
+                    if (M[i][j] == 1) {
+                        unionFind.union(i, j);
                     }
                 }
             }
@@ -261,6 +259,7 @@ public class UnionSetAlg {
         }
 
     }
+
     public static class UnionFind {
         //记录父亲关系，例如 parent[1] = 2 表示1的父亲是2
         private int[] parent;
@@ -269,41 +268,45 @@ public class UnionSetAlg {
         //帮助数组，记录沿途内存的
         private int[] help;
         private int sets;
-        public UnionFind(int n){
+
+        public UnionFind(int n) {
             parent = new int[n];
             size = new int[n];
             help = new int[n];
             sets = n;
-            for(int i =0; i < n; i++){
+            for (int i = 0; i < n; i++) {
                 parent[i] = i;
-                size[i]=1;
+                size[i] = 1;
             }
         }
+
         /**
          * 查找a的父亲
+         *
          * @param i
          * @return
          */
-        private int find(int i){
+        private int find(int i) {
             int hi = 0;
-            while (i != parent[i]){
+            while (i != parent[i]) {
                 help[hi++] = i;
                 i = parent[i];
             }
-            for(hi--;hi>=0;hi--){
+            for (hi--; hi >= 0; hi--) {
                 parent[help[hi]] = i;
             }
             return i;
         }
-        public void union(int i, int j){
-            int f1= find(i);
+
+        public void union(int i, int j) {
+            int f1 = find(i);
             int f2 = find(j);
-            if(f1 != f2){
-                if(size[f1] >= size[f2]){
+            if (f1 != f2) {
+                if (size[f1] >= size[f2]) {
                     size[f1] += size[f2];
                     parent[f2] = f1;
 
-                }else{
+                } else {
                     size[f2] += size[f1];
                     parent[f1] = f2;
                 }
@@ -312,8 +315,7 @@ public class UnionSetAlg {
         }
 
 
-
-        public int sets(){
+        public int sets() {
             return sets;
         }
 
