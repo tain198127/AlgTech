@@ -246,12 +246,7 @@ public class UnionSetAlg {
 
         @Override
         protected Integer test(int[][] M) {
-            if(M.length == 1){
-                return 1;
-            }
-            if(M.length <=0){
-                return 0;
-            }
+
             int N = M.length;
             UnionFind unionFind = new UnionFind(N);
             for(int i=0;i< N;i++){
@@ -261,7 +256,7 @@ public class UnionSetAlg {
                     }
                 }
             }
-            return unionFind.sets;
+            return unionFind.sets();
 
         }
 
@@ -284,10 +279,21 @@ public class UnionSetAlg {
                 size[i]=1;
             }
         }
-        public void add(int a){
-            parent[a] = a;
-            size[a]=1;
-            help[a]=a;
+        /**
+         * 查找a的父亲
+         * @param i
+         * @return
+         */
+        private int find(int i){
+            int hi = 0;
+            while (i != parent[i]){
+                help[hi++] = i;
+                i = parent[i];
+            }
+            for(hi--;hi>=0;hi--){
+                parent[help[hi]] = i;
+            }
+            return i;
         }
         public void union(int i, int j){
             int f1= find(i);
@@ -298,31 +304,17 @@ public class UnionSetAlg {
                     parent[f2] = f1;
 
                 }else{
-                    size[f2] += size[f2];
+                    size[f2] += size[f1];
                     parent[f1] = f2;
-
                 }
                 sets--;
             }
-
-
         }
 
-        /**
-         * 查找a的父亲
-         * @param i
-         * @return
-         */
-        public int find(int i){
-            int hi = 0;
-            while (i != parent[i]){
-                help[hi++] = i;
-                i = parent[i];
-            }
-            for(hi--;hi>=0;hi--){
-                parent[help[hi]] = i;
-            }
-            return i;
+
+
+        public int sets(){
+            return sets;
         }
 
 
