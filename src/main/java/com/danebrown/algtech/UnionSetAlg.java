@@ -305,8 +305,11 @@ public class UnionSetAlg {
                 help[hi++] = i;
                 i = parent[i];
             }
-            for (hi--; hi >= 0; hi--) {
-                parent[help[hi]] = i;
+            //这里之所以要才能够hi-1开始，是因为上面的程序最后一个hi++，虽然当前的index还是hi,但是
+            //由于有effort-side作用，在执行完赋值以后，index值变成了hi+1了。这里为了消除effort-side
+            //效果，必须从hi-1开始
+            for (int f = hi-1; f >= 0; f--) {
+                parent[help[f]] = i;
             }
             return i;
         }
