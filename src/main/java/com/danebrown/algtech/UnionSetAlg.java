@@ -250,6 +250,11 @@ public class UnionSetAlg {
             return integerUnionSet.size();
         }
 
+        /**
+         * 【测试通过】
+         * @param M
+         * @return
+         */
         @Override
         protected Integer test(int[][] M) {
 
