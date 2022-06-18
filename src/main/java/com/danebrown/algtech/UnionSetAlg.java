@@ -5,6 +5,7 @@ import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ public class UnionSetAlg {
     public static void main(String[] args) {
         AlgCompMenu.addComp(new UnionSetTest());
         AlgCompMenu.addComp(new FindCircleNum());
+        AlgCompMenu.addComp(new NumOfIsland());
         AlgCompMenu.run();
     }
 
@@ -79,9 +81,9 @@ public class UnionSetAlg {
             return v;
         }
 
-        public void union(UnionSetNode<V> left, UnionSetNode<V> right) {
-            UnionSetNode<V> lp = findAncestor(left);
-            UnionSetNode<V> rp = findAncestor(right);
+        public void union(V left, V right) {
+            UnionSetNode<V> lp = findAncestor(nodes.get(left));
+            UnionSetNode<V> rp = findAncestor(nodes.get(right));
             if (lp != rp) {
                 int lpSize = sizeMap.get(lp);
                 int rpSize = sizeMap.get(rp);
@@ -129,7 +131,7 @@ public class UnionSetAlg {
             for (int i = 0; i < ThreadLocalRandom.current().nextInt(1, 100); i++) {
                 String randomKey1 = testData.get(ThreadLocalRandom.current().nextInt(0, testData.size() - 1));
                 String randomKey2 = testData.get(ThreadLocalRandom.current().nextInt(0, testData.size() - 1));
-                data.union(data.nodes.get(randomKey1), data.nodes.get(randomKey2));
+                data.union(randomKey1, randomKey2);
                 boolean isSameSet = data.isSameSet(data.nodes.get(randomKey1), data.nodes.get(randomKey2));
                 if (!isSameSet) {
                     throw new RuntimeException("查询错误");
@@ -149,7 +151,7 @@ public class UnionSetAlg {
             for (int i = 0; i < ThreadLocalRandom.current().nextInt(1, 100); i++) {
                 String randomKey1 = testData.get(ThreadLocalRandom.current().nextInt(0, testData.size() - 1));
                 String randomKey2 = testData.get(ThreadLocalRandom.current().nextInt(0, testData.size() - 1));
-                data.union(data.nodes.get(randomKey1), data.nodes.get(randomKey2));
+                data.union(randomKey1, randomKey2);
                 boolean isSameSet = data.isSameSet(data.nodes.get(randomKey1), data.nodes.get(randomKey2));
                 if (!isSameSet) {
                     throw new RuntimeException("查询错误");
@@ -240,8 +242,7 @@ public class UnionSetAlg {
                     strings.add(j);
                     integerUnionSet.init(strings.stream().collect(Collectors.toList()));
                     if (data[i][j] == 1) {
-                        integerUnionSet.union(integerUnionSet.nodes.get(i),
-                                integerUnionSet.nodes.get(j));
+                        integerUnionSet.union(i, j);
                     }
 
                 }
@@ -336,5 +337,142 @@ public class UnionSetAlg {
         }
 
 
+    }
+    //空对象，只是个标志位
+    public static class Dot{
+
+    }
+
+    @AlgName("岛屿数量问题")
+    public static class NumOfIsland extends AlgCompImpl<Integer,int[][]>{
+        FindCircleNum findCircleNum = new FindCircleNum();
+        @Override
+        public int[][] prepare() {
+//            return new int[][]{{1,1,0,0,0},{0,1,0,0,1},{0,0,0,1,1},{0,0,0,0,0},
+//                    {0,0,0,0,1}};
+            return findCircleNum.prepare();
+        }
+
+        @Override
+        protected Integer standard(int[][] data) {
+            return numOfIsland(data);
+
+        }
+
+        /**
+         * 给一个布尔类型的二维数组, 0 表示海, 1 表示岛。如果两个1是相邻的,那么我们认为他们是同一个岛.我们只考虑 上下左右 相邻.
+         * 找到大小在 k 及 k 以上的岛屿的数量
+         * https://www.lintcode.com/problem/677/description
+         * @param grid
+         * @return
+         */
+        public int numOfIsland2(int[][] grid,int k){
+            int islandNum=0;
+            int[][] tmp = new int[grid.length][grid[0].length];
+            for(int i=0;i<grid.length;i++){
+                for (int j=0;j<grid.length;j++){
+                    tmp[i][j] = grid[i][j];
+                }
+            }
+            for(int i=0;i < tmp.length;i++){
+                for(int j=0;j<tmp[0].length;j++){
+                    if(tmp[i][j] == 1){
+                        if(influence(tmp,i,j) >= k) {
+                            islandNum++;
+                        }
+                    }
+                }
+            }
+            return islandNum;
+        }
+
+        /**
+         * https://leetcode.cn/problems/number-of-islands/
+         * 给你一个由 '1'（陆地）和 '0'（水）组成的的二维网格，请你计算网格中岛屿的数量。
+         *
+         * 岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
+         *
+         * 此外，你可以假设该网格的四条边均被水包围。
+         *
+         * 来源：力扣（LeetCode）
+         * 链接：https://leetcode.cn/problems/number-of-islands
+         * 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+         * @param grid
+         * @return
+         */
+        public int numOfIsland(int[][] grid){
+            int islandNum=0;
+            if(grid.length<=0) return 0;
+            int[][] tmp = new int[grid.length][grid[0].length];
+            for(int i=0;i<grid.length;i++){
+                for (int j=0;j<grid.length;j++){
+                    tmp[i][j] = grid[i][j];
+                }
+            }
+            for(int i=0;i < tmp.length;i++){
+                for(int j=0;j<tmp[0].length;j++){
+                    if(tmp[i][j] == 1){
+                        islandNum++;
+                        influence(tmp,i,j);
+                    }
+                }
+            }
+            return islandNum;
+        }
+        public static int influence(int[][] grid, int i, int j){
+            if(i<0 || j <0||i >= grid.length || j >= grid[0].length || grid[i][j] != 1){
+                return 0 ;
+            }
+            grid[i][j] = 2;
+            return influence(grid,i+1,j)+
+            influence(grid,i-1,j)+
+            influence(grid,i,j+1)+
+            influence(grid,i,j-1)+1;
+        }
+
+        @Override
+        protected Integer test(int[][] board) {
+            if(board.length <=0)
+            {
+                return 0;
+            }
+            int row = board.length;
+            int col = board[0].length;
+            Dot[][] dot = new Dot[row][col];
+            List<Dot> dotList = new ArrayList<>();
+            for(int i=0;i<row;i++){
+                for(int j=0;j<col;j++){
+                    if(board[i][j] == 1){
+                        dot[i][j] = new Dot();
+                        dotList.add(dot[i][j]);
+                    }
+                }
+            }
+            UnionSet<Dot> unionSet = new UnionSet<>(dotList);
+            // (0,j)  (0,0)跳过了  (0,1) (0,2) (0,3)
+            for(int j=1; j < col;j++){
+                if(board[0][j-1] == 1 && board[0][j] == 1){
+                    unionSet.union(dot[0][j-1],dot[0][j]);
+                }
+            }
+            for(int i=1;i<row;i++){
+                if(board[i-1][0]==1 && board[i][0] == 1){
+                    unionSet.union(dot[i-1][0],dot[i][0]);
+                }
+            }
+            for(int i=1;i<row;i++){
+                for(int j=1;j<col;j++){
+                    if(board[i][j] == 1){
+                        if(board[i][j-1] == 1){
+                            unionSet.union(dot[i][j-1],dot[i][j]);
+                        }
+                        if(board[i-1][j] == 1){
+                            unionSet.union(dot[i-1][j],dot[i][j]);
+                        }
+                    }
+                }
+            }
+            return unionSet.size();
+        }
     }
 }
