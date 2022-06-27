@@ -614,6 +614,143 @@ public class UnionSetAlg {
         }
 
     }
+
+    /**
+     * 动态系数矩阵的并查集
+     */
+    public static class DynamicUnionField{
+        private Map<String,String> parent = new HashMap<>();
+        private Map<String,Integer> size = new HashMap<>();
+        private List<String> help = new ArrayList<>();
+        private int sets = 0;
+        public DynamicUnionField(int m, int n){
+
+        }
+        public void union(int m, int n, int m1, int n1){
+            if(parent.containsKey(key(m,n)) && parent.containsKey(key(m1,n1))){
+                String key = key(find(m,n));
+                String key1 = key(find(m1,n1));
+                if(!key.equals(key1)){
+                    int s = size.get(key);
+                    int s1 = size.get(key1);
+                    if(s>=s1){
+                        size.put(key,s+s1);
+                        parent.put(key1,key);
+                        size.remove(key1);
+                    }else{
+                        //s1 大
+                        size.put(key1,s+s1);
+                        parent.put(key,key1);
+                        size.remove(key);
+                    }
+                    sets --;
+                }
+            }
+        }
+
+        /**
+         * 找到这个点的祖宗节点，在这个寻址过程中，会把寻址过程中路过的节点放到help中
+         * 最终找到祖宗后，将路径中所有经历过的节点的祖宗都改成最终找到的祖宗节点
+         * @param m
+         * @param n
+         * @return
+         */
+        public int[] find(int m, int n){
+            String findKey = key(m,n);
+
+            while (!findKey.equals(parent.get(findKey))){
+                help.add(findKey);
+                findKey = parent.get(findKey);
+            }
+            for(String k : help){
+                parent.put(k,findKey);
+            }
+            help.clear();
+            return unkey(findKey);
+        }
+        //动态连接
+        public int connect(int m, int n){
+            String key = key(m,n);
+            if(!parent.containsKey(key)){
+                parent.put(key,key);
+                size.put(key,1);
+                sets++;
+                union(m-1,n,m,n);
+                union(m,n-1,m,n);
+                union(m+1,n,m,n);
+                union(m,n+1,m,n);
+            }
+            return sets;
+        }
+        private String key(int[] ary){
+            return key(ary[0],ary[1]);
+        }
+        private String key(int m, int n){
+
+            String k =  String.format("%s_%s",m,n);
+            return k;
+        }
+        private int[] unkey(String findKey){
+            String[] keys = findKey.split("_");
+            if(keys == null || keys.length != 2){
+                return null;
+            }
+            int[] rst = new int[2];
+            rst[0] = Integer.valueOf(keys[0]);
+            rst[1] = Integer.valueOf(keys[1]);
+            return rst;
+        }
+
+
+
+    }
+
+    @AlgName("巨量岛屿数量问题")
+    public static class BigNumOfIsland extends AlgCompImpl<List<Integer>,
+            NumOfIsland2Param>{
+
+
+        @Override
+        public NumOfIsland2Param prepare() {
+            int mMax = 100;
+            int nMax = 100;
+            int m = ThreadLocalRandom.current().nextInt(1,mMax);
+            int n = ThreadLocalRandom.current().nextInt(1,nMax);
+            int t = ThreadLocalRandom.current().nextInt(1,nMax*nMax);
+            int[][] post = new int[t][2];
+            for(int i = 0;i < t;i++){
+                int l = ThreadLocalRandom.current().nextInt(1,mMax);
+                int r = ThreadLocalRandom.current().nextInt(1,nMax);
+                post[i][0] = l;
+                post[i][1] = r;
+            }
+            NumOfIsland2Param numOfIsland2Param = new NumOfIsland2Param();
+            numOfIsland2Param.setM(m);
+            numOfIsland2Param.setN(n);
+            numOfIsland2Param.setPosition(post);
+            return numOfIsland2Param;
+        }
+
+        @Override
+        protected List<Integer> standard(NumOfIsland2Param data) {
+            UnionFind1 unionField = new UnionFind1(data.m,data.n);
+            List<Integer> rst = new ArrayList<>();
+            for(int[] p :data.position){
+                rst.add(unionField.connect(p[0],p[1]));
+            }
+            return rst;
+        }
+
+        @Override
+        protected List<Integer> test(NumOfIsland2Param data) {
+            UnionField unionField = new UnionField(data.m,data.n);
+            List<Integer> rst = new ArrayList<>();
+            for(int[] p :data.position){
+                rst.add(unionField.connect(p[0],p[1]));
+            }
+            return rst;
+        }
+    }
     public static class UnionFind1 {
         private int[] parent;
         private int[] size;
@@ -748,114 +885,6 @@ public class UnionSetAlg {
                 union(r,c+1,r,c);
             }
             return sets;
-        }
-    }
-    /**
-     * 动态系数矩阵的并查集
-     */
-    public static class DynamicUnionField{
-        private Map<String,String> parent = new HashMap<>();
-        private Map<String,Integer> size = new HashMap<>();
-        private List<String> help = new ArrayList<>();
-        private int sets = 0;
-        public DynamicUnionField(int m, int n){
-
-        }
-        public void union(int m, int n, int m1, int n1){
-            if(parent.containsKey(key(m,n)) && parent.containsKey(key(m1,n1))){
-                String key = key(find(m,n));
-                String key1 = key(find(m1,n1));
-                if(!key.equals(key1)){
-                    int s = size.get(key);
-                    int s1 = size.get(key1);
-                    if(s>=s1){
-                        size.put(key,s+s1);
-                        parent.put(key1,key);
-                        size.remove(key1);
-                    }else{
-                        //s1 大
-                        size.put(key1,s+s1);
-                        parent.put(key,key1);
-                        size.remove(key);
-                    }
-                    sets --;
-                }
-            }
-        }
-
-        /**
-         * 找到这个点的祖宗节点，在这个寻址过程中，会把寻址过程中路过的节点放到help中
-         * 最终找到祖宗后，将路径中所有经历过的节点的祖宗都改成最终找到的祖宗节点
-         * @param m
-         * @param n
-         * @return
-         */
-        public int[] find(int m, int n){
-            String findKey = key(m,n);
-
-            while (!findKey.equals(parent.get(findKey))){
-                help.add(findKey);
-                findKey = parent.get(findKey);
-            }
-            for(String k : help){
-                parent.put(k,findKey);
-            }
-            help.clear();
-            return unkey(findKey);
-        }
-        //动态连接
-        public int connect(int m, int n){
-            String key = key(m,n);
-            if(!parent.containsKey(key)){
-                parent.put(key,key);
-                size.put(key,1);
-                sets++;
-                union(m-1,n,m,n);
-                union(m,n-1,m,n);
-                union(m+1,n,m,n);
-                union(m,n+1,m,n);
-            }
-            return sets;
-        }
-        private String key(int[] ary){
-            return key(ary[0],ary[1]);
-        }
-        private String key(int m, int n){
-
-            String k =  String.format("%s_%s",m,n);
-            return k;
-        }
-        private int[] unkey(String findKey){
-            String[] keys = findKey.split("_");
-            if(keys == null || keys.length != 2){
-                return null;
-            }
-            int[] rst = new int[2];
-            rst[0] = Integer.valueOf(keys[0]);
-            rst[1] = Integer.valueOf(keys[1]);
-            return rst;
-        }
-
-
-
-    }
-
-    @AlgName("巨量岛屿数量问题")
-    public static class BigNumOfIsland extends AlgCompImpl<Integer, int[][]>{
-
-        @Override
-        public int[][] prepare() {
-            return new int[0][];
-        }
-
-        @Override
-        protected Integer standard(int[][] data) {
-            return null;
-        }
-
-        @Override
-        protected Integer test(int[][] data) {
-            return null;
         }
     }
 
