@@ -32,6 +32,7 @@ public class HeapSortStaf {
         AlgCompMenu.addComp(new HeapOp());
         AlgCompMenu.addComp(new HeapSort());
         AlgCompMenu.addComp(new MaxLineCoincidence());
+        AlgCompMenu.addComp(new EnhanceHeap());
         AlgCompMenu.run();
     }
 
@@ -285,7 +286,7 @@ public class HeapSortStaf {
     }
 
     /**
-     * TODO
+     * TODO【尚未实现】
      * 加强堆，主要实现了反向索引
      */
     @AlgName("加强堆")
@@ -321,11 +322,9 @@ public class HeapSortStaf {
             for (int i = 0; i < data.length; i++) {
                 if(data[i] == null){
                     heapGreater.pop();
-                    priorityQueue.poll();
                 }
                 else{
                     heapGreater.push(data[i]);
-                    priorityQueue.add(data[i]);
                 }
             }
             for (int i=0;i < data.length;i++){
@@ -338,7 +337,20 @@ public class HeapSortStaf {
 
         @Override
         protected int[] test(Integer[] data) {
-            return new int[0];
+            for (int i = 0; i < data.length; i++) {
+                if(data[i] == null){
+                    priorityQueue.poll();
+                }
+                else{
+                    priorityQueue.add(data[i]);
+                }
+            }
+            for (int i=0;i < data.length;i++){
+                if (i %2 ==0){
+                    //                    heapGreater.resign();
+                }
+            }
+            return priorityQueue.stream().mapToInt(Integer::intValue).toArray();
         }
         private void add(){
 

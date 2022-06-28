@@ -45,6 +45,9 @@ public class HeapGreater<T> {
 	}
 
 	public T pop() {
+		if(heap.isEmpty()){
+			return null;
+		}
 		T ans = heap.get(0);
 		swap(0, heapSize - 1);
 		indexMap.remove(ans);
@@ -54,6 +57,9 @@ public class HeapGreater<T> {
 	}
 
 	public void remove(T obj) {
+		if(heap.isEmpty()){
+			return;
+		}
 		T replace = heap.get(heapSize - 1);
 		int index = indexMap.get(obj);
 		indexMap.remove(obj);
