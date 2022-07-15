@@ -8,21 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
-import org.checkerframework.checker.units.qual.A;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Set;
-import java.util.Stack;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -347,6 +334,7 @@ public class GraphAlg {
             }
             HashSet<Edge> edgeSet = new HashSet<>();
             HashSet<String> edgeKeySet = new HashSet<>();
+            HashMap<Integer,GraphNode> nodeMap = new HashMap<>();
             for(int i=0;i< edges;i++){
                 int fromNode = ThreadLocalRandom.current().nextInt(0,nodes);
                 int toNode = ThreadLocalRandom.current().nextInt(0,nodes);
@@ -362,10 +350,11 @@ public class GraphAlg {
                     from.getNodes().add(to);
                     from.out++;
                     to.in++;
+                    nodeMap.put(from.value,from);
+                    nodeMap.put(to.value,to);
                     edgeSet.add(edge);
                 }
             }
-            HashMap<Integer,GraphNode> nodeMap = new HashMap<>();
 
             for(Edge e: edgeSet){
                 nodeMap.put(e.from.value,e.from);
@@ -458,14 +447,52 @@ public class GraphAlg {
 
         //使用Dijkstra算法
         @Override
-        protected Map<GraphNode, Integer> standard(GraphNode data) {
-            return null;
+        protected Map<GraphNode, Integer> standard(GraphNode from) {
+            HashMap<GraphNode, Integer> distanceMap = new HashMap<>();
+            distanceMap.put(from, 0);
+            // 打过对号的点
+            HashSet<GraphNode> selectedNodes = new HashSet<>();
+            GraphNode minNode = getMinDistanceAndUnselectedNode(distanceMap, selectedNodes);
+            while (minNode != null) {
+                //  原始点  ->  minNode(跳转点)   最小距离distance
+                int distance = distanceMap.get(minNode);
+                for (Edge edge : minNode.edges) {
+                    GraphNode toNode = edge.to;
+                    if (!distanceMap.containsKey(toNode)) {
+                        distanceMap.put(toNode, distance + edge.val);
+                    } else { // toNode
+                        distanceMap.put(edge.to,
+                                Math.min(distanceMap.get(toNode),
+                                        distance + edge.val));
+                    }
+                }
+                selectedNodes.add(minNode);
+                minNode = getMinDistanceAndUnselectedNode(distanceMap, selectedNodes);
+            }
+            return distanceMap;
         }
+    public static GraphNode getMinDistanceAndUnselectedNode(HashMap<GraphNode, Integer> distanceMap, HashSet<GraphNode> touchedNodes) {
+        GraphNode minNode = null;
+        int minDistance = Integer.MAX_VALUE;
+        for (Map.Entry<GraphNode, Integer> entry : distanceMap.entrySet()) {
+            GraphNode node = entry.getKey();
+            int distance = entry.getValue();
+            if (!touchedNodes.contains(node) && distance < minDistance) {
+                minNode = node;
+                minDistance = distance;
+            }
+        }
+        return minNode;
+    }
 
         //使用改进版Dijkstra算法
         @Override
         protected Map<GraphNode, Integer> test(GraphNode data) {
+            PriorityQueue<GraphNode> priorityQueue = new PriorityQueue<>();
+
             return null;
+
         }
+
     }
 }
