@@ -1,28 +1,18 @@
 package com.danebrown.algtech.algcomp;
 
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
 import com.danebrown.algtech.algcomp.wrongbook.JsonWrongBook;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections.bag.UnmodifiableBag;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.logging.log4j.Level;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by danebrown on 2021/7/28
@@ -240,12 +230,13 @@ public abstract class AlgCompImpl<T,R>{
 
         double meanStandard =
                 standardTime.stream().map(Long::doubleValue).reduce((a,b)->a+b).get()/times;
-        log.warn("{} 测试程序 平均耗时[{}]毫秒,最大耗时:[{}]毫秒,最小耗时:[{}]毫秒",testName,
-                meanTest,
-                maxTest,minTest);
         log.warn("{} 标准程序 平均耗时[{}]毫秒,最大耗时:[{}]毫秒,最小耗时:[{}]毫秒",testName,
                 meanStandard,
                 maxStandard,minStandard);
+        log.warn("{} 测试程序 平均耗时[{}]毫秒,最大耗时:[{}]毫秒,最小耗时:[{}]毫秒",testName,
+                meanTest,
+                maxTest,minTest);
+        
         return result;
     }
 
