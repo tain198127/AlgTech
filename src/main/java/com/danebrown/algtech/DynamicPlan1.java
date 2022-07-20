@@ -153,17 +153,29 @@ public class DynamicPlan1 {
 
         }
 
+        private static Integer dpVersion(int cur,int rest, int aim, int N){
+            int[][] dp = new int[N+1][rest+1];
+            dp[aim][0]=1;
+            for(int r =1; r<=rest;r++){
+                dp[1][r] = dp[2][r-1];
+                for(int c=2;c<N;c++){
+                    dp[c][r] = dp[c-1][r-1]+dp[c+1][r-1];
+                }
+                dp[N][r]=dp[N-1][r-1];
+            }
+            return dp[cur][rest];
+        }
         @Override
         public RobotBestWalkInput prepare() {
             int N = ThreadLocalRandom.current().nextInt(2, 30);
-            int M = ThreadLocalRandom.current().nextInt(0, N);
-            int P = ThreadLocalRandom.current().nextInt(0, N);
-            int K = ThreadLocalRandom.current().nextInt(Math.abs(P - M), N);
-
-//            N = 4;
+            int M = ThreadLocalRandom.current().nextInt(1, N);
+            int P = ThreadLocalRandom.current().nextInt(1, N);
+            int K = ThreadLocalRandom.current().nextInt(Math.abs(P - M), 40);
+//            K = 31;
+//            N = 5;
 //            M = 2;
 //            P = 4;
-//            K = 4;
+//            K = 6;
 
             RobotBestWalkInput input = new RobotBestWalkInput(N, M, P, K);
             return input;
@@ -171,7 +183,7 @@ public class DynamicPlan1 {
 
         @Override
         protected Integer standard(RobotBestWalkInput data) {
-
+            
             int result = standard_process(data.M, data.K, data.P, data.N);
             log.info("standard结果是:{}", result);
             return result;
@@ -185,7 +197,8 @@ public class DynamicPlan1 {
                     dp[i][j] = -1;
                 }
             }
-            int result = standard_process_delbranch(data.M, data.K, data.P, data.N, dp);
+//            int result = standard_process_delbranch(data.M, data.K, data.P, data.N, dp);
+            int result = dpVersion(data.M, data.K, data.P, data.N);
             log.info("test结果是:{}", result);
             return result;
         }

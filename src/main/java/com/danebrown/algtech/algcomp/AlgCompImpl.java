@@ -10,7 +10,10 @@ import org.apache.commons.lang3.time.StopWatch;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -105,27 +108,58 @@ public abstract class AlgCompImpl<T,R>{
             forTest = ObjectUtil.cloneIfPossible(setupData);
             forStandard = ObjectUtil.cloneIfPossible(setupData);
         }
-        StopWatch stopWatch = new StopWatch();
+        R finalForStandard = forStandard;
+        R finalForTest = forTest;
+        CompletableFuture standardFuture = CompletableFuture.supplyAsync(()->{
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+            T standardResult = standard(finalForStandard);
+            stopWatch.stop();
+            log.debug("标准结果:{}", standardResult);
+            log.debug("标准计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
+            if(standardTime != null){
+                standardTime.accept(stopWatch.getTime(TimeUnit.MILLISECONDS));
+            }
+            return standardResult;
+        });
+        
+        CompletableFuture testFeature = CompletableFuture.supplyAsync(()->{
+            StopWatch stopWatch = new StopWatch();
 
+            stopWatch.start();
+            T testResult = test(finalForTest);
+            stopWatch.stop();
+            log.debug("测试结果:{}", testResult);
+            log.debug("测试计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
+            if(testTime != null){
+                testTime.accept(stopWatch.getTime(TimeUnit.MILLISECONDS));
+            }
+            return testResult;
+        });
 
-        stopWatch.start();
-        T standardResult = standard(forStandard);
-        stopWatch.stop();
-        log.debug("标准结果:{}", standardResult);
-        log.debug("标准计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
-        if(standardTime != null){
-            standardTime.accept(stopWatch.getTime(TimeUnit.MILLISECONDS));
+        T standardResult = null;
+        T testResult = null;
+        try {
+            standardResult = (T) standardFuture.get(5,TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.warn(e);
+        } catch (ExecutionException e) {
+            log.warn(e);
+        } catch (TimeoutException e) {
+            log.error("标准方法超时",e);
+            standardFuture.cancel(true);
+        }
+        try {
+            testResult = (T) testFeature.get(5,TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.warn(e);
+        } catch (ExecutionException e) {
+            log.warn(e);
+        } catch (TimeoutException e) {
+            testFeature.cancel(true);
+            log.error("测试方法超时",e);
         }
 
-        stopWatch.reset();
-        stopWatch.start();
-        T testResult = test(forTest);
-        stopWatch.stop();
-        log.debug("测试结果:{}", testResult);
-        log.debug("测试计算耗时:{} 毫秒", stopWatch.getTime(TimeUnit.MILLISECONDS));
-        if(testTime != null){
-            testTime.accept(stopWatch.getTime(TimeUnit.MILLISECONDS));
-        }
 
         boolean result = true;
 
