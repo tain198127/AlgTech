@@ -90,6 +90,11 @@ public abstract class AlgCompImpl<T,R>{
         log.debug("原始数据:\n{}",setupData);
         R forTest = null;
         R forStandard = null;
+        int timeout = 5;
+        AlgName algName = this.getClass().getAnnotation(AlgName.class);
+        if(algName!= null && algName.timout() >0){
+            timeout = algName.timout();
+        }
         //直接clone
         if(setupData instanceof Cloneable){
             log.debug("克隆接口实现的克隆");
@@ -140,7 +145,7 @@ public abstract class AlgCompImpl<T,R>{
         T standardResult = null;
         T testResult = null;
         try {
-            standardResult = (T) standardFuture.get(5,TimeUnit.SECONDS);
+            standardResult = (T) standardFuture.get(timeout,TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             log.warn(e);
         } catch (ExecutionException e) {
@@ -150,7 +155,7 @@ public abstract class AlgCompImpl<T,R>{
             standardFuture.cancel(true);
         }
         try {
-            testResult = (T) testFeature.get(5,TimeUnit.SECONDS);
+            testResult = (T) testFeature.get(timeout,TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             log.warn(e);
         } catch (ExecutionException e) {

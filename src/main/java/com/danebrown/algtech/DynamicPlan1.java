@@ -100,7 +100,7 @@ public class DynamicPlan1 {
      * 规定机器人必须走 K 步，最终能来到P位置(P也是1~N中的一个)的方法有多少种
      * 给定四个参数 N、M、K、P，返回方法数。
      */
-    @AlgName("机器人巡径数")
+    @AlgName(value = "机器人巡径数",timout = 10)
     public static class RobotBestWalk extends AlgCompImpl<Integer, RobotBestWalkInput> {
 
         private static Integer standard_process(int cur, int rest, int aim, int N) {
@@ -170,7 +170,7 @@ public class DynamicPlan1 {
             int N = ThreadLocalRandom.current().nextInt(2, 30);
             int M = ThreadLocalRandom.current().nextInt(1, N);
             int P = ThreadLocalRandom.current().nextInt(1, N);
-            int K = ThreadLocalRandom.current().nextInt(Math.abs(P - M), 40);
+            int K = ThreadLocalRandom.current().nextInt(Math.abs(P - M), 30);
 //            K = 31;
 //            N = 5;
 //            M = 2;

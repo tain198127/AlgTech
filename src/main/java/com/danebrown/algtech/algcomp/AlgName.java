@@ -25,4 +25,10 @@ public @interface AlgName {
      */
     String value() default "";
 
+    /**
+     * 超时时间(S)
+     * @return
+     */
+    int timout() default 5;
+
 }
