@@ -103,6 +103,12 @@ public class DynamicPlan1 {
     @AlgName(value = "机器人巡径数",timout = 10)
     public static class RobotBestWalk extends AlgCompImpl<Integer, RobotBestWalkInput> {
 
+        private static boolean check(int cur, int rest, int aim, int N){
+            if(N<2 || cur <1 || cur > N|| aim <1 || aim >N || rest <1){
+                return false;
+            }
+            return true;
+        }
         private static Integer standard_process(int cur, int rest, int aim, int N) {
             if (rest == 0) {
                 return cur == aim ? 1 : 0;
@@ -170,7 +176,7 @@ public class DynamicPlan1 {
             int N = ThreadLocalRandom.current().nextInt(2, 30);
             int M = ThreadLocalRandom.current().nextInt(1, N);
             int P = ThreadLocalRandom.current().nextInt(1, N);
-            int K = ThreadLocalRandom.current().nextInt(Math.abs(P - M), 30);
+            int K = ThreadLocalRandom.current().nextInt(Math.abs(P - M), 35);
 //            K = 31;
 //            N = 5;
 //            M = 2;
@@ -183,7 +189,9 @@ public class DynamicPlan1 {
 
         @Override
         protected Integer standard(RobotBestWalkInput data) {
-            
+            if(!check(data.M, data.K, data.P, data.N)){
+                return -1;
+            }
             int result = standard_process(data.M, data.K, data.P, data.N);
             log.info("standard结果是:{}", result);
             return result;
@@ -191,6 +199,9 @@ public class DynamicPlan1 {
 
         @Override
         protected Integer test(RobotBestWalkInput data) {
+            if(!check(data.M, data.K, data.P, data.N)){
+                return -1;
+            }
             int[][] dp = new int[data.M + 1][data.K + 1];
             for (int i = 0; i < dp.length; i++) {
                 for (int j = 0; j < dp[0].length; j++) {
