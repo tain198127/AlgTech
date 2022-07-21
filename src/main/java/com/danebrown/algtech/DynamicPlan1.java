@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -20,6 +22,7 @@ public class DynamicPlan1 {
 
         AlgCompMenu.addComp(new Fib());
         AlgCompMenu.addComp(new RobotBestWalk());
+        AlgCompMenu.addComp(new SmartestPokerPlayer());
         AlgCompMenu.run();
     }
 
@@ -100,15 +103,13 @@ public class DynamicPlan1 {
      * 规定机器人必须走 K 步，最终能来到P位置(P也是1~N中的一个)的方法有多少种
      * 给定四个参数 N、M、K、P，返回方法数。
      */
-    @AlgName(value = "机器人巡径数",timout = 10)
+    @AlgName(value = "机器人巡径数", timout = 10)
     public static class RobotBestWalk extends AlgCompImpl<Integer, RobotBestWalkInput> {
 
-        private static boolean check(int cur, int rest, int aim, int N){
-            if(N<2 || cur <1 || cur > N|| aim <1 || aim >N || rest <1){
-                return false;
-            }
-            return true;
+        private static boolean check(int cur, int rest, int aim, int N) {
+            return N >= 2 && cur >= 1 && cur <= N && aim >= 1 && aim <= N && rest >= 1;
         }
+
         private static Integer standard_process(int cur, int rest, int aim, int N) {
             if (rest == 0) {
                 return cur == aim ? 1 : 0;
@@ -159,18 +160,19 @@ public class DynamicPlan1 {
 
         }
 
-        private static Integer dpVersion(int cur,int rest, int aim, int N){
-            int[][] dp = new int[N+1][rest+1];
-            dp[aim][0]=1;
-            for(int r =1; r<=rest;r++){
-                dp[1][r] = dp[2][r-1];
-                for(int c=2;c<N;c++){
-                    dp[c][r] = dp[c-1][r-1]+dp[c+1][r-1];
+        private static Integer dpVersion(int cur, int rest, int aim, int N) {
+            int[][] dp = new int[N + 1][rest + 1];
+            dp[aim][0] = 1;
+            for (int r = 1; r <= rest; r++) {
+                dp[1][r] = dp[2][r - 1];
+                for (int c = 2; c < N; c++) {
+                    dp[c][r] = dp[c - 1][r - 1] + dp[c + 1][r - 1];
                 }
-                dp[N][r]=dp[N-1][r-1];
+                dp[N][r] = dp[N - 1][r - 1];
             }
             return dp[cur][rest];
         }
+
         @Override
         public RobotBestWalkInput prepare() {
             int N = ThreadLocalRandom.current().nextInt(2, 30);
@@ -189,7 +191,7 @@ public class DynamicPlan1 {
 
         @Override
         protected Integer standard(RobotBestWalkInput data) {
-            if(!check(data.M, data.K, data.P, data.N)){
+            if (!check(data.M, data.K, data.P, data.N)) {
                 return -1;
             }
             int result = standard_process(data.M, data.K, data.P, data.N);
@@ -199,7 +201,7 @@ public class DynamicPlan1 {
 
         @Override
         protected Integer test(RobotBestWalkInput data) {
-            if(!check(data.M, data.K, data.P, data.N)){
+            if (!check(data.M, data.K, data.P, data.N)) {
                 return -1;
             }
             int[][] dp = new int[data.M + 1][data.K + 1];
@@ -212,6 +214,150 @@ public class DynamicPlan1 {
             int result = dpVersion(data.M, data.K, data.P, data.N);
             log.info("test结果是:{}", result);
             return result;
+        }
+    }
+
+    /**
+     * 给定一个整型数组arr，代表数值不同的纸牌排成一条线
+     * 玩家A和玩家B依次拿走每张纸牌
+     * 规定玩家A先拿，玩家B后拿
+     * 但是每个玩家每次只能拿走最左或最右的纸牌
+     * 玩家A和玩家B都绝顶聪明
+     * 请返回最后获胜者的分数。
+     */
+    @AlgName("扑克博弈")
+    public static class SmartestPokerPlayer extends AlgCompImpl<Integer, List<Integer>> {
+
+
+        @Override
+        public List<Integer> prepare() {
+            int times = ThreadLocalRandom.current().nextInt(1, 30);
+            List<Integer> result = new ArrayList<>();
+            for (int i = 0; i < times; i++) {
+                int t = ThreadLocalRandom.current().nextInt(1, times*3);
+                while (result.contains(t)) {
+                    t = ThreadLocalRandom.current().nextInt(1, times*3);
+                }
+                result.add(t);
+            }
+            return result;
+        }
+
+        @Override
+        protected Integer standard(List<Integer> data) {
+            if (null == data || 0 == data.size()) {
+                return 0;
+            }
+            int first = first(0, data.size() - 1, data);
+            int second = second(0, data.size() - 1, data);
+            return Math.max(first, second);
+        }
+        
+        private static Integer dpVersion(int left, int right, List<Integer> array){
+            return null;
+        }
+        /**
+         * 先手。在left right这个区域上，能获得的最好分数是多少
+         *
+         * @param left
+         * @param right
+         * @param array
+         * @return
+         */
+        private static Integer first(int left, int right, List<Integer> array) {
+            //base case
+            if (left == right) {
+                return array.get(left);
+            }
+            int p1 = array.get(left) + second(left + 1, right, array);
+            int p2 = array.get(right) + second(left, right - 1, array);
+            int v = Math.max(p1, p2);
+            return v;
+
+        }
+
+        /**
+         * 后手，后手是对方决定的，对方一定给我们最小的
+         *
+         * @param left
+         * @param right
+         * @param array
+         * @return
+         */
+        private static Integer second(int left, int right, List<Integer> array) {
+            //base case，因为是后手，肯定是对方先走，那么自己只能拿到0。这个地方比较绕
+            if (left == right) {
+                return 0;
+            }
+            int p1 = first(left + 1, right, array);//表示对手拿走了left上的数
+            int p2 = first(left, right - 1, array);//表示对手拿走了right上的数
+            int v = Math.min(p1, p2);//作为后手，没办法，只能挑选最小的那个
+            return v;
+        }
+
+        @Override
+        protected Integer test(List<Integer> data) {
+            int[][] first_cache=new int[data.size()][data.size()];
+            int[][] second_cache=new int[data.size()][data.size()];
+            for(int i=0;i < data.size();i++){
+                for(int j=0;j<data.size();j++){
+                    first_cache[i][j] = -1;
+                    second_cache[i][j] = -1;
+                }
+            }
+            int first = first_cache(0,data.size()-1,data,first_cache,second_cache);
+            int second = second_cache(0,data.size()-1,data,first_cache,second_cache);
+            return Math.max(first,second);
+        }
+
+        /**
+         * 先手。在left right这个区域上，能获得的最好分数是多少
+         *
+         * @param left
+         * @param right
+         * @param array
+         * @return
+         */
+        private static Integer first_cache(int left, int right, List<Integer> array,int[][] firstcache, int[][] secondcache) {
+            //base case
+            if(firstcache[left][right]!=-1){
+                return firstcache[left][right];
+            }
+            if (left == right) {
+                firstcache[left][right] = array.get(left);
+                return firstcache[left][right];
+            }
+            
+            int p1 = array.get(left) + second_cache(left + 1, right, array,firstcache,secondcache);;
+            int p2 = array.get(right) + second_cache(left, right - 1, array,firstcache,secondcache);
+            int v = Math.max(p1, p2);
+            firstcache[left][right] = v;
+            return firstcache[left][right];
+
+        }
+
+        /**
+         * 后手，后手是对方决定的，对方一定给我们最小的
+         *
+         * @param left
+         * @param right
+         * @param array
+         * @return
+         */
+        private static Integer second_cache(int left, int right, List<Integer> array,int[][] firstcache, int[][] secondcache) {
+            //base case，因为是后手，肯定是对方先走，那么自己只能拿到0。这个地方比较绕
+            if(secondcache[left][right] != -1){
+                return secondcache[left][right];
+            }
+            if (left == right) {
+                secondcache[left][right] = 0;
+                return secondcache[left][right];
+            }
+            int p1 = first_cache(left + 1, right, array,firstcache,secondcache);//表示对手拿走了left上的数
+            int p2 = first_cache(left, right - 1, array,firstcache,secondcache);//表示对手拿走了right上的数
+            int v = Math.min(p1,p2);//作为后手，没办法，只能挑选最小的那个
+            secondcache[left][right] = v;
+            return secondcache[left][right];
         }
     }
 }
