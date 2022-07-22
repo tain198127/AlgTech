@@ -115,6 +115,8 @@ public abstract class AlgCompImpl<T,R>{
         }
         R finalForStandard = forStandard;
         R finalForTest = forTest;
+        CompletableFuture complete = new CompletableFuture();
+        
         CompletableFuture standardFuture = CompletableFuture.supplyAsync(()->{
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
@@ -127,6 +129,18 @@ public abstract class AlgCompImpl<T,R>{
             }
             return standardResult;
         });
+        T standardResult = null;
+        try {
+            standardResult = (T) standardFuture.get(timeout,TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.warn(e);
+        } catch (ExecutionException e) {
+            log.warn(e);
+        } catch (TimeoutException e) {
+            log.error("标准方法超时",e);
+            standardFuture.cancel(true);
+        }
+        
         
         CompletableFuture testFeature = CompletableFuture.supplyAsync(()->{
             StopWatch stopWatch = new StopWatch();
@@ -141,19 +155,9 @@ public abstract class AlgCompImpl<T,R>{
             }
             return testResult;
         });
-
-        T standardResult = null;
+        
         T testResult = null;
-        try {
-            standardResult = (T) standardFuture.get(timeout,TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            log.warn(e);
-        } catch (ExecutionException e) {
-            log.warn(e);
-        } catch (TimeoutException e) {
-            log.error("标准方法超时",e);
-            standardFuture.cancel(true);
-        }
+        
         try {
             testResult = (T) testFeature.get(timeout,TimeUnit.SECONDS);
         } catch (InterruptedException e) {

@@ -109,7 +109,7 @@ public class DynamicPlan1 {
         private static boolean check(int cur, int rest, int aim, int N) {
             return N >= 2 && cur >= 1 && cur <= N && aim >= 1 && aim <= N && rest >= 1;
         }
-
+        
         private static Integer standard_process(int cur, int rest, int aim, int N) {
             if (rest == 0) {
                 return cur == aim ? 1 : 0;
@@ -179,11 +179,11 @@ public class DynamicPlan1 {
             int M = ThreadLocalRandom.current().nextInt(1, N);
             int P = ThreadLocalRandom.current().nextInt(1, N);
             int K = ThreadLocalRandom.current().nextInt(Math.abs(P - M), 35);
-//            K = 31;
-//            N = 5;
-//            M = 2;
-//            P = 4;
-//            K = 6;
+            K = 4;
+            N = 5;
+            M = 1;
+            P = 3;
+            
 
             RobotBestWalkInput input = new RobotBestWalkInput(N, M, P, K);
             return input;
@@ -231,7 +231,7 @@ public class DynamicPlan1 {
 
         @Override
         public List<Integer> prepare() {
-            int times = ThreadLocalRandom.current().nextInt(1, 30);
+            int times = ThreadLocalRandom.current().nextInt(1000, 2000);
             List<Integer> result = new ArrayList<>();
             for (int i = 0; i < times; i++) {
                 int t = ThreadLocalRandom.current().nextInt(1, times*3);
@@ -244,17 +244,33 @@ public class DynamicPlan1 {
         }
 
         @Override
-        protected Integer standard(List<Integer> data) {
+        protected Integer test(List<Integer> data) {
             if (null == data || 0 == data.size()) {
                 return 0;
             }
-            int first = first(0, data.size() - 1, data);
-            int second = second(0, data.size() - 1, data);
-            return Math.max(first, second);
+            return dpVersion(data.stream().mapToInt(Integer::intValue).toArray());
+//            int first = first(0, data.size() - 1, data);
+//            int second = second(0, data.size() - 1, data);
+//            return Math.max(first, second);
         }
         
-        private static Integer dpVersion(int left, int right, List<Integer> array){
-            return null;
+        private static Integer dpVersion(int[] cache){
+            int[][] f_dp=new int[cache.length][cache.length];
+            int[][] g_dp=new int[cache.length][cache.length];
+            for(int i=0;i < cache.length;i++){
+                f_dp[i][i] = cache[i];
+            }
+            for(int i=1;i<cache.length;i++){
+                int L = 0;
+                int R = i;
+                while (R< cache.length && L< cache.length){
+                    f_dp[L][R] = Math.max(cache[L]+g_dp[L+1][R], cache[R]+g_dp[L][R-1]);
+                    g_dp[L][R] = Math.min(f_dp[L+1][R],f_dp[L][R-1]);
+                    L++;
+                    R++;
+                }
+            }
+            return Math.max(f_dp[0][cache.length-1],g_dp[0][cache.length-1]);
         }
         /**
          * 先手。在left right这个区域上，能获得的最好分数是多少
@@ -296,7 +312,11 @@ public class DynamicPlan1 {
         }
 
         @Override
-        protected Integer test(List<Integer> data) {
+        protected Integer standard(List<Integer> data) {
+//            int first = first(0, data.size() - 1, data);
+//            int second = second(0, data.size() - 1, data);
+//            return Math.max(first, second);
+            
             int[][] first_cache=new int[data.size()][data.size()];
             int[][] second_cache=new int[data.size()][data.size()];
             for(int i=0;i < data.size();i++){
