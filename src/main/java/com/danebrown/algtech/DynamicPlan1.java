@@ -23,6 +23,7 @@ public class DynamicPlan1 {
         AlgCompMenu.addComp(new Fib());
         AlgCompMenu.addComp(new RobotBestWalk());
         AlgCompMenu.addComp(new SmartestPokerPlayer());
+        AlgCompMenu.addComp(new Knapsack());
         AlgCompMenu.run();
     }
 
@@ -378,6 +379,131 @@ public class DynamicPlan1 {
             int v = Math.min(p1,p2);//作为后手，没办法，只能挑选最小的那个
             secondcache[left][right] = v;
             return secondcache[left][right];
+        }
+    }
+
+    /**
+     * 给定两个长度都为N的数组weights和values，
+     * weights[i]和values[i]分别代表 i号物品的重量和价值。
+     * 给定一个正数bag，表示一个载重bag的袋子，
+     * 你装的物品不能超过这个重量。
+     * 返回你能装下最多的价值是多少? 
+     */
+    @Data
+    @AllArgsConstructor
+    public static class Bag{
+        private int[] weights;
+        private int[] values;
+        private int bagSize;
+    }
+    @AlgName("背包问题")
+    public static class Knapsack extends AlgCompImpl<Long, Bag>{
+
+        @Override
+        public Bag prepare() {
+            
+            //货物列表长度
+            int n = ThreadLocalRandom.current().nextInt(1,100);
+            //背包承载数，背包中所有weight不大于bagSize
+            int bagSize = ThreadLocalRandom.current().nextInt(50,10000);
+            //每个货物的重量
+            int[] weights = new int[n];
+            //每个货物的价值
+            int[] values = new int[n];
+            for(int i=0;i < n;i++){
+                weights[i] = ThreadLocalRandom.current().nextInt(0,bagSize);
+                values[i] = ThreadLocalRandom.current().nextInt(0,10000);
+            }
+            Bag bag = new Bag(weights,values,bagSize);
+            Bag testBag = new Bag(new int[]{1,2,3},new int[]{3,4,5},3);
+            return bag;
+//            return testBag;
+        }
+
+        @Override
+        protected Long standard(Bag data) {
+            return process(data.weights,data.values,0,data.bagSize);
+        }
+        private static long process(int[] w, int[] v, int index, int bagSize){
+            //边界
+            if(w == null||v == null||w.length != v.length||w.length<=0||bagSize<0){
+                return 0;
+            }
+            //basecase
+            if(bagSize <0){
+                return -1;
+            }
+            //数组越界了
+            if(index == w.length){
+                return 0;
+            }
+            //选择不要这个货物
+            long p1 = process(w,v,index+1,bagSize);
+            long p2 = bagSize<w[index]?0:(v[index]+ process(w,v,index+1,bagSize-w[index]));
+            return Math.max(p1,p2);
+        }
+        @Override
+        protected Long test(Bag data) {
+            return dpVersion(data.weights, data.values, data.bagSize);
+        }
+        //index的范围是0~N， restBagSize是bag~0。因为index == w.length的时候是0，因此dp表中最后一行是0
+        private static long dpVersion(int[] w, int[] v,  int bagSize){
+            if(w == null||v == null||w.length != v.length||w.length<=0||bagSize<0){
+                return 0;
+            }
+            long[][] dp = new long [w.length+1][bagSize+1];
+            long lastMax = -1;
+            //从下往上走
+            for(int index = w.length-1;index>=0;index--){
+                for(int rest=0;rest<=bagSize;rest++){
+                    long p1 = dp[index+1][rest];
+                    long p2 =rest < w[index]? -1:(dp[index+1][rest-w[index]]+v[index]);
+                    dp[index][rest] = Math.max(p1,p2);
+                    if(lastMax < dp[index][rest]){
+                        lastMax = dp[index][rest];
+                    }
+                }
+            }
+            return lastMax;
+        }
+    }
+    
+    /**
+     * 给定3个参数，N，M，K
+     * 怪兽有N滴血，等着英雄来砍自己
+     * 英雄每一次打击，都会让怪兽流失[0~M]的血量
+     * 到底流失多少？每一次在[0~M]上等概率的获得一个值
+     * 求K次打击之后，英雄把怪兽砍死的概率
+     */
+    @AlgName("英雄杀死怪物")
+    public static class KillMonster extends AlgCompImpl<Double, int[] >{
+        /**
+         * 数组的0,1,2分别代表,N,M,K
+         * @return
+         */
+        @Override
+        public int[] prepare() {
+            return new int[0];
+        }
+
+        /**
+         * 标准算法
+         * @param data
+         * @return
+         */
+        @Override
+        protected Double standard(int[] data) {
+            return null;
+        }
+
+        /**
+         * 测试算法
+         * @param data
+         * @return
+         */
+        @Override
+        protected Double test(int[] data) {
+            return null;
         }
     }
 }
