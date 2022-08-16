@@ -1,13 +1,10 @@
 package com.danebrown.algtech.algcomp;
 
-import cn.hutool.core.annotation.AnnotationUtil;
 import com.google.common.base.Strings;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.AnnotationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.util.Integers;
 import org.slf4j.MDC;
 
 import java.util.ArrayList;
@@ -142,7 +139,8 @@ public final class AlgCompMenu {
         String name = triple.getLeft();
         AlgCompImpl impl = triple.getMiddle();
         TestMode mode = triple.getRight();
-        int times  = 100;
+        AlgName algName = impl.getClass().getAnnotation(AlgName.class);
+        int times  = algName.times();
         MDC.put(TEST_NAME_FLG,name);
         //TODO 要在单次计算中增加超时判定
         if(mode ==TestMode.NORMAL){

@@ -29,6 +29,7 @@ public @interface AlgName {
      * 超时时间(S)
      * @return
      */
-    int timout() default 5;
+    int timout() default -1;
+    int times() default 100;
 
 }

@@ -90,7 +90,7 @@ public abstract class AlgCompImpl<T,R>{
         log.debug("原始数据:\n{}",setupData);
         R forTest = null;
         R forStandard = null;
-        int timeout = 5;
+        int timeout = -1;
         AlgName algName = this.getClass().getAnnotation(AlgName.class);
         if(algName!= null && algName.timout() >0){
             timeout = algName.timout();
@@ -131,7 +131,11 @@ public abstract class AlgCompImpl<T,R>{
         });
         T standardResult = null;
         try {
-            standardResult = (T) standardFuture.get(timeout,TimeUnit.SECONDS);
+            if(timeout>0) {
+                standardResult = (T) standardFuture.get(timeout, TimeUnit.SECONDS);
+            }else{
+                standardResult = (T)standardFuture.get();
+            }
         } catch (InterruptedException e) {
             log.warn(e);
         } catch (ExecutionException e) {
@@ -159,7 +163,11 @@ public abstract class AlgCompImpl<T,R>{
         T testResult = null;
         
         try {
-            testResult = (T) testFeature.get(timeout,TimeUnit.SECONDS);
+            if(timeout>0) {
+                testResult = (T) testFeature.get(timeout, TimeUnit.SECONDS);
+            }else{
+                testResult = (T) testFeature.get();
+            }
         } catch (InterruptedException e) {
             log.warn(e);
         } catch (ExecutionException e) {

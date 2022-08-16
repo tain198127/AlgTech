@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 动态规划
@@ -24,6 +25,8 @@ public class DynamicPlan1 {
         AlgCompMenu.addComp(new RobotBestWalk());
         AlgCompMenu.addComp(new SmartestPokerPlayer());
         AlgCompMenu.addComp(new Knapsack());
+        AlgCompMenu.addComp(new NumCombine());
+        AlgCompMenu.addComp(new CutPaper());
         AlgCompMenu.run();
     }
 
@@ -46,7 +49,7 @@ public class DynamicPlan1 {
                 return 1;
             }
             if (!cache.containsKey(data)) {
-                cache.put(data, standard(data - 1) + standard(data - 2));
+                cache.put(data, test(data - 1) + test(data - 2));
             }
             return cache.get(data);
         }
@@ -116,9 +119,11 @@ public class DynamicPlan1 {
                 return cur == aim ? 1 : 0;
             }
             if (cur == 1) {
+                //到头了，向右走
                 return standard_process(cur + 1, rest - 1, aim, N);
             }
             if (cur == N) {
+                //到头了，向左走
                 return standard_process(cur - 1, rest - 1, aim, N);
             }
             return standard_process(cur + 1, rest - 1, aim, N) + standard_process(cur - 1, rest - 1, aim, N);
@@ -467,7 +472,117 @@ public class DynamicPlan1 {
             return lastMax;
         }
     }
-    
+
+    /**
+     * 规定1和A对应、2和B对应、3和C对应...26和Z对应
+     * 那么一个数字字符串比如"111”就可以转化为:
+     * "AAA"、"KA"和"AK"
+     * 给定一个只有数字字符组成的字符串str，返回有多少种转化结果。
+     * 例如769,只能转化为['GFI']，那就说明只有一种方法。
+     * 再比如305，没有办法转化，因为中间的0没法处理。如果转化成 [3,05]，不对。转化成[30,5]也不对，转化成[3,0,5]也不对
+     * 再比如123，可以分成[1,2,3][12,3][1,23],说明有3中分法
+     */
+    @AlgName(value = "数字转化字符",timout = -1,times = 5)
+    public static class NumCombine extends AlgCompImpl<Long, String>{
+
+        private static HashMap<String,String> map = new HashMap<>();
+        private static HashMap<String, AtomicInteger> numCount = new HashMap<>();
+        static {
+            for(int i=1; i <=26;i++){
+                map.put(String.valueOf(i),String.valueOf('a'+i-1));
+                numCount.put(String.valueOf(i),new AtomicInteger(0));
+            }
+        }
+        @Override
+        public String prepare() {
+            StringBuilder stringBuilder = new StringBuilder();
+            int len = ThreadLocalRandom.current().nextInt(10000,10000000);
+            for(int i=0;i < len;i++){
+                long val = ThreadLocalRandom.current().nextLong(1000000,1000000000000L);
+                stringBuilder.append(val);
+            }
+            
+            return stringBuilder.toString();
+        }
+
+        @Override
+        protected Long standard(String data) {
+            long ways= myProcess(data.toCharArray(),0);
+            return ways;
+        }
+        private static long myProcess(char[] ary, int index){
+            if(index == ary.length){
+                return 1;
+            }
+            if(ary[index] == '0'){
+                return 0;
+            }
+            long ways = myProcess(ary,index+1);
+            //判断是否越界
+            if(index+1 < ary.length && ((ary[index]-'0')*10 +(ary[index]-'0'))<26){
+                ways+=myProcess(ary,index+2);
+            }
+            return ways;
+            
+            
+        }
+
+        @Override
+        protected Long test(String data) {
+            return processWithDP(data.toCharArray());
+        }
+        private static HashMap<Integer,Long> cache = new HashMap<>();
+        private static long processWithDP(char[] ary){
+            int N = ary.length;
+            int[] dp=new int[N+1];
+            dp[N] = 1;
+            for(int i=N-1;i>=0;i--){
+                if(ary[i] =='0'){
+                    dp[i] = 0;
+                }else{
+                    int ways = dp[i+1];
+                    if(i+1 < ary.length && ((ary[i]-'0')*10 +(ary[i]-'0'))<26){
+                        ways += dp[i+2];
+                    }
+                    dp[i] = ways;
+                }
+            }
+            return dp[0];
+            
+        }
+    }
+    @Data
+    public static class CutPaperData{
+        private String paper;
+        private String[] array;
+    }
+
+    /**
+     * 给定一个字符串str，给定一个字符串类型的数组arr，出现的字符都是小写英文
+     * arr每一个字符串，代表一张贴纸，你可以把单个字符剪开使用，目的是拼出str来
+     * 返回需要至少多少张贴纸可以完成这个任务。
+     * 例子：str= "babac"，arr = {"ba","c","abcd"}
+     * ba + ba + c  3  abcd + abcd 2  abcd+ba 2
+     * 所以返回2
+     */
+    @AlgName("切纸片游戏")
+    public static class CutPaper extends AlgCompImpl<Integer,CutPaperData>{
+
+        @Override
+        public CutPaperData prepare() {
+            return null;
+        }
+
+        @Override
+        protected Integer standard(CutPaperData data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(CutPaperData data) {
+            return null;
+        }
+    }
     /**
      * 给定3个参数，N，M，K
      * 怪兽有N滴血，等着英雄来砍自己
