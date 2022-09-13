@@ -3,6 +3,7 @@ package com.danebrown.algtech;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
+import com.google.common.primitives.Chars;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
@@ -27,6 +28,8 @@ public class DynamicPlan1 {
         AlgCompMenu.addComp(new Knapsack());
         AlgCompMenu.addComp(new NumCombine());
         AlgCompMenu.addComp(new CutPaper());
+        AlgCompMenu.addComp(new MaxCommonSubsequence());
+        AlgCompMenu.addComp(new KillMonster());
         AlgCompMenu.run();
     }
 
@@ -107,7 +110,7 @@ public class DynamicPlan1 {
      * 规定机器人必须走 K 步，最终能来到P位置(P也是1~N中的一个)的方法有多少种
      * 给定四个参数 N、M、K、P，返回方法数。
      */
-    @AlgName(value = "机器人巡径数", timout = 10)
+    @AlgName(value = "机器人巡径数", timeout = 10)
     public static class RobotBestWalk extends AlgCompImpl<Integer, RobotBestWalkInput> {
 
         private static boolean check(int cur, int rest, int aim, int N) {
@@ -482,7 +485,7 @@ public class DynamicPlan1 {
      * 再比如305，没有办法转化，因为中间的0没法处理。如果转化成 [3,05]，不对。转化成[30,5]也不对，转化成[3,0,5]也不对
      * 再比如123，可以分成[1,2,3][12,3][1,23],说明有3中分法
      */
-    @AlgName(value = "数字转化字符",timout = -1,times = 5)
+    @AlgName(value = "数字转化字符", timeout = -1,times = 5)
     public static class NumCombine extends AlgCompImpl<Long, String>{
 
         private static HashMap<String,String> map = new HashMap<>();
@@ -552,6 +555,7 @@ public class DynamicPlan1 {
         }
     }
     @Data
+    @AllArgsConstructor
     public static class CutPaperData{
         private String paper;
         private String[] array;
@@ -567,20 +571,261 @@ public class DynamicPlan1 {
      */
     @AlgName("切纸片游戏")
     public static class CutPaper extends AlgCompImpl<Integer,CutPaperData>{
+        public static List<Character> base = new ArrayList<>();
+        static{
+            for(int i='a';i<'z';i++){
+                base.add((char) i);
+            }
+        }
+        public static String randomStr(int len,List<Character> baseChar){
+            
+            StringBuilder stringBuilder = new StringBuilder();
+            for(int i=0;i<len;i++){
+                int idx = ThreadLocalRandom.current().nextInt(0,100000)%baseChar.size();
+                stringBuilder.append(baseChar.get(idx));
+            }
+            return stringBuilder.toString();
+        }
+        private static String minus(String target, String stick){
+            
+            char[] targetChar = target.toCharArray();
+            char[] stickChar = stick.toCharArray();
+            
+            StringBuilder restBuilder = new StringBuilder();
 
+            int[] count = new int[26];
+            for(char t:targetChar){
+                count[t - 'a']++;
+            }
+            for(char s:stickChar){
+                count[s-'a']--;
+            }
+            List<Character> restList = new ArrayList<>();
+            for(int i=0;i<26;i++){
+                if(count[i] >0){
+                    for(int j=0;j<count[i];j++){
+                        restList.add((char)(i+'a'));
+                    }
+                }
+            }
+            restList.sort(Character::compareTo);
+            restList.stream().forEach(c->restBuilder.append(c));
+            
+            return restBuilder.toString();
+        }
         @Override
         public CutPaperData prepare() {
-            return null;
+            int sticks = ThreadLocalRandom.current().nextInt(2,30);
+            
+            String paper = randomStr(ThreadLocalRandom.current().nextInt(10,30),base);
+            String[] array = new String[sticks];
+            //生成可解的准备数据
+            if(ThreadLocalRandom.current().nextBoolean()){
+                for(int i=0;i<sticks;i++){
+                    array[i] = randomStr(ThreadLocalRandom.current().nextInt(10,30), Chars.asList(paper.toCharArray()));
+                }
+            }else{
+                for(int i=0;i<sticks;i++){
+                    array[i] = randomStr(ThreadLocalRandom.current().nextInt(10,30),base);
+                }
+            }
+            CutPaperData cutPaperData = new CutPaperData(paper,array);
+//            CutPaperData cutPaperData = new CutPaperData("yxsm",new String[]{"ym","s","xx"});
+//            CutPaperData cutPaperData = new CutPaperData("a",new String[]{"a"});
+            return cutPaperData;
         }
 
         @Override
         protected Integer standard(CutPaperData data) {
-            return null;
+            //第一版，很慢
+//            return firstVersion(data);
+            int[][] sticks = new int[data.array.length][26];
+            for(int i=0;i < sticks.length;i++){
+                int[] ary = stringToCharTimes(data.array[i]);
+                for(int j=0;j<ary.length;j++){
+                    sticks[i][j] = ary[j];
+                }
+            }
+            Map<String,Integer> dp = new HashMap<>();
+            dp.put("",0);
+            return process_cut_branch_and_cache(data.paper,sticks,dp);
+        }
+        
+        private int firstVersion(CutPaperData data){
+            if(data.paper.length() ==0){
+                return 0;
+            }
+            int min = Integer.MAX_VALUE;
+            for(String first: data.array){
+                String rest = minus(data.paper,first);
+                if(rest.length() != data.paper.length()){//能减掉一点点
+                    min = Math.min(min,standard(new CutPaperData(rest,data.array)));
+                }
+            }
+            return min + (min == Integer.MAX_VALUE?0:1);
+        }
+
+        /**
+         * 变成词频数组
+         * @param msg
+         * @return
+         */
+        private static int[] stringToCharTimes(String msg){
+            int[] charsTimes = new int[26];//因为只有26个字母
+            char[] chars = msg.toCharArray();
+            for(char c: chars){
+                charsTimes[c-'a']++;
+            }
+            return charsTimes;
+        }
+        @Override
+        protected Integer test(CutPaperData data) {
+            int[][] sticks = new int[data.array.length][26];
+            for(int i=0;i < sticks.length;i++){
+                int[] ary = stringToCharTimes(data.array[i]);
+                for(int j=0;j<ary.length;j++){
+                    sticks[i][j] = ary[j];
+                }
+            }
+            int times = process_cut_branch(data.paper,sticks);
+            log.info("测试结果是:{}",times);
+            return times;
+        }
+        private static Integer process_cut_branch(String targetStr, int[][] sticks){
+            int N = sticks.length;
+            char[] target = targetStr.toCharArray();
+            if(target.length == 0){
+                return 0;
+            }
+            int[] tcount = stringToCharTimes(targetStr);
+            int min = Integer.MAX_VALUE;
+            for(int i=0;i<N;i++){
+                int[] row = sticks[i];
+                if(row[target[0] -'a']>0){
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for(int j=0;j<26;j++){
+                        if(tcount[j] >0){
+                            int num = tcount[j] - row[j];
+                            for(int k=0;k<num;k++){
+                                stringBuilder.append((char)(j+'a'));
+                            }
+                        }
+                    }
+                    
+                    min = Math.min(min, process_cut_branch(stringBuilder.toString(), sticks));
+                }//end if
+            }
+            
+            int result = min + (min == Integer.MAX_VALUE?0:1);
+            return result;
+            
+        }
+
+        private static Integer process_cut_branch_and_cache(String targetStr, int[][] sticks,Map<String,Integer> cache){
+            if(cache.containsKey(targetStr)){
+                return cache.get(targetStr);
+            }
+            int N = sticks.length;
+            char[] target = targetStr.toCharArray();
+            if(target.length == 0){
+                return 0;
+            }
+            int[] tcount = stringToCharTimes(targetStr);
+            int min = Integer.MAX_VALUE;
+            for(int i=0;i<N;i++){
+                int[] row = sticks[i];
+                if(row[target[0] -'a']>0){
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for(int j=0;j<26;j++){
+                        if(tcount[j] >0){
+                            int num = tcount[j] - row[j];
+                            for(int k=0;k<num;k++){
+                                stringBuilder.append((char)(j+'a'));
+                            }
+                        }
+                    }
+
+                    min = Math.min(min, process_cut_branch_and_cache(stringBuilder.toString(), sticks,cache));
+                }//end if
+            }
+
+            int result = min + (min == Integer.MAX_VALUE?0:1);
+            cache.put(targetStr,result);
+            return result;
+
+        }
+        
+    }
+
+    /**
+     * 给定两个字符串str1和str2，
+     * 返回这两个字符串的最长公共子序列长度
+     *
+     * 比如 ： str1 = “a12b3c456d”,str2 = “1ef23ghi4j56k”
+     * 最长公共子序列是“123456”，所以返回长度6
+     */
+    @AlgName(value = "最长公共子序列", timeout = 10)
+    public static class MaxCommonSubsequence extends AlgCompImpl<Integer ,String[]>{
+
+        @Override
+        public String[] prepare() {
+            String[] arr = new String[2];
+            arr[0] = CutPaper.randomStr(15,CutPaper.base);
+            arr[1] = CutPaper.randomStr(15,CutPaper.base);
+            return arr;
         }
 
         @Override
-        protected Integer test(CutPaperData data) {
-            return null;
+        protected Integer standard(String[] data) {
+            return process1(data[0].toCharArray(),data[1].toCharArray(),data[0].length()-1,data[1].length()-1);
+        }
+        private static int process1(char[] str1, char[] str2, int i, int j){
+            if(i==0&&j==0){
+                return str1[i] == str2[j]?1:0;
+            }else if(i ==0){
+                if(str1[i] == str2[j]){
+                    return 1;
+                }else{
+                    return process1(str1,str2,i,j-1);
+                }
+            }else if(j ==0){
+                if(str1[i] == str2[j]){
+                    return 1;
+                }else{
+                    return process1(str1, str2, i-1, j);
+                }
+            }else{
+                int p1 = process1(str1, str2, i-1, j);
+                int p2 = process1(str1, str2, i, j-1);
+                int p3 = str1[i] == str2[j]?(1+process1(str1, str2, i-1, j-1)):0;
+                return Math.max(p1, Math.max(p2,p3));
+            }
+        }
+
+        @Override
+        protected Integer test(String[] data) {
+            return dp(data[0].toCharArray(),data[1].toCharArray());
+        }
+        private static int dp(char[] str1, char[] str2){
+            int[][] dp = new int[str1.length][str2.length];
+            dp[0][0] = str1[0] == str2[0]?1:0;
+            for(int i =1; i < str1.length;i++){
+                dp[i][0] += str1[i] == str2[0]?1:dp[i-1][0];
+            }
+            for(int j=1;j < str2.length;j++){
+                dp[0][j] += str1[0] == str2[j]?1:dp[0][j-1];
+            }
+            for(int i=1;i<str1.length;i++){
+                for( int j=1;j<str2.length;j++){
+                    int p1 = dp[i-1][j];
+                    int p2 = dp[i][j-1];
+                    int p3 = str1[i] == str2[j]?(1+dp[i-1][j-1]):0;
+                    int max = Math.max(p1,Math.max(p2,p3));
+                    dp[i][j] = max;
+                }
+            }
+            return dp[str1.length-1][str2.length-1];
+            
         }
     }
     /**
@@ -589,6 +834,9 @@ public class DynamicPlan1 {
      * 英雄每一次打击，都会让怪兽流失[0~M]的血量
      * 到底流失多少？每一次在[0~M]上等概率的获得一个值
      * 求K次打击之后，英雄把怪兽砍死的概率
+     * 分析过程，第一次砍，可能掉0-M点血，第二次砍是在第一次砍的基础上，又进行了0-M点血。那么总次数就是(M+1)^k.这么多次组合
+     * 这是一个K层，每层M棵分支的完全展开树。只要收集所有节点上总数大于N的节点数。就可以知道跟总次数的比例了。比如收集了所有砍死
+     * 怪兽的点的次数为ALL，总情况数是(M+1)^k，那么比例就是ALL/(M+1)^k.在砍的过程中，如果怪兽死了，不剪枝，继续走。走完所有的树
      */
     @AlgName("英雄杀死怪物")
     public static class KillMonster extends AlgCompImpl<Double, int[] >{
@@ -598,7 +846,14 @@ public class DynamicPlan1 {
          */
         @Override
         public int[] prepare() {
-            return new int[0];
+            int[] ary = new int[3];
+            //N
+            ary[0] = 10;
+            //M
+            ary[1] = 5;
+            //K
+            ary[2] = 10;
+            return ary;
         }
 
         /**
@@ -608,7 +863,32 @@ public class DynamicPlan1 {
          */
         @Override
         protected Double standard(int[] data) {
-            return null;
+            int N = data[0];
+            int M = data[1];
+            int K = data[2];
+            if(N<1 || M <1 || K<1){
+                return 0D;
+            }
+//            long ways =process(K,M,N);
+            
+            long ways =process2(N,M,K);
+            
+            double all = Math.pow((M+1),K);
+            return Double.valueOf(ways/all);
+            
+        }
+        private long process2(int hp, int m, int times){
+            if(times ==0){
+                return hp<=0 ? 1:0;
+            }
+            if(hp <=0){
+                return (long) Math.pow(m+1,times);
+            }
+            long ways = 0;
+            for (int i=0 ;i <= m; i++){
+                ways += process2(hp-i,m,times-1);
+            }
+            return ways;
         }
 
         /**
@@ -618,7 +898,38 @@ public class DynamicPlan1 {
          */
         @Override
         protected Double test(int[] data) {
-            return null;
+            int N = data[0];
+            int M = data[1];
+            int K = data[2];
+            if(N<1 || M <1 || K<1){
+                return 0D;
+            }
+            long ways =dp1(N,M,K);
+            double all = Math.pow((M+1),K);
+            return Double.valueOf(ways/all);
         }
+        private long dp1(int N, int M, int K){
+            long[][] dp = new long[K+1][N+1];
+            dp[0][0] = 1;
+            for(int times = 1; times<=K;times++){
+                dp[times][0] = (long) Math.pow(M+1,times);
+                for(int hp = 1;hp <=N;hp++){
+                    long ways = 0;
+                    for(int i=0;i <= M;i++){
+                        if(hp - i >=0){
+                            ways+= dp[times-1][hp-i];
+                        }else{
+                            ways+= Math.pow(M+1,times-1);
+                        }
+                    }//end for
+                    dp[times][hp] = ways;
+                }//end for
+            }//end for
+            return dp[K][N];
+            
+        }//end pd1
+        
     }
+    
+    
 }

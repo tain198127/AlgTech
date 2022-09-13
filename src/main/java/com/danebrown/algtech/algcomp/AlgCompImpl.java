@@ -92,8 +92,8 @@ public abstract class AlgCompImpl<T,R>{
         R forStandard = null;
         int timeout = -1;
         AlgName algName = this.getClass().getAnnotation(AlgName.class);
-        if(algName!= null && algName.timout() >0){
-            timeout = algName.timout();
+        if(algName!= null && algName.timeout() >0){
+            timeout = algName.timeout();
         }
         //直接clone
         if(setupData instanceof Cloneable){
