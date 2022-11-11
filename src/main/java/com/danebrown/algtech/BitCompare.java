@@ -6,12 +6,7 @@ import com.danebrown.algtech.algcomp.AlgName;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Triple;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -33,6 +28,7 @@ public class BitCompare {
         AlgCompMenu.addComp(new LastRightOne(),"保持最右边的一个1");
         AlgCompMenu.addComp(new TwoOddNumSearch(),"查找两个奇数");
         AlgCompMenu.addComp(new OnlyKTimesNumSearch(),"查找只有K次的数字");
+        AlgCompMenu.addComp(new BitOp(),"位运算例子");
         AlgCompMenu.run();
 
     }
@@ -401,6 +397,34 @@ public class BitCompare {
         @Override
         protected Integer test(Integer data) {
             return data & (-data);
+        }
+    }
+
+    /**
+     * 位运算
+     */
+    @AlgName("位运算计算器")
+    public static class BitOp extends AlgCompImpl<Integer, Integer> {
+
+        @Override
+        public Integer prepare() {
+            return 1;
+        }
+
+        @Override
+        protected Integer standard(Integer data) {
+            int i = -0b0001;
+            System.out.printf("0b0001 >> 1位= %s \n",Integer.toBinaryString(i >> 1));
+            i = 0b0001;
+            System.out.printf("0b0001 >>> 1位= %s \n",Integer.toBinaryString( i >>> 1));
+            i = 0b0001;
+            System.out.printf("0b0001 << 1位= %s \n",Integer.toBinaryString(i << 1));
+            return 1;
+        }
+
+        @Override
+        protected Integer test(Integer data) {
+            return 1;
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.danebrown.algtech;
 
+import cn.hutool.json.JSONUtil;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
@@ -31,6 +32,8 @@ public class DynamicPlan1 {
         AlgCompMenu.addComp(new MaxCommonSubsequence());
         AlgCompMenu.addComp(new KillMonster());
         AlgCompMenu.addComp(new LessMoney());
+        AlgCompMenu.addComp(new SplitNumber());
+        AlgCompMenu.addComp(new NQueens());
         AlgCompMenu.run();
     }
 
@@ -1041,11 +1044,11 @@ public class DynamicPlan1 {
         @Override
         public LessMoneyInput prepare() {
             LessMoneyInput input = new LessMoneyInput();
-            int len = ThreadLocalRandom.current().nextInt(3, 20);
+            int len = ThreadLocalRandom.current().nextInt(3, 10);
             List<Integer> ary = new ArrayList<>(len);
             for (int i = 0; i < len; i++) {
                 while (true) {
-                    int v = ThreadLocalRandom.current().nextInt(1, 1000);
+                    int v = ThreadLocalRandom.current().nextInt(1, 100);
                     if (ary.contains(v)) {
                         continue;
                     }
@@ -1054,7 +1057,7 @@ public class DynamicPlan1 {
                 }
             }
             input.arr = ary.stream().mapToInt(Integer::intValue).toArray();
-            input.aim = ThreadLocalRandom.current().nextInt(1,100000);
+            input.aim = ThreadLocalRandom.current().nextInt(1, 1000);
             return input;
         }
 
@@ -1065,7 +1068,329 @@ public class DynamicPlan1 {
 
         @Override
         protected Integer test(LessMoneyInput data) {
-            return dpOld(data.arr, data.aim);
+            return dp(data.arr, data.aim);
+        }
+    }
+
+    /**
+     * 数字分裂方法数：
+     * 有一个数，如果用加法进行拆解的话，要求后面的数字不能比前面的小。问有多少种拆发
+     * 例如：3，可以的拆法有 1+1+1, 1+2,3这三种拆法。但是不能有 2+1这种拆法
+     * 这道题是拉玛努金的整数拆分近似公式。但是这道题没有严格的解的，只有近似解
+     */
+    @AlgName("最小分裂数")
+    public static class SplitNumber extends AlgCompImpl<Integer, Integer> {
+
+        private static int standard(int pre, int rest) {
+            if (rest == 0) {
+                return 1;
+            }
+            if (pre > rest) {//如果上个拆出去的数已经大于我剩余的数了，表明这种拆法有问题。就返回0
+                return 0;
+            }
+
+            if (pre == rest) {
+                return 1;
+            }
+            int ways = 0;
+            for (int i = pre; i <= rest; i++) {
+                //这里是重点，要把这个弄明白
+                ways += standard(i, rest - i);
+            }
+            return ways;
+        }
+
+        private static int dp(int n) {
+            //第一个是pre,第二个是rest
+            int[][] dp = new int[n + 1][n + 1];
+            if (n < 0) {
+                return 0;
+            }
+            if (n == 1) {
+                return 1;
+            }
+            //初始化
+            for (int pre = 1; pre <= n; pre++) {
+                /*
+                if(rest == 0){
+                    return 1;
+                }
+                来源自这个代码的改写
+                 */
+                dp[pre][0] = 1;
+                /*
+                if(pre == rest){
+                    return 1;
+                }
+                来源自这个方法的改写
+                 */
+                dp[pre][pre] = 1;
+            }
+            //从下往上推导
+            for (int pre = n - 1; pre >= 1; pre--) {
+                //只考虑rest大于pre的位置
+                for (int rest = pre + 1; rest <= n; rest++) {
+                    /*
+                    改写自：
+                    for(int i=pre;i <= rest;i++){
+                        ways+= standard(i, rest -i);
+                    }
+                     */
+                    int ways = 0;
+                    for (int i = pre; i <= rest; i++) {
+
+                        ways += dp[i][rest - i];
+                    }
+                    dp[pre][rest] = ways;
+
+                }
+            }
+            return dp[1][n];
+        }
+
+        private static int dp2(int n) {
+            //第一个是pre,第二个是rest
+            int[][] dp = new int[n + 1][n + 1];
+            if (n < 0) {
+                return 0;
+            }
+            if (n == 1) {
+                return 1;
+            }
+            //初始化
+            for (int pre = 1; pre <= n; pre++) {
+                /*
+                if(rest == 0){
+                    return 1;
+                }
+                来源自这个代码的改写
+                 */
+                dp[pre][0] = 1;
+                /*
+                if(pre == rest){
+                    return 1;
+                }
+                来源自这个方法的改写
+                 */
+                dp[pre][pre] = 1;
+            }
+            //从下往上推导
+            for (int pre = n - 1; pre >= 1; pre--) {
+                //只考虑rest大于pre的位置
+                for (int rest = pre + 1; rest <= n; rest++) {
+                    /*
+                    改写自：
+                    for(int i=pre;i <= rest;i++){
+                        ways+= standard(i, rest -i);
+                    }
+                     */
+
+                    dp[pre][rest] = dp[pre + 1][rest];
+                    dp[pre][rest] += dp[pre][rest - pre];
+
+                }
+            }
+            return dp[1][n];
+        }
+
+        @Override
+        public Integer prepare() {
+            return ThreadLocalRandom.current().nextInt(1, 100);
+        }
+
+        @Override
+        protected Integer standard(Integer data) {
+            return standard(1, data);
+        }
+
+        @Override
+        protected Integer test(Integer data) {
+            return dp2(data);
+        }
+    }
+
+    /**
+     * 给定一个正数数组arr，
+     * 请把arr中所有的数分成两个集合，尽量让两个集合的累加和接近
+     * 返回：
+     * 最接近的情况下，较小集合的累加和
+     */
+    public static class SplitSumClosed extends AlgCompImpl<Integer, Integer[]> {
+
+        @Override
+        public Integer[] prepare() {
+            return new Integer[0];
+        }
+
+        @Override
+        protected Integer standard(Integer[] data) {
+            return 0;
+        }
+
+        @Override
+        protected Integer test(Integer[] data) {
+            return 0;
+        }
+    }
+
+    /**
+     * 给定一个正数数组arr，请把arr中所有的数分成两个集合
+     * 如果arr长度为偶数，两个集合包含数的个数要一样多（这个是跟前面那道题的差异）
+     * 如果arr长度为奇数，两个集合包含数的个数必须只差一个
+     * 请尽量让两个集合的累加和接近
+     * 返回：
+     * 最接近的情况下，较小集合的累加和
+     */
+    public static class SplitSumClosedSizeHalf extends AlgCompImpl<Integer, Integer[]> {
+
+        @Override
+        public Integer[] prepare() {
+            return new Integer[0];
+        }
+
+        @Override
+        protected Integer standard(Integer[] data) {
+            return 0;
+        }
+
+        @Override
+        protected Integer test(Integer[] data) {
+            return 0;
+        }
+    }
+
+    /**
+     * N皇后问题是指在N*N的棋盘上要摆N个皇后，
+     * 要求任何两个皇后不同行、不同列， 也不在同一条斜线上
+     * 给定一个整数n，返回n皇后的摆法有多少种。  n=1，返回1
+     * n=2或3，2皇后和3皇后问题无论怎么摆都不行，返回0
+     * n=8，返回92
+     * 对于8皇后问题，优化方法不能用dp方法。只能用位运算方法优化。
+     * 这个问题是O(N^N) 的复杂度
+     */
+    @AlgName("N皇后问题")
+    public static class NQueens extends AlgCompImpl<Integer, Integer> {
+
+        
+
+        
+
+        @Override
+        public Integer prepare() {
+            return ThreadLocalRandom.current().nextInt(1,14);
+//            return 4;
+        }
+
+        @Override
+        protected Integer standard(Integer data) {
+            if (data < 1)
+                return 0;
+            int[] record = new int[data];
+            int rst = process(0, record, data);
+            System.out.println(rst);
+            return rst;
+
+        }
+        private static void print(int[] record){
+            for(int r=0;r < record.length;r++){
+                int v = record[r];
+                for(int c =0;c<record.length;c++){
+                    if(c == v){
+                        System.out.print("1");
+                    }else{
+                        System.out.print("0");
+                    }
+                }
+                System.out.println();
+            }
+        }
+        private static Integer process(int i, int[] record, Integer n) {
+            //base case i == n，表示已经走到最后一步了。发现了一种有效的方法
+            if (i == n) {
+                print(record);
+                log.info(JSONUtil.toJsonStr(record));
+                System.out.println("=============");
+                return 1;
+            }
+            for(int k=i;k<n;k++){
+                record[k] = 0;
+            }
+            int res = 0;
+            //J表示的列数，每一列都试一下。
+            for (int j = 0; j < n; j++) {
+                //意思是：如果在i行，j列有个皇后，跟之前的皇后不打架，那么就可以在I行J列放上皇后
+                if (isValid(record, i, j)) {
+                    //这里record数组可能是污染了的，但是没关系，因为我们最终要的是res这个值。
+                    //对于这个算法而言，record的记录，只关心前面的数据就行了。即便有脏的，也是后面的数据。前面
+                    //的数据是重新计算的
+                    record[i] = j;
+                    res += process(i + 1, record, n);
+                }
+            }
+            return res;
+        }
+
+        /**
+         * @param record 之前的皇后位置
+         * @param i      行
+         * @param j      列
+         * @return
+         */
+        private static boolean isValid(int[] record, int i, int j) {
+            //把之前的皇后的位置，数一遍
+            for (int k = 0; k < i; k++) {
+                //之前的皇后所在的列，与j（列）相同就认为打架了
+                //前皇后列与目标皇后列的差， 与前皇后行与目标皇后的差 相同，表明在一条斜线上。
+                //满足以上两个条件，就认为打架了
+                //注意，这里最难的是判断在一条斜线上，是最难的：Math.abs(record[k] - j) == Math.abs(i-k)
+                //(行-行) = （列-列），就表明是在一条直线上了这个是关键
+                if (j == record[k] || Math.abs(record[k] - j) == Math.abs(i - k)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        @Override
+        protected Integer test(Integer n) {
+            /**
+             * 32皇后以上根本算不完
+             */
+            if (n < 1 || n > 32)
+                return 0;
+            //如果是13皇后问题，limit最右边13个1，其他都是0
+            int limits = n == 32 ? -1 : ((1 << n) - 1);
+            return process2(limits, 0, 0, 0);
+            
+        }
+        /**
+         *
+         * @param limit 最原始的N皇后
+         * @param colLimit 每增加一个皇后对列的影响
+         * @param leftDiaLimit 每增加一个皇后对左下的影响
+         * @param rightDiaLimit 每增加一个皇后对右下的影响
+         * @return
+         */
+        private static int process2(int limit, int colLimit, int leftDiaLimit, int rightDiaLimit) {
+            /**
+             * 如果列限制等于了我N皇后的限制，证明算法已经走完了
+             */
+            if(limit == colLimit){
+                return 1;
+            }
+            int pos = limit &(~(colLimit | leftDiaLimit | rightDiaLimit));
+            int mostRightOne = 0;
+            int res = 0;
+            while (pos!=0){
+                //提取最右边的1
+                mostRightOne = pos &(~pos +1);
+                //下一个pos
+                pos = pos-mostRightOne;
+                res += process2(limit,
+                        colLimit|mostRightOne,
+                        (leftDiaLimit|mostRightOne)<<1,
+                        (rightDiaLimit|mostRightOne)>>>1);
+            }
+            return res;
         }
     }
 }

@@ -19,7 +19,7 @@ import java.util.Scanner;
  * @author danebrown
  */
 @Log4j2
-public final class AlgCompMenu {
+public final class AlgCompMenu<I extends Number, I1 extends Number> {
     public static enum TestMode{
         /**
          * 普通模式
