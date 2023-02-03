@@ -32,7 +32,11 @@ public final class AlgCompMenu<I extends Number, I1 extends Number> {
         /**
          * 错题本模式
          */
-        WRONGBOOK
+        WRONGBOOK,
+        /**
+         * 统计算法复杂度
+         */
+        ALGCOMPLEX
     }
 
     /**
@@ -71,11 +75,19 @@ public final class AlgCompMenu<I extends Number, I1 extends Number> {
     public static void addComp(AlgCompImpl comp, String name){
         addComp(comp,name,100);
     }
+
+    /**
+     *
+     * @param comp 测试组件
+     * @param name 测试名称
+     * @param times 最大随机测试数量
+     */
     public static void addComp(AlgCompImpl comp, String name, Integer times) {
         int t = times == null ? 100 : times;
         algCompList.add(Triple.of(name, comp, TestMode.NORMAL));
-//        algCompList.add(Triple.of(name, comp, TestMode.WRONGBOOK));
+        algCompList.add(Triple.of(name, comp, TestMode.WRONGBOOK));
         algCompList.add(Triple.of(name, comp, TestMode.MULTI));
+        algCompList.add(Triple.of(name, comp, TestMode.ALGCOMPLEX));
     }
 
     /**
@@ -97,6 +109,9 @@ public final class AlgCompMenu<I extends Number, I1 extends Number> {
                 case MULTI:{
                     name+=":多次循环";
                 };break;
+                case ALGCOMPLEX:{
+                    name+=":算法复杂度";
+                }
             }
             System.out.printf("[%3d]:[%s] \n", i, name);
         }
@@ -148,20 +163,20 @@ public final class AlgCompMenu<I extends Number, I1 extends Number> {
         }
         else if(mode == TestMode.WRONGBOOK){
             log.info("第{}位对数器 :{},结果为:[{}]", idx, name, impl.multiCompareWrongBook(name));
+        } else if (mode == TestMode.ALGCOMPLEX) {
 
-        }
-        else{
+        } else {
             log.info("第{}位对数器 :{},循环:[{}]次,结果为:[{}]", idx, name, times,
-                    impl.multiCompare(name, times,r->
-                    {
-                        if(log.getLevel().intLevel() <= Level.INFO.intLevel()){
-                            if(r != null)
-                                System.out.print(".");
-                            else{
-                                System.out.println("");
+                    impl.multiCompare(name, times, r ->
+                            {
+                                if (log.getLevel().intLevel() <= Level.INFO.intLevel()) {
+                                    if (r != null)
+                                        System.out.print(".");
+                                    else {
+                                        System.out.println("");
+                                    }
+                                }
                             }
-                        }
-                    }
 
                     ));
         }

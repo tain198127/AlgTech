@@ -3,6 +3,8 @@ package com.danebrown.algtech.algcomp;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.danebrown.algtech.algcomp.wrongbook.JsonWrongBook;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -25,7 +27,7 @@ import java.util.function.Supplier;
  */
 @Log4j2
 public abstract class AlgCompImpl<T,R>{
-    private WrongBook<R> wrongBook = null;
+    private volatile WrongBook<R> wrongBook = null;
     protected WrongBook initWrongBook(){
         if(wrongBook == null){
             synchronized (this){
@@ -42,6 +44,10 @@ public abstract class AlgCompImpl<T,R>{
      * @return
      */
     public abstract R prepare();
+    public R prepare(int range, int steps){
+        return prepare();
+    }
+
 
     /**
      * 标准对数器
@@ -74,27 +80,20 @@ public abstract class AlgCompImpl<T,R>{
     protected Object formatResultData(T result){
         return result;
     }
-    /**
-     * 对数
-     * @param testName 对数器名称
-     * @param testTime 测试时间消费者
-     * @param standardTime 标准程序时间消费者
-     * @param prepareSupplier 测试数据提供者，默认使用基类中的prepare方法
-     * @return
-     */
-    public boolean compare(String testName, Consumer<Long> testTime,
-                           Consumer<Long> standardTime ,
-                           Supplier<R> prepareSupplier){
-        WrongBook wrongBook = initWrongBook();
+
+    @Data
+    @AllArgsConstructor
+    public class LoadedData{
+        private R setupData;
+        private R forTest;
+        private R forStandard;
+    }
+    private LoadedData loadTestData(Supplier<R> prepareSupplier){
         R setupData =prepareSupplier == null? prepare():prepareSupplier.get();
+
         log.debug("原始数据:\n{}",setupData);
-        R forTest = null;
-        R forStandard = null;
-        int timeout = -1;
-        AlgName algName = this.getClass().getAnnotation(AlgName.class);
-        if(algName!= null && algName.timeout() >0){
-            timeout = algName.timeout();
-        }
+        R forTest=null;
+        R forStandard=null;
         //直接clone
         if(setupData instanceof Cloneable){
             log.debug("克隆接口实现的克隆");
@@ -113,8 +112,31 @@ public abstract class AlgCompImpl<T,R>{
             forTest = ObjectUtil.cloneIfPossible(setupData);
             forStandard = ObjectUtil.cloneIfPossible(setupData);
         }
-        R finalForStandard = forStandard;
-        R finalForTest = forTest;
+        return new LoadedData(setupData,forTest,forStandard);
+    }
+    /**
+     * 对数
+     * @param testName 对数器名称
+     * @param testTime 测试时间消费者
+     * @param standardTime 标准程序时间消费者
+     * @param prepareSupplier 测试数据提供者，默认使用基类中的prepare方法
+     * @return
+     */
+    public boolean compare(String testName, Consumer<Long> testTime,
+                           Consumer<Long> standardTime ,
+                           Supplier<R> prepareSupplier){
+        this.initWrongBook();
+
+        int timeout = -1;
+        AlgName algName = this.getClass().getAnnotation(AlgName.class);
+        if(algName!= null && algName.timeout() >0){
+            timeout = algName.timeout();
+        }
+        LoadedData setupData = loadTestData(prepareSupplier);
+        R originData = setupData.getSetupData();
+        R finalForStandard = setupData.getForStandard();
+        R finalForTest = setupData.getForTest();
+
         CompletableFuture complete = new CompletableFuture();
         
         CompletableFuture standardFuture = CompletableFuture.supplyAsync(()->{
@@ -182,10 +204,10 @@ public abstract class AlgCompImpl<T,R>{
 
         result = testEqual(testResult, standardResult);
         if (!result) {
-//            wrongBook.write(testName, setupData);
+            wrongBook.write(testName, originData);
 
             log.error("{}测试失败,原始数据:\n{}", testName,
-                    formatSetupData(setupData)
+                    formatSetupData(originData)
                     );
             log.error("{}测试失败,测试结果:{}",testName,
                     formatResultData(testResult));
@@ -236,7 +258,7 @@ public abstract class AlgCompImpl<T,R>{
      */
     public boolean multiCompareWrongBook(String testName){
         WrongBook wrongBook = initWrongBook();
-
+        // TODO: 2023/2/3 这里有问题，尚未解决
         List<R> testCase = wrongBook.load(testName);
         boolean result = true;
         for (R item:testCase){
@@ -247,7 +269,7 @@ public abstract class AlgCompImpl<T,R>{
 
     }
     /**
-     * 多次测试
+     * 多次测试,并统计执行速度
      * @param testName
      * @param times
      * @return
@@ -291,6 +313,25 @@ public abstract class AlgCompImpl<T,R>{
         return result;
     }
 
+    /**
+     *
+     * @param testName 测试名称
+     * @param times 最终循环次数
+     * @param steps 每次循环要执行多少步长，在本次步长内，循环的dataSize是保持不变的
+     * @param dataSize 每次循环要执行的数据量
+     * @param dataSizeStep 每次数据量增长多少
+     * @param consumer 算法
+     * @return
+     */
+    // TODO: 2023/2/3 完成算法复杂度测算
+    public boolean algCompleCompare(String testName, int times,int steps, int dataSize,int dataSizeStep,
+                                    Consumer consumer){
+        boolean result = true;
+        List<Long> testTime = new ArrayList<>(times);
+        List<Long> standardTime = new ArrayList<>(times);
+
+            throw new RuntimeException("尚未实现");
+    }
     /**
      * 值比较器
      * @param standard
