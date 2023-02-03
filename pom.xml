@@ -96,7 +96,7 @@
         </dependency>
 
         <!--        disruptor-->
-        <!--JMH-->
+        <!--JMH 性能测试组件-->
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
@@ -108,20 +108,14 @@
             <version>1.23</version>
         </dependency>
         <!--JMH-->
+        <!--        JOL java 对象 布局-->
+        <dependency>
+            <groupId>org.openjdk.jol</groupId>
+            <artifactId>jol-core</artifactId>
+            <version>0.16</version>
+        </dependency>
+        <!--        JOL java 对象 布局-->
 
-<!--&lt;!&ndash;        DEEP LEARNING&ndash;&gt;-->
-
-<!--            <dependency>-->
-<!--                <groupId>org.deeplearning4j</groupId>-->
-<!--                <artifactId>deeplearning4j-core</artifactId>-->
-<!--                <version>1.0.0-M1.1</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>org.nd4j</groupId>-->
-<!--                <artifactId>nd4j-native-platform</artifactId>-->
-<!--                <version>1.0.0-M1.1</version>-->
-<!--            </dependency>-->
-<!--&lt;!&ndash;        DEEP LEARNING&ndash;&gt;-->
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -224,18 +218,7 @@
             </dependency>
             <!--JMH-->
 
-            <!--        DEEP LEARNING-->
 
-            <dependency>
-                <groupId>org.deeplearning4j</groupId>
-                <artifactId>deeplearning4j-core</artifactId>
-                <version>1.0.0-M1.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.nd4j</groupId>
-                <artifactId>nd4j-native-platform</artifactId>
-                <version>1.0.0-M1.1</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
