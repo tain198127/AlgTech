@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -44,7 +45,13 @@ public abstract class AlgCompImpl<T,R>{
      * @return
      */
     public abstract R prepare();
-    public R prepare(int range, int steps){
+
+    /**
+     *
+     * @param range 准备的数据范围
+     * @return
+     */
+    public R prepare(long range){
         return prepare();
     }
 
@@ -280,15 +287,16 @@ public abstract class AlgCompImpl<T,R>{
         List<Long> testTime = new ArrayList<>(times);
         List<Long> standardTime = new ArrayList<>(times);
         for(int i = 0; i < times && result ; i++){
-            result = compare(testName, t->{
-                testTime.add(t);
-            },s->{
-                standardTime.add(s);
+            result = compare(testName, testSpan->{
+                testTime.add(testSpan);
+            },standarSpan->{
+                standardTime.add(standarSpan);
             });
             if(consumer != null){
                 consumer.accept(result);
             }
         }
+        //这里之所以要加一个accept是为了解决批量打印时最后一个逗号问题
         if(consumer != null) {
             consumer.accept(null);
         }
@@ -317,20 +325,48 @@ public abstract class AlgCompImpl<T,R>{
      *
      * @param testName 测试名称
      * @param times 最终循环次数
-     * @param steps 每次循环要执行多少步长，在本次步长内，循环的dataSize是保持不变的
      * @param dataSize 每次循环要执行的数据量
-     * @param dataSizeStep 每次数据量增长多少
      * @param consumer 算法
      * @return
      */
     // TODO: 2023/2/3 完成算法复杂度测算
-    public boolean algCompleCompare(String testName, int times,int steps, int dataSize,int dataSizeStep,
+    public boolean algComplexCompare(String testName, int times,int dataSize,
                                     Consumer consumer){
         boolean result = true;
         List<Long> testTime = new ArrayList<>(times);
         List<Long> standardTime = new ArrayList<>(times);
+        List<Long> dataSizeRecord = new ArrayList<>(times);
+        int preSteps = (int) Math.ceil((dataSize/times));
+        //预热一次
+        compare(testName);
 
-            throw new RuntimeException("尚未实现");
+        for(int i=0;i < times && result;i++){
+            int finalI = i;
+            result = compare(testName, timeSpan -> {
+                testTime.add(timeSpan);//这里记录的测试耗时
+            }, standardSpan -> {
+                standardTime.add(standardSpan);//这里记录的是普通方法的耗时
+            }, () -> {
+                        //这里把表示，每次梯度增加一定的数量
+                        long val = (finalI + 1) * preSteps;
+                        dataSizeRecord.add(val);
+                        return prepare(val);//每次增加的数据量
+                    }
+             );
+            if(consumer != null){
+                consumer.accept(result);
+            }
+        }
+        //这里之所以要加一个accept是为了解决批量打印时最后一个逗号问题
+        if(consumer != null) {
+            consumer.accept(null);
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        for(int i = 0; i < times; i++){
+            stringBuilder.append(String.format("%d 条数据下 测试程序耗时 %d ms， 标准程序耗时 %d ms \n",dataSizeRecord.get(i),testTime.get(i),standardTime.get(i)));
+        }
+        log.info(stringBuilder.toString());
+        return result;
     }
     /**
      * 值比较器

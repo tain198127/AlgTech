@@ -407,24 +407,22 @@ public class ImportSlidWindow {
     public static class BestAddOil extends AlgCompImpl<Integer, List<int[]>> {
 
         @Override
-        public List<int[]> prepare() {
+        public List<int[]> prepare(long range) {
             List<int[]> rst = new ArrayList<>();
-//            rst.add(new int[]{2, 1});
-//            rst.add(new int[]{2, 1});
-//            rst.add(new int[]{2, 2});
-//            rst.add(new int[]{2, 3});
-//            rst.add(new int[]{2, 1});
-//            rst.add(new int[]{3, 2});
-//            rst.add(new int[]{4, 10});
 //
-            int range = 10000;
             for(int i=0;i < range;i++){
-                int gas = ThreadLocalRandom.current().nextInt(1,range*4);
-                int cost = ThreadLocalRandom.current().nextInt(1,range*4);
+                int gas = ThreadLocalRandom.current().nextInt(1, (int) (range*4));
+                int cost = ThreadLocalRandom.current().nextInt(1, (int) (range*4));
                 rst.add(new int[]{gas,cost});
             }
 
             return rst;
+
+        }
+
+        @Override
+        public List<int[]> prepare() {
+            return prepare(1000);
         }
 
         @Override

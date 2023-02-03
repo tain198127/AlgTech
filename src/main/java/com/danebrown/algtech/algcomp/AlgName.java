@@ -37,4 +37,10 @@ public @interface AlgName {
      */
     int times() default 100;
 
+    /**
+     * 数据量范围
+     * @return
+     */
+    int range() default 10000;
+
 }

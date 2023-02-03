@@ -156,6 +156,7 @@ public final class AlgCompMenu<I extends Number, I1 extends Number> {
         TestMode mode = triple.getRight();
         AlgName algName = impl.getClass().getAnnotation(AlgName.class);
         int times  = algName.times();
+        int datarange = algName.range();
         MDC.put(TEST_NAME_FLG,name);
         //TODO 要在单次计算中增加超时判定
         if(mode ==TestMode.NORMAL){
@@ -164,7 +165,15 @@ public final class AlgCompMenu<I extends Number, I1 extends Number> {
         else if(mode == TestMode.WRONGBOOK){
             log.info("第{}位对数器 :{},结果为:[{}]", idx, name, impl.multiCompareWrongBook(name));
         } else if (mode == TestMode.ALGCOMPLEX) {
-
+            log.info("第{}位对数器 :{},结果为:[{}]", idx, name, impl.algComplexCompare(name,times,datarange,r->{
+                if (log.getLevel().intLevel() <= Level.INFO.intLevel()) {
+                    if (r != null)
+                        System.out.print(".");
+                    else {
+                        System.out.println("");
+                    }
+                }
+            }));
         } else {
             log.info("第{}位对数器 :{},循环:[{}]次,结果为:[{}]", idx, name, times,
                     impl.multiCompare(name, times, r ->
