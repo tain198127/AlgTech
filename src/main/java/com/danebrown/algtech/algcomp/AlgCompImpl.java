@@ -269,7 +269,9 @@ public abstract class AlgCompImpl<T,R>{
         List<R> testCase = wrongBook.load(testName);
         boolean result = true;
         for (R item:testCase){
-            log.info("错题集:{}",item);
+            if(log.isDebugEnabled()) {
+                log.debug("错题集:{}",item);
+            }
             result &= compare(testName, () -> item);
         }
         return result;
