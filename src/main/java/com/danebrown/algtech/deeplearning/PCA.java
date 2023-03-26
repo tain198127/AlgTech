@@ -24,6 +24,7 @@ import org.apache.commons.math3.linear.MatrixUtils;
  */
 public class PCA {
 
+
     private static final double threshold = 0.95;// 特征值阈值
 
     /**

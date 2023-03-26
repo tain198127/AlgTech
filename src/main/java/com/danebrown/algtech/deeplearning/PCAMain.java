@@ -2,10 +2,15 @@ package com.danebrown.algtech.deeplearning;
 
 
 import com.danebrown.algtech.jama.Matrix;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.EigenDecomposition;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.stat.correlation.Covariance;
 
 import java.io.FileWriter;
 import java.io.IOException;
-
+@Log4j2
 public class PCAMain {
 
     public static double[][] loadData(){
@@ -163,6 +168,22 @@ public class PCAMain {
         };
         return iris;
     }
+
+    public static RealMatrix PCAwithCommonMath(double[][] data){
+        RealMatrix matrix = MatrixUtils.createRealMatrix(data);
+        //进行协方差
+        Covariance covariance = new Covariance(matrix);
+        //拿到协方差的值
+        RealMatrix covarianceMatrix = covariance.getCovarianceMatrix();
+        EigenDecomposition eigen = new EigenDecomposition(covarianceMatrix);
+        RealMatrix eigenvectors = eigen.getV();
+
+        RealMatrix transformed = eigenvectors.transpose().multiply(matrix.transpose());
+        transformed = transformed.transpose();
+
+        return transformed;
+    }
+
     public static void main(String[] args) throws IOException {
         // TODO Auto-generated catch block
 
@@ -198,8 +219,16 @@ public class PCAMain {
         System.out.println("降维后的矩阵: ");
         Matrix resultMatrix = pca.getResult(primaryArray, principalMatrix);
         resultMatrix.print(6, 3);
+        log.info("降维后的结果:{}",resultMatrix.getArrayCopy());
         int c = resultMatrix.getColumnDimension(); //列数
         int r = resultMatrix.getRowDimension();//行数
         System.out.println(resultMatrix.getRowDimension() + "," + resultMatrix.getColumnDimension());
+
+        RealMatrix rst = PCAwithCommonMath(primaryArray);
+        System.out.println("-----------------使用apache common math--------------------");
+        System.out.println(rst.getColumnDimension());
+        System.out.println(rst.getRowDimension());
+        System.out.println(rst.getData());
+
     }
 }
