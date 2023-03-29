@@ -340,7 +340,7 @@ public abstract class AlgCompImpl<T,R>{
         List<Long> dataSizeRecord = new ArrayList<>(times);
         int preSteps = (int) Math.ceil((dataSize/times));
         //预热一次
-        compare(testName);
+        result = compare(testName);
 
         for(int i=0;i < times && result;i++){
             int finalI = i;
@@ -363,11 +363,13 @@ public abstract class AlgCompImpl<T,R>{
         if(consumer != null) {
             consumer.accept(null);
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        for(int i = 0; i < times; i++){
-            stringBuilder.append(String.format("%d 条数据下 测试程序耗时 %d ms， 标准程序耗时 %d ms \n",dataSizeRecord.get(i),testTime.get(i),standardTime.get(i)));
+        if(result && dataSizeRecord.size() == times && testTime.size() == times && standardTime.size() == times){
+            StringBuilder stringBuilder = new StringBuilder();
+            for(int i = 0; i < times; i++){
+                stringBuilder.append(String.format("%d 条数据下 测试程序耗时 %d ms， 标准程序耗时 %d ms \n",dataSizeRecord.get(i),testTime.get(i),standardTime.get(i)));
+            }
+            log.info(stringBuilder.toString());
         }
-        log.info(stringBuilder.toString());
         return result;
     }
     /**

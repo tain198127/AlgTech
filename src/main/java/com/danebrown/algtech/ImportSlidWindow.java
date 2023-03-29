@@ -20,6 +20,7 @@ public class ImportSlidWindow {
         AlgCompMenu.addComp(new SlidWindowMaxArray2());
         AlgCompMenu.addComp(new SlidSubWindowMaxArray());
         AlgCompMenu.addComp(new BestAddOil());
+        AlgCompMenu.addComp(new MinCoins());
         AlgCompMenu.run();
     }
 
@@ -504,6 +505,215 @@ public class ImportSlidWindow {
                 }
             }
             return count;
+        }
+    }
+
+    @Data
+    public static class BestMoneyInput{
+        private int aim;
+        private int[] money;
+    }
+
+    /**
+     * arr是货币数组，其中的值都是正数。再给定一个正数aim。
+     * 每个值都认为是一张货币，
+     * 返回组成aim的最少货币数
+     * 注意：
+     * 因为是求最少货币数，所以每一张货币认为是相同或者不同就不重要了
+     */
+    @AlgName("最小面值")
+    public static class  MinCoins extends AlgCompImpl<Integer,BestMoneyInput>{
+
+        @Override
+        public BestMoneyInput prepare() {
+            BestMoneyInput input = new BestMoneyInput();
+            int root = 10;
+            input.aim = ThreadLocalRandom.current().nextInt(root,root*10);
+            int times = ThreadLocalRandom.current().nextInt(root*2,root*3);
+            input.money = new int[times];
+            for(int i=0; i < times; i++){
+                input.money[i] = ThreadLocalRandom.current().nextInt(root,root*10);
+            }
+            return input;
+        }
+        public static int minCoins(int[] arr, int aim) {
+            return process(arr, 0, aim);
+        }
+
+        public static int process(int[] arr, int index, int rest) {
+            if (rest < 0) {
+                return Integer.MAX_VALUE;
+            }
+            if (index == arr.length) {
+                return rest == 0 ? 0 : Integer.MAX_VALUE;
+            } else {
+                int p1 = process(arr, index + 1, rest);
+                int p2 = process(arr, index + 1, rest - arr[index]);
+                if (p2 != Integer.MAX_VALUE) {
+                    p2++;
+                }
+                return Math.min(p1, p2);
+            }
+        }
+        public static int dpAI(BestMoneyInput data){
+            int aim = data.aim;
+            int[] arr = data.money;
+            int[] dp = new int[aim + 1];
+            Arrays.fill(dp, Integer.MAX_VALUE);
+            dp[0] = 0;
+            for (int i = 0; i < arr.length; i++) {
+                for (int j = arr[i]; j <= aim; j++) {
+                    if (dp[j - arr[i]] != Integer.MAX_VALUE) {
+                        dp[j] = Math.min(dp[j], dp[j - arr[i]] + 1);
+                    }
+                }
+            }
+            return dp[aim] == Integer.MAX_VALUE ? -1 : dp[aim];
+        }
+        @Override
+        protected Integer standard(BestMoneyInput data) {
+//            return minCoins(data.money,data.aim);
+            return minCoinsAI(data.money,data.aim);
+//            return dpAI(data);
+        }
+
+        public static int compensate(int pre, int cur, int coin) {
+            return (cur - pre) / coin;
+        }
+        public static int dp1(int[] arr, int aim) {
+            if (aim == 0) {
+                return 0;
+            }
+            int N = arr.length;
+            int[][] dp = new int[N + 1][aim + 1];
+            dp[N][0] = 0;
+            for (int j = 1; j <= aim; j++) {
+                dp[N][j] = Integer.MAX_VALUE;
+            }
+            for (int index = N - 1; index >= 0; index--) {
+                for (int rest = 0; rest <= aim; rest++) {
+                    int p1 = dp[index + 1][rest];
+                    int p2 = rest - arr[index] >= 0 ? dp[index + 1][rest - arr[index]] : Integer.MAX_VALUE;
+                    if (p2 != Integer.MAX_VALUE) {
+                        p2++;
+                    }
+                    dp[index][rest] = Math.min(p1, p2);
+                }
+            }
+            return dp[0][aim];
+        }
+        // dp2时间复杂度为：O(arr长度) + O(货币种数 * aim * 每种货币的平均张数)
+        public static int dp2(int[] arr, int aim) {
+            if (aim == 0) {
+                return 0;
+            }
+            // 得到info时间复杂度O(arr长度)
+            Info info = getInfo(arr);
+            int[] coins = info.coins;
+            int[] zhangs = info.zhangs;
+            int N = coins.length;
+            int[][] dp = new int[N + 1][aim + 1];
+            dp[N][0] = 0;
+            for (int j = 1; j <= aim; j++) {
+                dp[N][j] = Integer.MAX_VALUE;
+            }
+            // 这三层for循环，时间复杂度为O(货币种数 * aim * 每种货币的平均张数)
+            for (int index = N - 1; index >= 0; index--) {
+                for (int rest = 0; rest <= aim; rest++) {
+                    dp[index][rest] = dp[index + 1][rest];
+                    for (int zhang = 1; zhang * coins[index] <= aim && zhang <= zhangs[index]; zhang++) {
+                        if (rest - zhang * coins[index] >= 0
+                                && dp[index + 1][rest - zhang * coins[index]] != Integer.MAX_VALUE) {
+                            dp[index][rest] = Math.min(dp[index][rest], zhang + dp[index + 1][rest - zhang * coins[index]]);
+                        }
+                    }
+                }
+            }
+            return dp[0][aim];
+        }
+        public static class Info {
+            public int[] coins;
+            public int[] zhangs;
+
+            public Info(int[] c, int[] z) {
+                coins = c;
+                zhangs = z;
+            }
+        }
+        public static Info getInfo(int[] arr) {
+            HashMap<Integer, Integer> counts = new HashMap<>();
+            for (int value : arr) {
+                if (!counts.containsKey(value)) {
+                    counts.put(value, 1);
+                } else {
+                    counts.put(value, counts.get(value) + 1);
+                }
+            }
+            int N = counts.size();
+            int[] coins = new int[N];
+            int[] zhangs = new int[N];
+            int index = 0;
+            for (Map.Entry<Integer, Integer> entry : counts.entrySet()) {
+                coins[index] = entry.getKey();
+                zhangs[index++] = entry.getValue();
+            }
+            return new Info(coins, zhangs);
+        }
+        public static int dp3(int[] arr, int aim) {
+            if (aim == 0) {
+                return 0;
+            }
+            // 得到info时间复杂度O(arr长度)
+            Info info = getInfo(arr);
+            int[] c = info.coins;
+            int[] z = info.zhangs;
+            int N = c.length;
+            int[][] dp = new int[N + 1][aim + 1];
+            dp[N][0] = 0;
+            for (int j = 1; j <= aim; j++) {
+                dp[N][j] = Integer.MAX_VALUE;
+            }
+            // 虽然是嵌套了很多循环，但是时间复杂度为O(货币种数 * aim)
+            // 因为用了窗口内最小值的更新结构
+            for (int i = N - 1; i >= 0; i--) {
+                for (int mod = 0; mod < Math.min(aim + 1, c[i]); mod++) {
+                    // 当前面值 X
+                    // mod  mod + x   mod + 2*x   mod + 3 * x
+                    LinkedList<Integer> w = new LinkedList<>();
+                    w.add(mod);
+                    dp[i][mod] = dp[i + 1][mod];
+                    for (int r = mod + c[i]; r <= aim; r += c[i]) {
+                        while (!w.isEmpty() && (dp[i + 1][w.peekLast()] == Integer.MAX_VALUE
+                                || dp[i + 1][w.peekLast()] + compensate(w.peekLast(), r, c[i]) >= dp[i + 1][r])) {
+                            w.pollLast();
+                        }
+                        w.addLast(r);
+                        int overdue = r - c[i] * (z[i] + 1);
+                        if (w.peekFirst() == overdue) {
+                            w.pollFirst();
+                        }
+                        dp[i][r] = dp[i + 1][w.peekFirst()] + compensate(w.peekFirst(), r, c[i]);
+                    }
+                }
+            }
+            return dp[0][aim];
+        }
+        public int minCoinsAI(int[] arr, int aim) {
+            int[] dp = new int[aim + 1];
+            Arrays.fill(dp, Integer.MAX_VALUE);
+            dp[0] = 0;
+            for (int i = 1; i <= aim; i++) {
+                for (int j = 0; j < arr.length; j++) {
+                    if (i >= arr[j] && dp[i - arr[j]] != Integer.MAX_VALUE) {
+                        dp[i] = Math.min(dp[i], dp[i - arr[j]] + 1);
+                    }
+                }
+            }
+            return dp[aim] == Integer.MAX_VALUE ? Integer.MAX_VALUE: dp[aim];
+        }
+        @Override
+        protected Integer test(BestMoneyInput data) {
+            return dp3(data.money,data.aim);
         }
     }
 }
