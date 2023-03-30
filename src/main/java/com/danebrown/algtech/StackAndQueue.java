@@ -49,7 +49,7 @@ public class StackAndQueue {
          */
         @Override
         public Pair<int[], Integer[]> prepare(AlgCompContext context) {
-            int dataSize = ThreadLocalRandom.current().nextInt(20, 10000);
+            int dataSize = ThreadLocalRandom.current().nextInt(20, (int) (context.getRange()));
 
             int opSize = ThreadLocalRandom.current().nextInt(0, dataSize - 1);
 
