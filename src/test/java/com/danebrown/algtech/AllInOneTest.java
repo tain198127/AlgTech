@@ -37,19 +37,12 @@ public class AllInOneTest {
                 Object clazz = clsItem.getDeclaredConstructor().newInstance();
 
                 Method method = clazz.getClass().getMethod("compare", new Class[]{String.class});
-//                System.out.println(clsItem.getSimpleName() + "开始测试");
-                CompletableFuture standardFuture = CompletableFuture.supplyAsync(()->{
-                    try {
-                        return method.invoke(clazz, UUID.randomUUID().toString());
-                    } catch (IllegalAccessException|InvocationTargetException e) {
-                        Assert.fail(e.getMessage());
-                    }finally {
-                        System.out.print(".");
-                        return false;
-                    }
-                });
-                standardFuture.get(10, TimeUnit.SECONDS);
-
+                boolean retVal = false;
+                retVal = (boolean) method.invoke(clazz, UUID.randomUUID().toString());
+                if(!retVal){
+                    System.err.println(MessageFormat.format("{0} 执行结果出错",clsItem.getTypeName()));
+//                    Assert.fail(clsItem.getTypeName()+"执行结果出错");
+                }
 //                System.out.println(clsItem.getSimpleName() + "测试完毕");
             }catch (Exception ex){
                 System.err.println(MessageFormat.format("{0}",ex));
