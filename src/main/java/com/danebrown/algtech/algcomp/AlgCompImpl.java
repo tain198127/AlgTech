@@ -43,7 +43,7 @@ public abstract class AlgCompImpl<T,R>{
      */
     public R prepare(){
         AlgCompContext context = new AlgCompContext();
-        context.setRange(ThreadLocalRandom.current().nextLong());
+        context.setRange(ThreadLocalRandom.current().nextLong(DefaultValue.RANGE));
         return prepare(context);
     }
 

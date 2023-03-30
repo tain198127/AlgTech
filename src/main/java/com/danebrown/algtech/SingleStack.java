@@ -149,12 +149,6 @@ public class SingleStack {
      * 求所有子数组中，这个最大值是多少？
      */
     public static class MaxSumSubArray extends AlgCompImpl<Long,int[]>{
-
-        @Override
-        public int[] prepare() {
-            return new int[0];
-        }
-
         @Override
         public int[] prepare(AlgCompContext context) {
             return new int[0];
