@@ -104,7 +104,7 @@ public class TreeStaff {
 
             traverseNodes(sb, "", pointerLeft, root.getLeft(), root.getRight() != null);
             traverseNodes(sb, "", pointerRight, root.getRight(), false);
-            System.out.println(sb);
+            log.info(sb);
 
 
         }
@@ -112,7 +112,7 @@ public class TreeStaff {
         //=============
         public static void show(TreeNode root) {
             if (root == null)
-                System.out.println("EMPTY!");
+                log.info("EMPTY!");
             // 得到树的深度
             int treeDepth = getTreeDepth(root);
 
@@ -142,7 +142,7 @@ public class TreeStaff {
                         i += line[i].length() > 4 ? 2 : line[i].length() - 1;
                     }
                 }
-                System.out.println(sb.toString());
+                log.info(sb.toString());
             }
         }
 

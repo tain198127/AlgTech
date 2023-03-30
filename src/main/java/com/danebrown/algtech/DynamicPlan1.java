@@ -1288,7 +1288,7 @@ public class DynamicPlan1 {
                 return 0;
             int[] record = new int[data];
             int rst = process(0, record, data);
-            System.out.println(rst);
+            log.info(rst);
             return rst;
 
         }
@@ -1297,12 +1297,12 @@ public class DynamicPlan1 {
                 int v = record[r];
                 for(int c =0;c<record.length;c++){
                     if(c == v){
-                        System.out.print("1");
+                        log.info("1");
                     }else{
-                        System.out.print("0");
+                        log.info("0");
                     }
                 }
-                System.out.println();
+                log.info("====");
             }
         }
         private static Integer process(int i, int[] record, Integer n) {
@@ -1310,7 +1310,7 @@ public class DynamicPlan1 {
             if (i == n) {
                 print(record);
                 log.info(JSONUtil.toJsonStr(record));
-                System.out.println("=============");
+                log.info("=============");
                 return 1;
             }
             for(int k=i;k<n;k++){

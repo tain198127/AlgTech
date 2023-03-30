@@ -320,52 +320,113 @@ public class GraphAlg {
             }
 
         }
+
         @Override
         public Graph prepare(AlgCompContext context) {
+
+            int nodes = ThreadLocalRandom.current().nextInt(1, 10);
+            int edges = ThreadLocalRandom.current().nextInt(1, nodes * 2);
+
             Graph graph = new Graph();
-            int nodes = ThreadLocalRandom.current().nextInt(1,10);
-            int edges = ThreadLocalRandom.current().nextInt(1,nodes*2);
+
             List<GraphNode> nodeList = new ArrayList<>();
-            for(int i=0;i < nodes;i++){
+            for (int i = 0; i < nodes; i++) {
                 GraphNode graphNode =
                         GraphNode.builder().value(i)
                                 .nodes(new ArrayList<>())
                                 .edges(new ArrayList<>()).build();
                 nodeList.add(graphNode);
             }
+
             HashSet<Edge> edgeSet = new HashSet<>();
             HashSet<String> edgeKeySet = new HashSet<>();
-            HashMap<Integer,GraphNode> nodeMap = new HashMap<>();
-            for(int i=0;i< edges;i++){
-                int fromNode = ThreadLocalRandom.current().nextInt(0,nodes);
-                int toNode = ThreadLocalRandom.current().nextInt(0,nodes);
-                String edgeKey = String.format("%s_%s",fromNode,toNode);
-                if(!edgeKeySet.contains(edgeKey)){
+            HashMap<Integer, GraphNode> nodeMap = new HashMap<>();
+            for (int i = 0; i < edges; i++) {
+                int fromNode = ThreadLocalRandom.current().nextInt(0, nodes);
+                int toNode;
+                do {
+                    toNode = ThreadLocalRandom.current().nextInt(0, nodes);
+                } while (toNode == fromNode);
+
+                String edgeKey = String.format("%s_%s", fromNode, toNode);
+                if (!edgeKeySet.contains(edgeKey)) {
                     GraphNode from = nodeList.get(fromNode);
                     GraphNode to = nodeList.get(toNode);
-                    int val = ThreadLocalRandom.current().nextInt(1,edges);
-                    Edge edge  =
+                    int val = ThreadLocalRandom.current().nextInt(1, nodes);
+                    Edge edge =
                             Edge.builder().from(from)
                                     .to(to).val(val).build();
                     from.getEdges().add(edge);
                     from.getNodes().add(to);
                     from.out++;
                     to.in++;
-                    nodeMap.put(from.value,from);
-                    nodeMap.put(to.value,to);
+                    nodeMap.put(from.value, from);
+                    nodeMap.put(to.value, to);
                     edgeSet.add(edge);
+                    edgeKeySet.add(edgeKey);
+
+                    // add edge to 'to' node as well
+                    to.getEdges().add(edge);
+                    to.getNodes().add(from);
+                    to.out++;
+                    from.in++;
                 }
-            }
 
-            for(Edge e: edgeSet){
-                nodeMap.put(e.from.value,e.from);
-                nodeMap.put(e.to.value,e.to);
-            }
-            graph.setEdges(edgeSet);
-            graph.setNodes(nodeMap);
 
+                // set up
+
+            }
             return graph;
         }
+//        @Override
+//        public Graph prepare(AlgCompContext context) {
+//            Graph graph = new Graph();
+//            int nodes = ThreadLocalRandom.current().nextInt(1,10);
+//            int edges = ThreadLocalRandom.current().nextInt(1,nodes*2);
+//            List<GraphNode> nodeList = new ArrayList<>();
+//            for(int i=0;i < nodes;i++){
+//                GraphNode graphNode =
+//                        GraphNode.builder().value(i)
+//                                .nodes(new ArrayList<>())
+//                                .edges(new ArrayList<>()).build();
+//                nodeList.add(graphNode);
+//            }
+//            HashSet<Edge> edgeSet = new HashSet<>();
+//            HashSet<String> edgeKeySet = new HashSet<>();
+//            HashMap<Integer,GraphNode> nodeMap = new HashMap<>();
+//            for(int i=0;i< edges;i++){
+//                int fromNode = ThreadLocalRandom.current().nextInt(0,nodes);
+//                int toNode;
+//                do {
+//                    toNode = ThreadLocalRandom.current().nextInt(0, nodes);
+//                } while (toNode == fromNode);
+//                String edgeKey = String.format("%s_%s",fromNode,toNode);
+//                if(!edgeKeySet.contains(edgeKey)){
+//                    GraphNode from = nodeList.get(fromNode);
+//                    GraphNode to = nodeList.get(toNode);
+//                    int val = ThreadLocalRandom.current().nextInt(1,edges);
+//                    Edge edge  =
+//                            Edge.builder().from(from)
+//                                    .to(to).val(val).build();
+//                    from.getEdges().add(edge);
+//                    from.getNodes().add(to);
+//                    from.out++;
+//                    to.in++;
+//                    nodeMap.put(from.value,from);
+//                    nodeMap.put(to.value,to);
+//                    edgeSet.add(edge);
+//                }
+//            }
+//
+//            for(Edge e: edgeSet){
+//                nodeMap.put(e.from.value,e.from);
+//                nodeMap.put(e.to.value,e.to);
+//            }
+//            graph.setEdges(edgeSet);
+//            graph.setNodes(nodeMap);
+//
+//            return graph;
+//        }
         private List<String> toNormorlize(Set<Edge> edges){
             PriorityQueue<Edge> resultQueue =
                     new PriorityQueue<>(new EdgeComparator());

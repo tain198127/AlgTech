@@ -268,7 +268,7 @@ public class Recursion {
             List<String> result = new ArrayList<>();
 
             process(chars, 0, result, "");
-            result.forEach(s -> System.out.println(s));
+            result.forEach(s -> log.info(s));
             result.sort(String::compareTo);
             return result;
         }
