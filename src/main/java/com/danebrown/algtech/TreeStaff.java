@@ -292,7 +292,7 @@ public class TreeStaff {
         }
 
         @Override
-        public TreeNode prepare() {
+        public TreeNode prepare(long range) {
             //            TreeNode node = binaryTreeGenerator(1000,0);
             int nodeCount = 10000;
             TreeNode node = stackBinaryTreeGenerator(nodeCount);
@@ -604,7 +604,7 @@ public class TreeStaff {
         TreeDeepWalking treeDeepWalking = new TreeDeepWalking();
 
         @Override
-        public TreeNode prepare() {
+        public TreeNode prepare(long range) {
             TreeNode node = treeDeepWalking.stackBinaryTreeGenerator(10);
             BTreePrinter.show(node);
             BTreePrinter.traversePreOrder(node);
@@ -672,7 +672,7 @@ public class TreeStaff {
         TreeWideWalking wideWalking = new TreeWideWalking();
 
         @Override
-        public TreeNode prepare() {
+        public TreeNode prepare(long range) {
             TreeNode node = treeDeepWalking.stackBinaryTreeGenerator(10);
             BTreePrinter.show(node);
             BTreePrinter.traversePreOrder(node);
@@ -864,7 +864,7 @@ public class TreeStaff {
          * @return
          */
         @Override
-        public Integer prepare() {
+        public Integer prepare(long range) {
             return ThreadLocalRandom.current().nextInt(0, 100);
         }
 
@@ -925,7 +925,7 @@ public class TreeStaff {
         private static AtomicInteger count = new AtomicInteger(0);
 
         @Override
-        public MultiTreeNode prepare() {
+        public MultiTreeNode prepare(long range) {
 
             MultiTreeNode root = new MultiTreeNode("-1");
             prepare(root);
@@ -1060,7 +1060,7 @@ public class TreeStaff {
             BinTreeNode<Integer,String>> {
 
         @Override
-        public BinTreeNode<Integer,String> prepare() {
+        public BinTreeNode<Integer,String> prepare(long range) {
             int size = 100000;
             SimpleNormalBinTreeGenerator simpleNormalBinTreeGenerator =
                     new SimpleNormalBinTreeGenerator();
@@ -1231,7 +1231,7 @@ public class TreeStaff {
     public static class IsSBT extends TreeAlgComImpl<Boolean, BinTreeNode<Integer, String>> {
 
         @Override
-        public BinTreeNode<Integer, String> prepare() {
+        public BinTreeNode<Integer, String> prepare(long range) {
             SimpleNormalBinTreeGenerator generator = new SimpleNormalBinTreeGenerator();
             int size = 10000;
             BalanceSearchBinTreeGenerator bstGenerator =
@@ -1318,7 +1318,7 @@ public class TreeStaff {
             BinTreeNode<Integer,String>>{
 
         @Override
-        public BinTreeNode<Integer, String> prepare() {
+        public BinTreeNode<Integer, String> prepare(long range) {
             return null;
         }
 
@@ -1351,7 +1351,7 @@ public class TreeStaff {
             BinTreeNode<Integer,String>>{
 
         @Override
-        public BinTreeNode<Integer, String> prepare() {
+        public BinTreeNode<Integer, String> prepare(long range) {
             return null;
         }
 
@@ -1386,7 +1386,7 @@ public class TreeStaff {
             BinTreeNode<Integer,String>>{
 
         @Override
-        public BinTreeNode<Integer, String> prepare() {
+        public BinTreeNode<Integer, String> prepare(long range) {
             return null;
         }
 
@@ -1428,7 +1428,7 @@ public class TreeStaff {
             BinTreeNode<Integer,String>>{
 
         @Override
-        public BinTreeNode<Integer, String> prepare() {
+        public BinTreeNode<Integer, String> prepare(long range) {
             return null;
         }
 
@@ -1457,7 +1457,7 @@ public class TreeStaff {
          * @return
          */
         @Override
-        public BinTreeNode<Integer, String>[] prepare() {
+        public BinTreeNode<Integer, String>[] prepare(long range) {
             int size = 100000;
             BalanceSearchBinTreeGenerator bstGenerator =
                     new BalanceSearchBinTreeGenerator();
@@ -1609,7 +1609,7 @@ public class TreeStaff {
     public static class MaxHappy extends AlgCompImpl<Integer, Employee>{
 
         @Override
-        public Employee prepare() {
+        public Employee prepare(long range) {
             int maxLevel = 4;
             int maxNexts = 7;
             int maxHappy = 100;

@@ -186,7 +186,7 @@ public class Recursion {
         }
 
         @Override
-        public Integer prepare() {
+        public Integer prepare(long range) {
             return ThreadLocalRandom.current().nextInt(10, 20);
         }
 
@@ -257,7 +257,7 @@ public class Recursion {
         }
 
         @Override
-        public String prepare() {
+        public String prepare(long range) {
             return "ABCD";
         }
 
@@ -311,7 +311,7 @@ public class Recursion {
         }
 
         @Override
-        public String prepare() {
+        public String prepare(long range) {
             return "abcadfsdfacdssfcsd";
         }
 
@@ -404,7 +404,7 @@ public class Recursion {
         }
 
         @Override
-        public String prepare() {
+        public String prepare(long range) {
             return "abcdefghij";
         }
 
@@ -498,7 +498,7 @@ public class Recursion {
         }
 
         @Override
-        public String prepare() {
+        public String prepare(long range) {
             return "abccddeff";
         }
 
@@ -544,7 +544,7 @@ public class Recursion {
         
 
         @Override
-        public Stack<Integer> prepare() {
+        public Stack<Integer> prepare(long range) {
             Stack<Integer> stack = new Stack<>();
             int len = ThreadLocalRandom.current().nextInt(10, 100);
             for (int i = 0; i < len; i++) {

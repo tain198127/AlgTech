@@ -46,7 +46,7 @@ public class DynamicPlan1 {
         public Map<Integer, Integer> cache = new HashMap<>();
 
         @Override
-        public Integer prepare() {
+        public Integer prepare(long range) {
             return ThreadLocalRandom.current().nextInt(90, 100);
         }
 
@@ -187,7 +187,7 @@ public class DynamicPlan1 {
         }
 
         @Override
-        public RobotBestWalkInput prepare() {
+        public RobotBestWalkInput prepare(long range) {
             int N = ThreadLocalRandom.current().nextInt(2, 30);
             int M = ThreadLocalRandom.current().nextInt(1, N);
             int P = ThreadLocalRandom.current().nextInt(1, N);
@@ -351,7 +351,7 @@ public class DynamicPlan1 {
         }
 
         @Override
-        public List<Integer> prepare() {
+        public List<Integer> prepare(long range) {
             int times = ThreadLocalRandom.current().nextInt(1000, 2000);
             List<Integer> result = new ArrayList<>();
             for (int i = 0; i < times; i++) {
@@ -454,7 +454,7 @@ public class DynamicPlan1 {
         }
 
         @Override
-        public Bag prepare() {
+        public Bag prepare(long range) {
 
             //货物列表长度
             int n = ThreadLocalRandom.current().nextInt(1, 100);
@@ -545,7 +545,7 @@ public class DynamicPlan1 {
         }
 
         @Override
-        public String prepare() {
+        public String prepare(long range) {
             StringBuilder stringBuilder = new StringBuilder();
             int len = ThreadLocalRandom.current().nextInt(10000, 10000000);
             for (int i = 0; i < len; i++) {
@@ -711,7 +711,7 @@ public class DynamicPlan1 {
         }
 
         @Override
-        public CutPaperData prepare() {
+        public CutPaperData prepare(long range) {
             int sticks = ThreadLocalRandom.current().nextInt(2, 30);
 
             String paper = randomStr(ThreadLocalRandom.current().nextInt(10, 30), base);
@@ -834,7 +834,7 @@ public class DynamicPlan1 {
         }
 
         @Override
-        public String[] prepare() {
+        public String[] prepare(long range) {
             String[] arr = new String[2];
             arr[0] = CutPaper.randomStr(15, CutPaper.base);
             arr[1] = CutPaper.randomStr(15, CutPaper.base);
@@ -870,7 +870,7 @@ public class DynamicPlan1 {
          * @return
          */
         @Override
-        public int[] prepare() {
+        public int[] prepare(long range) {
             int[] ary = new int[3];
             //N
             ary[0] = 10;
@@ -1042,7 +1042,7 @@ public class DynamicPlan1 {
         }//end fn
 
         @Override
-        public LessMoneyInput prepare() {
+        public LessMoneyInput prepare(long range) {
             LessMoneyInput input = new LessMoneyInput();
             int len = ThreadLocalRandom.current().nextInt(3, 10);
             List<Integer> ary = new ArrayList<>(len);
@@ -1194,7 +1194,7 @@ public class DynamicPlan1 {
         }
 
         @Override
-        public Integer prepare() {
+        public Integer prepare(long range) {
             return ThreadLocalRandom.current().nextInt(1, 100);
         }
 
@@ -1218,7 +1218,7 @@ public class DynamicPlan1 {
     public static class SplitSumClosed extends AlgCompImpl<Integer, Integer[]> {
 
         @Override
-        public Integer[] prepare() {
+        public Integer[] prepare(long range) {
             return new Integer[0];
         }
 
@@ -1244,7 +1244,7 @@ public class DynamicPlan1 {
     public static class SplitSumClosedSizeHalf extends AlgCompImpl<Integer, Integer[]> {
 
         @Override
-        public Integer[] prepare() {
+        public Integer[] prepare(long range) {
             return new Integer[0];
         }
 
@@ -1276,7 +1276,7 @@ public class DynamicPlan1 {
         
 
         @Override
-        public Integer prepare() {
+        public Integer prepare(long range) {
             return ThreadLocalRandom.current().nextInt(1,14);
 //            return 4;
         }

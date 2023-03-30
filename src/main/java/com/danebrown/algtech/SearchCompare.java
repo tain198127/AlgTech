@@ -31,7 +31,7 @@ public class SearchCompare extends AlgCompImpl<Integer, Integer[]> {
     }
 
     @Override
-    public Integer[] prepare() {
+    public Integer[] prepare(long range) {
         return new Integer[]{1,3};
     }
 

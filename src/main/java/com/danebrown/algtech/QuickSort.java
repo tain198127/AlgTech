@@ -30,7 +30,7 @@ public class QuickSort {
     public static class NetherlandsFlag extends AlgCompImpl<int[], int[]> {
 
         @Override
-        public int[] prepare() {
+        public int[] prepare(long range) {
             int dataSize = ThreadLocalRandom.current().nextInt(2, 10);
             int[] data = new int[dataSize + 1];
             for (int i = 0; i < dataSize; i++) {
@@ -140,7 +140,7 @@ public class QuickSort {
     public static class RecQuickSort extends AlgCompImpl<int[], int[]> {
 
         @Override
-        public int[] prepare() {
+        public int[] prepare(long range) {
             int dataSize = ThreadLocalRandom.current().nextInt(90000, 100000);
             int[] data = new int[dataSize + 1];
             for (int i = 0; i < dataSize; i++) {
@@ -229,8 +229,8 @@ public class QuickSort {
         RecQuickSort quickSort = new RecQuickSort();
 
         @Override
-        public int[] prepare() {
-            return quickSort.prepare();
+        public int[] prepare(long range) {
+            return quickSort.prepare(range);
         }
 
         @Override

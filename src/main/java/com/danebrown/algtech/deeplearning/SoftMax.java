@@ -20,7 +20,7 @@ public class SoftMax {
 
 
         @Override
-        public double[] prepare() {
+        public double[] prepare(long range) {
             int random = ThreadLocalRandom.current().nextInt(5,10);
             double[] result = new double[random];
             BigDecimal sum = new BigDecimal(0);

@@ -13,10 +13,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -44,16 +41,16 @@ public abstract class AlgCompImpl<T,R>{
      * 准备原始测试数据
      * @return
      */
-    public abstract R prepare();
+    public R prepare(){
+        return prepare(ThreadLocalRandom.current().nextLong());
+    }
 
     /**
      *
      * @param range 准备的数据范围
      * @return
      */
-    public R prepare(long range){
-        return prepare();
-    }
+    public abstract R prepare(long range);
 
 
     /**

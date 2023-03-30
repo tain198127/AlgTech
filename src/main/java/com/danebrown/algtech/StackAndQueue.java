@@ -54,7 +54,7 @@ public class StackAndQueue {
          * @return
          */
         @Override
-        public Pair<int[], Integer[]> prepare() {
+        public Pair<int[], Integer[]> prepare(long range) {
             int dataSize = ThreadLocalRandom.current().nextInt(20, 10000);
 
             int opSize = ThreadLocalRandom.current().nextInt(0, dataSize - 1);
@@ -175,7 +175,7 @@ public class StackAndQueue {
     public static class MaxMinStack extends AlgCompImpl<int[], Integer[]> {
 
         @Override
-        public Integer[] prepare() {
+        public Integer[] prepare(long range) {
             int dataSize = ThreadLocalRandom.current().nextInt(200, 20000);
             int popOpSize = dataSize / 2;
             Integer[] data = new Integer[dataSize + popOpSize];
@@ -234,8 +234,8 @@ public class StackAndQueue {
         private ArrayQueue arrayQueue = new ArrayQueue();
 
         @Override
-        public Pair<int[], Integer[]> prepare() {
-            return arrayQueue.prepare();
+        public Pair<int[], Integer[]> prepare(long range) {
+            return arrayQueue.prepare( range);
         }
 
         @Override
@@ -319,8 +319,8 @@ public class StackAndQueue {
         private ArrayQueue arrayQueue = new ArrayQueue();
 
         @Override
-        public Pair<int[], Integer[]> prepare() {
-            return arrayQueue.prepare();
+        public Pair<int[], Integer[]> prepare(long range) {
+            return arrayQueue.prepare( range);
         }
 
         @Override

@@ -60,7 +60,7 @@ public class ImportSlidWindow {
     public static class SlidWindowMaxArray extends AlgCompImpl<Integer[], SlidWindowMaxArrayParam> {
 
         @Override
-        public SlidWindowMaxArrayParam prepare() {
+        public SlidWindowMaxArrayParam prepare(long range) {
             SlidWindowMaxArrayParam param = new SlidWindowMaxArrayParam();
             int size = ThreadLocalRandom.current().nextInt(1, 100);
             //L和R要走几步
@@ -138,7 +138,7 @@ public class ImportSlidWindow {
     @AlgName("滑动窗口最大值2")
     public static class SlidWindowMaxArray2 extends AlgCompImpl<Integer[], SlidWindowMaxArray2Param> {
         @Override
-        public SlidWindowMaxArray2Param prepare() {
+        public SlidWindowMaxArray2Param prepare(long range) {
             return prepare(100000);
         }
 
@@ -277,7 +277,7 @@ public class ImportSlidWindow {
         SlidWindowMaxArray2 slidWindowMaxArray2 = new SlidWindowMaxArray2();
 
         @Override
-        public SlidWindowMaxArray2Param prepare() {
+        public SlidWindowMaxArray2Param prepare(long range) {
 //            SlidWindowMaxArray2Param param = new SlidWindowMaxArray2Param();
 //            int[] arr = new int[]{2, 4, 5, 6, 2, 9, 44, 23,55,1};
 //            param.setArr(arr);
@@ -525,7 +525,7 @@ public class ImportSlidWindow {
     public static class  MinCoins extends AlgCompImpl<Integer,BestMoneyInput>{
 
         @Override
-        public BestMoneyInput prepare() {
+        public BestMoneyInput prepare(long range) {
             BestMoneyInput input = new BestMoneyInput();
             int root = 10;
             input.aim = ThreadLocalRandom.current().nextInt(root,root*10);

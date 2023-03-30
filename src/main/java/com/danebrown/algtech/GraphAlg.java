@@ -105,7 +105,7 @@ public class GraphAlg {
     public static class GraphBFS extends AlgCompImpl<Integer, GraphNode> {
 
         @Override
-        public GraphNode prepare() {
+        public GraphNode prepare(long range) {
             GraphNode root = GraphNode.builder().build();
             return root;
         }
@@ -196,7 +196,7 @@ public class GraphAlg {
             List<DirectedGraphNode>>{
 
         @Override
-        public List<DirectedGraphNode> prepare() {
+        public List<DirectedGraphNode> prepare(long range) {
             return null;
         }
 
@@ -320,7 +320,7 @@ public class GraphAlg {
 
         }
         @Override
-        public Graph prepare() {
+        public Graph prepare(long range) {
             Graph graph = new Graph();
             int nodes = ThreadLocalRandom.current().nextInt(1,10);
             int edges = ThreadLocalRandom.current().nextInt(1,nodes*2);
@@ -441,7 +441,7 @@ public class GraphAlg {
             GraphNode>{
 
         @Override
-        public GraphNode prepare() {
+        public GraphNode prepare(long range) {
             return null;
         }
 

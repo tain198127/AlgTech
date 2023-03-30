@@ -81,7 +81,7 @@ public class LinklistSort {
     public static class FastSlowPointer extends AlgCompImpl<String, Node> {
 
         @Override
-        public Node prepare() {
+        public Node prepare(long range) {
             int length = ThreadLocalRandom.current().nextInt(70, 80);
             Node head = new Node(0);
             Node current = head;
@@ -244,7 +244,7 @@ public class LinklistSort {
             return new Node[]{n1,n2};
         }
         @Override
-        public Node[] prepare() {
+        public Node[] prepare(long range) {
             Node[] heads = new Node[2];
             boolean createLoop = false;
             LinkedList<Node> nodes1 = this.generateLink(7, 8, createLoop);
@@ -450,7 +450,7 @@ public class LinklistSort {
         }
 
         @Override
-        public Node prepare() {
+        public Node prepare(long range) {
             int length = ThreadLocalRandom.current().nextInt(70000, 80000);
             Stack<Integer> huiwenStack = new Stack<>();
             Node current = new Node(-1);
@@ -591,7 +591,7 @@ public class LinklistSort {
     public static class GetLoopNode extends AlgCompImpl<Node, Node> {
 
         @Override
-        public Node prepare() {
+        public Node prepare(long range) {
             int length = ThreadLocalRandom.current().nextInt(70000, 80000);
             LinkedList<Node> list = new LinkedList<>();
             for (int i = 0; i < length; i++) {

@@ -113,7 +113,7 @@ public class UnionSetAlg {
 
 
         @Override
-        public UnionSet<String> prepare() {
+        public UnionSet<String> prepare(long range) {
 
             List<String> initVal = new ArrayList<>();
             for (int i = 0; i < ThreadLocalRandom.current().nextInt(3, 100); i++) {
@@ -196,7 +196,7 @@ public class UnionSetAlg {
         UnionSet<Integer> integerUnionSet = new UnionSet<>();
 
         @Override
-        public int[][] prepare() {
+        public int[][] prepare(long range) {
             int len = ThreadLocalRandom.current().nextInt(0, 100);
             int[][] matrix = new int[len][len];
 
@@ -363,10 +363,10 @@ public class UnionSetAlg {
         }
 
         @Override
-        public int[][] prepare() {
+        public int[][] prepare(long range) {
             //            return new int[][]{{1,1,0,0,0},{0,1,0,0,1},{0,0,0,1,1},{0,0,0,0,0},
             //                    {0,0,0,0,1}};
-            return findCircleNum.prepare();
+            return findCircleNum.prepare(range);
         }
 
         @Override
@@ -512,7 +512,7 @@ public class UnionSetAlg {
 
 
         @Override
-        public NumOfIsland2Param prepare() {
+        public NumOfIsland2Param prepare(long range) {
             int mMax = 100;
             int nMax = 100;
             int m = ThreadLocalRandom.current().nextInt(1,mMax);
@@ -711,7 +711,7 @@ public class UnionSetAlg {
 
 
         @Override
-        public NumOfIsland2Param prepare() {
+        public NumOfIsland2Param prepare(long range) {
             int mMax = 100;
             int nMax = 100;
             int m = ThreadLocalRandom.current().nextInt(1,mMax);

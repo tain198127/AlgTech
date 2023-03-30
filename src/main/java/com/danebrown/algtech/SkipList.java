@@ -8,7 +8,7 @@ import com.danebrown.algtech.algcomp.AlgCompImpl;
 //todo
 public class SkipList extends AlgCompImpl<Integer, Integer[]> {
     @Override
-    public Integer[] prepare() {
+    public Integer[] prepare(long range) {
         return new Integer[0];
     }
 

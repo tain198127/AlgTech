@@ -130,7 +130,7 @@ public class GreedProblem {
         }
 
         @Override
-        public String[] prepare() {
+        public String[] prepare(long range) {
             int times = ThreadLocalRandom.current().nextInt(1, 10);
             List<String> result = new ArrayList<>();
             for (int i = 0; i < times; i++) {
@@ -256,7 +256,7 @@ public class GreedProblem {
         // timeLine目前来到的时间点是什么
 
         @Override
-        public List<Project> prepare() {
+        public List<Project> prepare(long range) {
             return Arrays.stream(generatePrograms(100, 100000)).collect(Collectors.toList());
         }
 
@@ -336,7 +336,7 @@ public class GreedProblem {
     public static class MaxProfilo extends AlgCompImpl<Long, Triple<Integer,Integer,List<Portfolio>>>{
 
         @Override
-        public Triple<Integer,Integer,List<Portfolio>> prepare() {
+        public Triple<Integer,Integer,List<Portfolio>> prepare(long range) {
             return null;
         }
 
@@ -385,7 +385,7 @@ public class GreedProblem {
 
 
         @Override
-        public String prepare() {
+        public String prepare(long range) {
             return "XX..XX.X....XX...XX.....X.";
         }
 
