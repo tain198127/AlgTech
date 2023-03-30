@@ -1,30 +1,24 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
 import com.google.common.collect.Queues;
-import com.google.common.collect.Streams;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Deque;
 import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Created by danebrown on 2021/8/2
@@ -54,7 +48,7 @@ public class StackAndQueue {
          * @return
          */
         @Override
-        public Pair<int[], Integer[]> prepare(long range) {
+        public Pair<int[], Integer[]> prepare(AlgCompContext context) {
             int dataSize = ThreadLocalRandom.current().nextInt(20, 10000);
 
             int opSize = ThreadLocalRandom.current().nextInt(0, dataSize - 1);
@@ -175,7 +169,7 @@ public class StackAndQueue {
     public static class MaxMinStack extends AlgCompImpl<int[], Integer[]> {
 
         @Override
-        public Integer[] prepare(long range) {
+        public Integer[] prepare(AlgCompContext context) {
             int dataSize = ThreadLocalRandom.current().nextInt(200, 20000);
             int popOpSize = dataSize / 2;
             Integer[] data = new Integer[dataSize + popOpSize];
@@ -234,8 +228,8 @@ public class StackAndQueue {
         private ArrayQueue arrayQueue = new ArrayQueue();
 
         @Override
-        public Pair<int[], Integer[]> prepare(long range) {
-            return arrayQueue.prepare( range);
+        public Pair<int[], Integer[]> prepare(AlgCompContext context) {
+            return arrayQueue.prepare(context);
         }
 
         @Override
@@ -319,8 +313,8 @@ public class StackAndQueue {
         private ArrayQueue arrayQueue = new ArrayQueue();
 
         @Override
-        public Pair<int[], Integer[]> prepare(long range) {
-            return arrayQueue.prepare( range);
+        public Pair<int[], Integer[]> prepare(AlgCompContext context) {
+            return arrayQueue.prepare(context);
         }
 
         @Override

@@ -1,5 +1,6 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
@@ -105,7 +106,7 @@ public class GraphAlg {
     public static class GraphBFS extends AlgCompImpl<Integer, GraphNode> {
 
         @Override
-        public GraphNode prepare(long range) {
+        public GraphNode prepare(AlgCompContext context) {
             GraphNode root = GraphNode.builder().build();
             return root;
         }
@@ -196,7 +197,7 @@ public class GraphAlg {
             List<DirectedGraphNode>>{
 
         @Override
-        public List<DirectedGraphNode> prepare(long range) {
+        public List<DirectedGraphNode> prepare(AlgCompContext context) {
             return null;
         }
 
@@ -320,7 +321,7 @@ public class GraphAlg {
 
         }
         @Override
-        public Graph prepare(long range) {
+        public Graph prepare(AlgCompContext context) {
             Graph graph = new Graph();
             int nodes = ThreadLocalRandom.current().nextInt(1,10);
             int edges = ThreadLocalRandom.current().nextInt(1,nodes*2);
@@ -441,7 +442,7 @@ public class GraphAlg {
             GraphNode>{
 
         @Override
-        public GraphNode prepare(long range) {
+        public GraphNode prepare(AlgCompContext context) {
             return null;
         }
 

@@ -1,5 +1,6 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
@@ -52,8 +53,8 @@ public class SingleStack {
         }
 
         @Override
-        public int[] prepare(long range) {
-            int num = (int) range;
+        public int[] prepare(AlgCompContext context) {
+            int num = (int) context.getRange();
             int[] ret = new int[num];
             for(int i = 0 ; i < ret.length;i++){
                 ret[i] = ThreadLocalRandom.current().nextInt(0,100);
@@ -155,7 +156,7 @@ public class SingleStack {
         }
 
         @Override
-        public int[] prepare(long range) {
+        public int[] prepare(AlgCompContext context) {
             return new int[0];
         }
 

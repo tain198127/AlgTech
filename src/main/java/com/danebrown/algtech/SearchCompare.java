@@ -1,5 +1,6 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 
 /**
@@ -31,7 +32,7 @@ public class SearchCompare extends AlgCompImpl<Integer, Integer[]> {
     }
 
     @Override
-    public Integer[] prepare(long range) {
+    public Integer[] prepare(AlgCompContext context) {
         return new Integer[]{1,3};
     }
 

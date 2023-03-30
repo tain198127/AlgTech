@@ -1,5 +1,6 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
@@ -113,7 +114,7 @@ public class UnionSetAlg {
 
 
         @Override
-        public UnionSet<String> prepare(long range) {
+        public UnionSet<String> prepare(AlgCompContext context) {
 
             List<String> initVal = new ArrayList<>();
             for (int i = 0; i < ThreadLocalRandom.current().nextInt(3, 100); i++) {
@@ -196,7 +197,7 @@ public class UnionSetAlg {
         UnionSet<Integer> integerUnionSet = new UnionSet<>();
 
         @Override
-        public int[][] prepare(long range) {
+        public int[][] prepare(AlgCompContext context) {
             int len = ThreadLocalRandom.current().nextInt(0, 100);
             int[][] matrix = new int[len][len];
 
@@ -363,10 +364,10 @@ public class UnionSetAlg {
         }
 
         @Override
-        public int[][] prepare(long range) {
+        public int[][] prepare(AlgCompContext context) {
             //            return new int[][]{{1,1,0,0,0},{0,1,0,0,1},{0,0,0,1,1},{0,0,0,0,0},
             //                    {0,0,0,0,1}};
-            return findCircleNum.prepare(range);
+            return findCircleNum.prepare(context);
         }
 
         @Override
@@ -512,7 +513,7 @@ public class UnionSetAlg {
 
 
         @Override
-        public NumOfIsland2Param prepare(long range) {
+        public NumOfIsland2Param prepare(AlgCompContext context) {
             int mMax = 100;
             int nMax = 100;
             int m = ThreadLocalRandom.current().nextInt(1,mMax);
@@ -711,7 +712,7 @@ public class UnionSetAlg {
 
 
         @Override
-        public NumOfIsland2Param prepare(long range) {
+        public NumOfIsland2Param prepare(AlgCompContext context) {
             int mMax = 100;
             int nMax = 100;
             int m = ThreadLocalRandom.current().nextInt(1,mMax);

@@ -1,5 +1,6 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
@@ -30,7 +31,7 @@ public class QuickSort {
     public static class NetherlandsFlag extends AlgCompImpl<int[], int[]> {
 
         @Override
-        public int[] prepare(long range) {
+        public int[] prepare(AlgCompContext context) {
             int dataSize = ThreadLocalRandom.current().nextInt(2, 10);
             int[] data = new int[dataSize + 1];
             for (int i = 0; i < dataSize; i++) {
@@ -140,7 +141,7 @@ public class QuickSort {
     public static class RecQuickSort extends AlgCompImpl<int[], int[]> {
 
         @Override
-        public int[] prepare(long range) {
+        public int[] prepare(AlgCompContext context) {
             int dataSize = ThreadLocalRandom.current().nextInt(90000, 100000);
             int[] data = new int[dataSize + 1];
             for (int i = 0; i < dataSize; i++) {
@@ -229,8 +230,8 @@ public class QuickSort {
         RecQuickSort quickSort = new RecQuickSort();
 
         @Override
-        public int[] prepare(long range) {
-            return quickSort.prepare(range);
+        public int[] prepare(AlgCompContext context) {
+            return quickSort.prepare(context);
         }
 
         @Override

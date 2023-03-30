@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.lang3.tuple.Triple;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ import java.util.function.Supplier;
 @Log4j2
 public abstract class AlgCompImpl<T,R>{
     private volatile WrongBook<R> wrongBook = null;
+
     protected WrongBook initWrongBook(){
         if(wrongBook == null){
             synchronized (this){
@@ -42,15 +42,16 @@ public abstract class AlgCompImpl<T,R>{
      * @return
      */
     public R prepare(){
-        return prepare(ThreadLocalRandom.current().nextLong());
+        AlgCompContext context = new AlgCompContext();
+        context.setRange(ThreadLocalRandom.current().nextLong());
+        return prepare(context);
     }
 
     /**
-     *
-     * @param range 准备的数据范围
+     * @param context 准备的数据范围
      * @return
      */
-    public abstract R prepare(long range);
+    public abstract R prepare(AlgCompContext context);
 
 
     /**
@@ -349,7 +350,9 @@ public abstract class AlgCompImpl<T,R>{
                         //这里把表示，每次梯度增加一定的数量
                         long val = (finalI + 1) * preSteps;
                         dataSizeRecord.add(val);
-                        return prepare(val);//每次增加的数据量
+                        AlgCompContext context = new AlgCompContext();
+                        context.setRange(val);
+                        return prepare(context);//每次增加的数据量
                     }
              );
             if(consumer != null){

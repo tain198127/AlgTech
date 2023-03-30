@@ -29,18 +29,18 @@ public @interface AlgName {
      * 超时时间(S)
      * @return
      */
-    int timeout() default -1;
+    int timeout() default DefaultValue.TIMEOUT;
 
     /**
      * 默认循环次数
      * @return
      */
-    int times() default 100;
+    int times() default DefaultValue.TIMES;
 
     /**
      * 数据量范围
      * @return
      */
-    int range() default 10000;
+    int range() default DefaultValue.RANGE;
 
 }

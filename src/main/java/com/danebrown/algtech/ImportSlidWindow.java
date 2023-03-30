@@ -1,6 +1,7 @@
 package com.danebrown.algtech;
 
 import cn.hutool.core.lang.Pair;
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
@@ -60,7 +61,7 @@ public class ImportSlidWindow {
     public static class SlidWindowMaxArray extends AlgCompImpl<Integer[], SlidWindowMaxArrayParam> {
 
         @Override
-        public SlidWindowMaxArrayParam prepare(long range) {
+        public SlidWindowMaxArrayParam prepare(AlgCompContext context) {
             SlidWindowMaxArrayParam param = new SlidWindowMaxArrayParam();
             int size = ThreadLocalRandom.current().nextInt(1, 100);
             //L和R要走几步
@@ -138,7 +139,7 @@ public class ImportSlidWindow {
     @AlgName("滑动窗口最大值2")
     public static class SlidWindowMaxArray2 extends AlgCompImpl<Integer[], SlidWindowMaxArray2Param> {
         @Override
-        public SlidWindowMaxArray2Param prepare(long range) {
+        public SlidWindowMaxArray2Param prepare(AlgCompContext context) {
             return prepare(100000);
         }
 
@@ -277,7 +278,7 @@ public class ImportSlidWindow {
         SlidWindowMaxArray2 slidWindowMaxArray2 = new SlidWindowMaxArray2();
 
         @Override
-        public SlidWindowMaxArray2Param prepare(long range) {
+        public SlidWindowMaxArray2Param prepare(AlgCompContext context) {
 //            SlidWindowMaxArray2Param param = new SlidWindowMaxArray2Param();
 //            int[] arr = new int[]{2, 4, 5, 6, 2, 9, 44, 23,55,1};
 //            param.setArr(arr);
@@ -408,12 +409,12 @@ public class ImportSlidWindow {
     public static class BestAddOil extends AlgCompImpl<Integer, List<int[]>> {
 
         @Override
-        public List<int[]> prepare(long range) {
+        public List<int[]> prepare(AlgCompContext context) {
             List<int[]> rst = new ArrayList<>();
 //
-            for(int i=0;i < range;i++){
-                int gas = ThreadLocalRandom.current().nextInt(1, (int) (range*4));
-                int cost = ThreadLocalRandom.current().nextInt(1, (int) (range*4));
+            for(int i = 0; i < context.getRange(); i++){
+                int gas = ThreadLocalRandom.current().nextInt(1, (int) (context.getRange() *4));
+                int cost = ThreadLocalRandom.current().nextInt(1, (int) (context.getRange() *4));
                 rst.add(new int[]{gas,cost});
             }
 
@@ -423,7 +424,9 @@ public class ImportSlidWindow {
 
         @Override
         public List<int[]> prepare() {
-            return prepare(1000);
+            AlgCompContext context = new AlgCompContext();
+            context.setRange(1000);
+            return prepare(context);
         }
 
         @Override
@@ -525,7 +528,7 @@ public class ImportSlidWindow {
     public static class  MinCoins extends AlgCompImpl<Integer,BestMoneyInput>{
 
         @Override
-        public BestMoneyInput prepare(long range) {
+        public BestMoneyInput prepare(AlgCompContext context) {
             BestMoneyInput input = new BestMoneyInput();
             int root = 10;
             input.aim = ThreadLocalRandom.current().nextInt(root,root*10);

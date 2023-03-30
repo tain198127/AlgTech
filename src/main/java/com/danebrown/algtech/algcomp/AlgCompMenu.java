@@ -155,8 +155,9 @@ public final class AlgCompMenu<I extends Number, I1 extends Number> {
         AlgCompImpl impl = triple.getMiddle();
         TestMode mode = triple.getRight();
         AlgName algName = impl.getClass().getAnnotation(AlgName.class);
-        int times  = algName.times();
-        int datarange = algName.range();
+
+        int times  = algName == null? DefaultValue.TIMES:algName.times();
+        int datarange = algName == null? DefaultValue.RANGE:algName.range();
         MDC.put(TEST_NAME_FLG,name);
         //TODO 要在单次计算中增加超时判定
         if(mode ==TestMode.NORMAL){

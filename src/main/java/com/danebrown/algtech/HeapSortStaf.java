@@ -1,5 +1,6 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
@@ -46,7 +47,7 @@ public class HeapSortStaf {
          * @return
          */
         @Override
-        public Integer[] prepare(long range) {
+        public Integer[] prepare(AlgCompContext context) {
             int dataSize = ThreadLocalRandom.current().nextInt(200, 500);
             Integer[] data = new Integer[dataSize + 1];
             for (int i = 0; i < dataSize; i++) {
@@ -145,7 +146,7 @@ public class HeapSortStaf {
     @AlgName("堆排序")
     public static class HeapSort extends AlgCompImpl<int[], int[]> {
         @Override
-        public int[] prepare(long range) {
+        public int[] prepare(AlgCompContext context) {
             int dataSize = ThreadLocalRandom.current().nextInt(20000, 1000000);
             int[] data = new int[dataSize + 1];
             for (int i = 0; i < dataSize; i++) {
@@ -235,7 +236,7 @@ public class HeapSortStaf {
         private static int BOUND = 3000;
 
         @Override
-        public int[][] prepare(long range) {
+        public int[][] prepare(AlgCompContext context) {
             int dataSize = ThreadLocalRandom.current().nextInt(ORIGIN, BOUND);
             int[][] data = new int[dataSize][2];
             for (int i = 0; i < dataSize; i++) {
@@ -304,7 +305,7 @@ public class HeapSortStaf {
          * @return null表示pop,数字表示push
          */
         @Override
-        public Integer[] prepare(long range) {
+        public Integer[] prepare(AlgCompContext context) {
             int dataSize = ThreadLocalRandom.current().nextInt(200, 500);
             Integer[] data = new Integer[dataSize + 1];
             for (int i = 0; i < dataSize; i++) {
@@ -420,7 +421,7 @@ public class HeapSortStaf {
          * False为退货，Right:topK
          */
         @Override
-        public Triple<int[], boolean[], Integer> prepare(long range) {
+        public Triple<int[], boolean[], Integer> prepare(AlgCompContext context) {
             return null;
         }
 

@@ -1,5 +1,6 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
@@ -37,7 +38,7 @@ public class BitCompare {
     public static class BitSwap extends AlgCompImpl<String, int[]> {
 
         @Override
-        public int[] prepare(long range) {
+        public int[] prepare(AlgCompContext context) {
             return new int[]{ThreadLocalRandom.current().nextInt(), ThreadLocalRandom.current().nextInt()};
         }
 
@@ -89,7 +90,7 @@ public class BitCompare {
     public static class OddNumSearch extends AlgCompImpl<String, int[]> {
 
         @Override
-        public int[] prepare(long range) {
+        public int[] prepare(AlgCompContext context) {
             int times = ThreadLocalRandom.current().nextInt(3, 10);
 
             //保证是奇数长度
@@ -164,13 +165,13 @@ public class BitCompare {
         OddNumSearch inner = new OddNumSearch();
 
         @Override
-        public int[] prepare(long range) {
+        public int[] prepare(AlgCompContext context) {
             int times = ThreadLocalRandom.current().nextInt(3, 10000);
 
             //保证是奇数长度
             int[] num = new int[times % 2 == 0 ? times - 1 : times];
             Arrays.fill(num, ThreadLocalRandom.current().nextInt());
-            int[] oldNum = inner.prepare(range);
+            int[] oldNum = inner.prepare(context);
             int[] sumarray = new int[num.length + oldNum.length];
             for (int i = 0; i < oldNum.length; i++) {
                 sumarray[i] = oldNum[i];
@@ -249,7 +250,7 @@ public class BitCompare {
 
 
         @Override
-        public Triple<int[], Integer, Integer> prepare(long range) {
+        public Triple<int[], Integer, Integer> prepare(AlgCompContext context) {
             //数值有K次
             int k = ThreadLocalRandom.current().nextInt(1, 100);
             //数值有M次
@@ -345,10 +346,11 @@ public class BitCompare {
     /**
      * 查找数字二进制格式最右边为1
      */
+
     public static class LastRightOne extends AlgCompImpl<Integer, Integer> {
 
         @Override
-        public Integer prepare(long range) {
+        public Integer prepare(AlgCompContext context) {
             return ThreadLocalRandom.current().nextInt(1000, 1000000);
         }
 
@@ -407,7 +409,7 @@ public class BitCompare {
     public static class BitOp extends AlgCompImpl<Integer, Integer> {
 
         @Override
-        public Integer prepare(long range) {
+        public Integer prepare(AlgCompContext context) {
             return 1;
         }
 

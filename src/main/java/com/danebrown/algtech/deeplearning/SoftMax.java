@@ -1,13 +1,12 @@
 package com.danebrown.algtech.deeplearning;
 
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
 import lombok.extern.log4j.Log4j2;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 @Log4j2
 public class SoftMax {
@@ -20,7 +19,7 @@ public class SoftMax {
 
 
         @Override
-        public double[] prepare(long range) {
+        public double[] prepare(AlgCompContext context) {
             int random = ThreadLocalRandom.current().nextInt(5,10);
             double[] result = new double[random];
             BigDecimal sum = new BigDecimal(0);

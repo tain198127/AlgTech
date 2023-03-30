@@ -1,5 +1,6 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
@@ -186,7 +187,7 @@ public class Recursion {
         }
 
         @Override
-        public Integer prepare(long range) {
+        public Integer prepare(AlgCompContext context) {
             return ThreadLocalRandom.current().nextInt(10, 20);
         }
 
@@ -257,7 +258,7 @@ public class Recursion {
         }
 
         @Override
-        public String prepare(long range) {
+        public String prepare(AlgCompContext context) {
             return "ABCD";
         }
 
@@ -311,7 +312,7 @@ public class Recursion {
         }
 
         @Override
-        public String prepare(long range) {
+        public String prepare(AlgCompContext context) {
             return "abcadfsdfacdssfcsd";
         }
 
@@ -404,7 +405,7 @@ public class Recursion {
         }
 
         @Override
-        public String prepare(long range) {
+        public String prepare(AlgCompContext context) {
             return "abcdefghij";
         }
 
@@ -498,7 +499,7 @@ public class Recursion {
         }
 
         @Override
-        public String prepare(long range) {
+        public String prepare(AlgCompContext context) {
             return "abccddeff";
         }
 
@@ -544,7 +545,7 @@ public class Recursion {
         
 
         @Override
-        public Stack<Integer> prepare(long range) {
+        public Stack<Integer> prepare(AlgCompContext context) {
             Stack<Integer> stack = new Stack<>();
             int len = ThreadLocalRandom.current().nextInt(10, 100);
             for (int i = 0; i < len; i++) {

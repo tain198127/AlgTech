@@ -1,6 +1,7 @@
 package com.danebrown.algtech;
 
 import cn.hutool.json.JSONUtil;
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
@@ -292,7 +293,7 @@ public class TreeStaff {
         }
 
         @Override
-        public TreeNode prepare(long range) {
+        public TreeNode prepare(AlgCompContext context) {
             //            TreeNode node = binaryTreeGenerator(1000,0);
             int nodeCount = 10000;
             TreeNode node = stackBinaryTreeGenerator(nodeCount);
@@ -604,7 +605,7 @@ public class TreeStaff {
         TreeDeepWalking treeDeepWalking = new TreeDeepWalking();
 
         @Override
-        public TreeNode prepare(long range) {
+        public TreeNode prepare(AlgCompContext context) {
             TreeNode node = treeDeepWalking.stackBinaryTreeGenerator(10);
             BTreePrinter.show(node);
             BTreePrinter.traversePreOrder(node);
@@ -672,7 +673,7 @@ public class TreeStaff {
         TreeWideWalking wideWalking = new TreeWideWalking();
 
         @Override
-        public TreeNode prepare(long range) {
+        public TreeNode prepare(AlgCompContext context) {
             TreeNode node = treeDeepWalking.stackBinaryTreeGenerator(10);
             BTreePrinter.show(node);
             BTreePrinter.traversePreOrder(node);
@@ -864,7 +865,7 @@ public class TreeStaff {
          * @return
          */
         @Override
-        public Integer prepare(long range) {
+        public Integer prepare(AlgCompContext context) {
             return ThreadLocalRandom.current().nextInt(0, 100);
         }
 
@@ -925,7 +926,7 @@ public class TreeStaff {
         private static AtomicInteger count = new AtomicInteger(0);
 
         @Override
-        public MultiTreeNode prepare(long range) {
+        public MultiTreeNode prepare(AlgCompContext context) {
 
             MultiTreeNode root = new MultiTreeNode("-1");
             prepare(root);
@@ -1060,7 +1061,7 @@ public class TreeStaff {
             BinTreeNode<Integer,String>> {
 
         @Override
-        public BinTreeNode<Integer,String> prepare(long range) {
+        public BinTreeNode<Integer,String> prepare(AlgCompContext context) {
             int size = 100000;
             SimpleNormalBinTreeGenerator simpleNormalBinTreeGenerator =
                     new SimpleNormalBinTreeGenerator();
@@ -1231,7 +1232,7 @@ public class TreeStaff {
     public static class IsSBT extends TreeAlgComImpl<Boolean, BinTreeNode<Integer, String>> {
 
         @Override
-        public BinTreeNode<Integer, String> prepare(long range) {
+        public BinTreeNode<Integer, String> prepare(AlgCompContext context) {
             SimpleNormalBinTreeGenerator generator = new SimpleNormalBinTreeGenerator();
             int size = 10000;
             BalanceSearchBinTreeGenerator bstGenerator =
@@ -1318,7 +1319,7 @@ public class TreeStaff {
             BinTreeNode<Integer,String>>{
 
         @Override
-        public BinTreeNode<Integer, String> prepare(long range) {
+        public BinTreeNode<Integer, String> prepare(AlgCompContext context) {
             return null;
         }
 
@@ -1351,7 +1352,7 @@ public class TreeStaff {
             BinTreeNode<Integer,String>>{
 
         @Override
-        public BinTreeNode<Integer, String> prepare(long range) {
+        public BinTreeNode<Integer, String> prepare(AlgCompContext context) {
             return null;
         }
 
@@ -1386,7 +1387,7 @@ public class TreeStaff {
             BinTreeNode<Integer,String>>{
 
         @Override
-        public BinTreeNode<Integer, String> prepare(long range) {
+        public BinTreeNode<Integer, String> prepare(AlgCompContext context) {
             return null;
         }
 
@@ -1428,7 +1429,7 @@ public class TreeStaff {
             BinTreeNode<Integer,String>>{
 
         @Override
-        public BinTreeNode<Integer, String> prepare(long range) {
+        public BinTreeNode<Integer, String> prepare(AlgCompContext context) {
             return null;
         }
 
@@ -1457,7 +1458,7 @@ public class TreeStaff {
          * @return
          */
         @Override
-        public BinTreeNode<Integer, String>[] prepare(long range) {
+        public BinTreeNode<Integer, String>[] prepare(AlgCompContext context) {
             int size = 100000;
             BalanceSearchBinTreeGenerator bstGenerator =
                     new BalanceSearchBinTreeGenerator();
@@ -1609,7 +1610,7 @@ public class TreeStaff {
     public static class MaxHappy extends AlgCompImpl<Integer, Employee>{
 
         @Override
-        public Employee prepare(long range) {
+        public Employee prepare(AlgCompContext context) {
             int maxLevel = 4;
             int maxNexts = 7;
             int maxHappy = 100;

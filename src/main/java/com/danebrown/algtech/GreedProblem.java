@@ -1,5 +1,6 @@
 package com.danebrown.algtech;
 
+import com.danebrown.algtech.algcomp.AlgCompContext;
 import com.danebrown.algtech.algcomp.AlgCompImpl;
 import com.danebrown.algtech.algcomp.AlgCompMenu;
 import com.danebrown.algtech.algcomp.AlgName;
@@ -130,7 +131,7 @@ public class GreedProblem {
         }
 
         @Override
-        public String[] prepare(long range) {
+        public String[] prepare(AlgCompContext context) {
             int times = ThreadLocalRandom.current().nextInt(1, 10);
             List<String> result = new ArrayList<>();
             for (int i = 0; i < times; i++) {
@@ -256,7 +257,7 @@ public class GreedProblem {
         // timeLine目前来到的时间点是什么
 
         @Override
-        public List<Project> prepare(long range) {
+        public List<Project> prepare(AlgCompContext context) {
             return Arrays.stream(generatePrograms(100, 100000)).collect(Collectors.toList());
         }
 
@@ -336,7 +337,7 @@ public class GreedProblem {
     public static class MaxProfilo extends AlgCompImpl<Long, Triple<Integer,Integer,List<Portfolio>>>{
 
         @Override
-        public Triple<Integer,Integer,List<Portfolio>> prepare(long range) {
+        public Triple<Integer,Integer,List<Portfolio>> prepare(AlgCompContext context) {
             return null;
         }
 
@@ -385,7 +386,7 @@ public class GreedProblem {
 
 
         @Override
-        public String prepare(long range) {
+        public String prepare(AlgCompContext context) {
             return "XX..XX.X....XX...XX.....X.";
         }
 
