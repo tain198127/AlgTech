@@ -3,7 +3,6 @@ package com.danebrown.algtech.algcomp;
 import lombok.Data;
 
 @Data
-public class AlgCompContext {
-    private long range;
+public class AlgRunContext {
     private boolean fromWrongBook;
 }

@@ -18,6 +18,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -110,7 +111,7 @@ public class JsonWrongBook<R> implements WrongBook {
     }
 
     @Override
-    public  List load(String testName) {
+    public  List load(String testName, Type type) {
         checkAndCreate();
         List list = new ArrayList<>();
 
@@ -120,7 +121,7 @@ public class JsonWrongBook<R> implements WrongBook {
             while ((line = bufferedReader.readLine())!=null){
 
                 Object r = gson.fromJson(line,
-                        TypeToken.of(Object.class).getType());
+                        type);
                 list.add(r);
             }
 

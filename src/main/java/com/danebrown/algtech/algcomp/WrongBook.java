@@ -1,6 +1,7 @@
 package com.danebrown.algtech.algcomp;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -25,9 +26,9 @@ public interface WrongBook<R>
 
     /**
      * 加载错题本
-     * @param testName
-     *
+     * @param testName 测试名称
+     * @param type 要加载的数据类型
      * @return
      */
-     List<R> load(String testName);
+     List<R> load(String testName, Type type);
 }

@@ -3,6 +3,7 @@ package com.danebrown.algtech.algcomp;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.danebrown.algtech.algcomp.wrongbook.JsonWrongBook;
+import com.google.gson.reflect.TypeToken;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.Serializable;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -129,7 +131,7 @@ public abstract class AlgCompImpl<T,R>{
      */
     public boolean compare(String testName, Consumer<Long> testTime,
                            Consumer<Long> standardTime ,
-                           Supplier<R> prepareSupplier){
+                           Supplier<R> prepareSupplier, AlgRunContext context){
         this.initWrongBook();
 
         int timeout = -1;
@@ -209,8 +211,10 @@ public abstract class AlgCompImpl<T,R>{
 
         result = testEqual(testResult, standardResult);
         if (!result) {
-            wrongBook.write(testName, originData);
-
+            //只有不是来自错题本的，才需要重新记录错题本，否则错题会重复记录
+            if(!context.isFromWrongBook()) {
+                wrongBook.write(testName, originData);
+            }
             log.error("{}测试失败,原始数据:\n{}", testName,
                     formatSetupData(originData)
                     );
@@ -233,7 +237,7 @@ public abstract class AlgCompImpl<T,R>{
      */
     public boolean compare(String testName, Consumer<Long> testTime,
                            Consumer<Long> standardTime){
-        return this.compare(testName,testTime,standardTime,null);
+        return this.compare(testName,testTime,standardTime,null,new AlgRunContext());
     }
     /**
      * 对数
@@ -241,19 +245,24 @@ public abstract class AlgCompImpl<T,R>{
      * @return
      */
     public boolean compare(String testName) {
-        return this.compare(testName,null);
+        return this.compare(testName,null,new AlgRunContext());
     }
-    public boolean compare(String testName,Supplier<R> prepareSupplier){
+    public boolean compare(String testName,Supplier<R> prepareSupplier,AlgRunContext context){
         return this.compare(testName,t->{
             log.warn("{} 测试程序 耗时[{}]毫秒",testName,t);
         },s->{
             log.warn("{} 标准程序 耗时[{}]毫秒",testName,s);
-        },prepareSupplier);
+        },prepareSupplier,context);
     }
 
 
     public boolean multiCompare(String testName, int times){
         return multiCompare(testName,times,null);
+    }
+
+    public Class<R> getActualType() {
+        ParameterizedType parameterizedType = (ParameterizedType) this.getClass().getGenericSuperclass();
+        return (Class<R>) parameterizedType.getActualTypeArguments()[1];
     }
 
     /**
@@ -264,13 +273,16 @@ public abstract class AlgCompImpl<T,R>{
     public boolean multiCompareWrongBook(String testName){
         WrongBook wrongBook = initWrongBook();
         // TODO: 2023/2/3 这里有问题，尚未解决
-        List<R> testCase = wrongBook.load(testName);
+        Class<R> rClass = getActualType();
+        List<R> testCase = wrongBook.load(testName,rClass);
         boolean result = true;
+        AlgRunContext context = new AlgRunContext();
+        context.setFromWrongBook(true);
         for (R item:testCase){
             if(log.isDebugEnabled()) {
                 log.debug("错题集:{}",item);
             }
-            result &= compare(testName, () -> item);
+            result &= compare(testName, () -> item,context);
         }
         return result;
 
@@ -353,7 +365,7 @@ public abstract class AlgCompImpl<T,R>{
                         AlgCompContext context = new AlgCompContext();
                         context.setRange(val);
                         return prepare(context);//每次增加的数据量
-                    }
+                    },new AlgRunContext()
              );
             if(consumer != null){
                 consumer.accept(result);
