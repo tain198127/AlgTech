@@ -22,7 +22,7 @@
             <DefaultRolloverStrategy max="15"/>
         </RollingFile>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{16} %L %M  - %msg%n"/>
+            <PatternLayout pattern="%d %highlight{%-5level}{ERROR=Bright RED, WARN=Bright Yellow, INFO=Bright Green, DEBUG=Bright Cyan, TRACE=Bright White} %style{[%t]}{bright,magenta} %style{%c{1.}.%M(%L)}{cyan}:- %msg%n"/>
         </Console>
         <Async name="Async" bufferSize="262144">
             <AppenderRef ref="AsyncLogProcess"/>
