@@ -55,6 +55,7 @@ public class SingleStack {
                 ret[i] = ThreadLocalRandom.current().nextInt(0, 100);
             }
 //            return new int[]{9,9,88,71,33};
+//            return new int[]{0, 2, 4, 1, 2};
             return ret;
         }
 
@@ -151,51 +152,21 @@ public class SingleStack {
      * 求所有子数组中，这个最大值是多少？
      */
     @AlgName("子数组累加和乘积最大值")
-    public static class MaxSumSubArray extends AlgCompImpl<Long, Integer[]> {
-        /**
-         * 获取data数组中，单调栈
-         *
-         * @param data 原始数组
-         * @return 返回的int数组中，0位是左边界，1位是右边界。
-         */
-        private static int[][] getRange(Integer[] data) {
-            int[][] result = new int[data.length][2];
-            Stack<Integer> singleStack = new Stack<>();
-            for (int i = 0; i < data.length; i++) {
-                while (!singleStack.isEmpty() && data[singleStack.peek()] >= data[i]) {
-                    Integer pop = singleStack.pop();
-                    int leftestIdx = singleStack.isEmpty() ? -1 : singleStack.peek();
-                    result[pop][0] = leftestIdx;
-                    result[pop][1] = i;
-                }
-                singleStack.push(i);
-            }
-            while (!singleStack.isEmpty()) {
-                Integer pop = singleStack.pop();
-                int leftestIdx = singleStack.isEmpty() ? -1 : singleStack.peek();
-                result[pop][0] = leftestIdx;
-                result[pop][1] = -1;
+    public static class MaxSumSubArray extends AlgCompImpl<Long, int[]> {
 
-            }
-            return result;
-
-        }
 
         @Override
-        public Integer[] prepare(AlgCompContext context) {
+        public int[] prepare(AlgCompContext context) {
             int range = (int) context.getRange();
-            range = 5;
-            Integer[] data = new Integer[range];
+            int[] data = new int[range];
             for (int i = 0; i < data.length; i++) {
                 data[i] = ThreadLocalRandom.current().nextInt(0, range);
             }
-            //[0,0,0,4,2]
-//            data = new int[]{9, 5, 7, 0, 9, 7, 5, 7, 6, 2};
             return data;
         }
 
         @Override
-        protected Long standard(Integer[] arr) {
+        protected Long standard(int[] arr) {
             int size = arr.length;
             int[] sums = new int[size];
             sums[0] = arr[0];
@@ -218,8 +189,9 @@ public class SingleStack {
             return Long.valueOf(max);
         }
 
+        //todo 这里一直没有修改对
         @Override
-        protected Long test(Integer[] data) {
+        protected Long test(int[] data) {
             //先制造一个累加和的数组，作为滑动窗口的辅助数组
             long[] sumarray = new long[data.length];
             long sum = 0;
@@ -229,31 +201,42 @@ public class SingleStack {
             }
 
             //单调栈数组
-            int[][] range = getRange(data);
-
             long max = Integer.MIN_VALUE;
-//            Stack<Integer> stack = new Stack<>();
-//            for(int i=0;i < data.length;i++){
-//                while (!stack.isEmpty() && data[stack.peek()] >= data[i]){
-//                    int pop = stack.pop();
-//                    long curSum = stack.isEmpty()?sumarray[i-1]:sumarray[i-1]-sumarray[stack.peek()];
-//                    max = Math.max(max,curSum*data[pop]);
-//                }
-//                stack.push(i);
-//            }
-//            while (!stack.isEmpty()){
-//                int pop = stack.pop();
-//                long curSum = stack.isEmpty()?sumarray[data.length-1]:sumarray[data.length-1]-sumarray[stack.peek()];
-//                max = Math.max(max,curSum*data[pop]);
-//            }
-            for (int i = 0; i < data.length; i++) {
-                int minVal = data[i];
-                int left = range[i][0] == -1 ? i : range[i][0];
-                int right = range[i][1] == -1 ? i : range[i][1];
-                long slid_sum = sumarray[right] - sumarray[left];
-                max = Math.max(max, minVal * slid_sum);
+            Stack<Integer> stack = new Stack<>();
+            for(int i=0;i < data.length;i++){
+                while (!stack.isEmpty() && data[stack.peek()] >= data[i]){
+                    int pop = stack.pop();
+                    long curSum = stack.isEmpty()?sumarray[i-1]:sumarray[i-1]-sumarray[stack.peek()];
+                    max = Math.max(max,curSum*data[pop]);
+                }
+                stack.push(i);
             }
+            while (!stack.isEmpty()){
+                int pop = stack.pop();
+                long curSum = stack.isEmpty()?sumarray[data.length-1]:sumarray[data.length-1]-sumarray[stack.peek()];
+                max = Math.max(max,curSum*data[pop]);
+            }
+
             return max;
+        }
+
+    }
+
+    public static class LargestRectangleInHistogram extends AlgCompImpl<Integer,int[]>{
+
+        @Override
+        public int[] prepare(AlgCompContext context) {
+            return new int[0];
+        }
+
+        @Override
+        protected Integer standard(int[] data) {
+            return 0;
+        }
+
+        @Override
+        protected Integer test(int[] data) {
+            return 0;
         }
     }
 }
