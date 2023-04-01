@@ -202,7 +202,7 @@ public class SingleStack {
 
             //单调栈数组
             long max = Integer.MIN_VALUE;
-            int[][] range = new MinIndex().standard(data);
+            int[][] range = getRange(data);
             for (int i = 0; i < data.length; i++) {
                 int minVal = data[i];
                 int left = range[i][0];
