@@ -23,6 +23,7 @@ public class SingleStack {
         AlgCompMenu.addComp(new SingleStack.MinIndex());
         AlgCompMenu.addComp(new MaxSumSubArray());
         AlgCompMenu.addComp(new LargestRectangleInHistogram());
+        AlgCompMenu.addComp(new MaximalRectangle());
         AlgCompMenu.run();
     }
 
@@ -243,7 +244,6 @@ public class SingleStack {
     /**
      * 最大面积直方图
      */
-    //TODO 尚未完成
     @AlgName(value = "最大面积直方图",range = 100000)
     public static class LargestRectangleInHistogram extends AlgCompImpl<Long,int[]>{
 
@@ -318,23 +318,89 @@ public class SingleStack {
      * 这道题非常难，如果用暴力算法，会达到N^6次方这么多的时间复杂度
      * 本质上做压缩数组技巧，进行压缩后，可以达到N^2的时间复杂度
      */
-    //TODO 尚未完成
-    @AlgName("最大矩形面试")
-    public static class MaximalRectangle extends AlgCompImpl<Integer, int[][]>{
+    @AlgName("最大矩形面积")
+    public static class MaximalRectangle extends AlgCompImpl<Integer, char[][]>{
 
         @Override
-        public int[][] prepare(AlgCompContext context) {
-            return new int[0][];
+        public char[][] prepare(AlgCompContext context) {
+            int length = (int) context.getRange();
+            int height = (int) Math.ceil(length* (ThreadLocalRandom.current().nextInt(1,100))/100);
+            char[][] result = new char[length][height];
+            for(int i=0; i < length;i++){
+                for(int j=0;j < height;j++){
+                    result[i][j] = ThreadLocalRandom.current().nextBoolean()?'0':'1';
+                }
+            }
+            if(log.isDebugEnabled()){
+                for(int i=0;i<length;i++){
+                    log.debug("{}",result[i]);
+                }
+            }
+            return result;
         }
 
         @Override
-        protected Integer standard(int[][] data) {
-            return null;
+        protected Integer standard(char[][] data) {
+            return maximalRectangle(data);
+        }
+        private static int maximalRectangle(char[][] map) {
+            if (map == null || map.length == 0 || map[0].length == 0) {
+                return 0;
+            }
+            int maxArea = 0;
+            int[] height = new int[map[0].length];
+            for (int i = 0; i < map.length; i++) {
+                for (int j = 0; j < map[0].length; j++) {
+                    height[j] = map[i][j] == '0' ? 0 : height[j] + 1;
+                }
+                maxArea = Math.max(maxRecFromBottom(height), maxArea);
+            }
+            return maxArea;
         }
 
+        // height是正方图数组
+        private static int maxRecFromBottom(int[] height) {
+            if (height == null || height.length == 0) {
+                return 0;
+            }
+            int maxArea = 0;
+            Stack<Integer> stack = new Stack<Integer>();
+            for (int i = 0; i < height.length; i++) {
+                while (!stack.isEmpty() && height[i] <= height[stack.peek()]) {
+                    int j = stack.pop();
+                    int k = stack.isEmpty() ? -1 : stack.peek();
+                    int curArea = (i - k - 1) * height[j];
+                    maxArea = Math.max(maxArea, curArea);
+                }
+                stack.push(i);
+            }
+            while (!stack.isEmpty()) {
+                int j = stack.pop();
+                int k = stack.isEmpty() ? -1 : stack.peek();
+                int curArea = (height.length - k - 1) * height[j];
+                maxArea = Math.max(maxArea, curArea);
+            }
+            return maxArea;
+        }
         @Override
-        protected Integer test(int[][] data) {
-            return null;
+        protected Integer test(char[][] data) {
+            if(data == null || data.length ==0 || data[0].length == 0){
+                return 0;
+            }
+            //矩阵的宽
+            int length = data.length;
+            //矩阵的高
+            int high = data[0].length;
+            int[] cur = new int[length];
+            int max = Integer.MIN_VALUE;
+            for(int i=0 ;i < high;i++){
+                for(int j=0; j < length;j++){
+                    cur[j] = data[j][i]=='0'?0:cur[j]+1;
+                }
+                long m = new LargestRectangleInHistogram().test(cur);
+                max = (int) Math.max(max,m);
+            }
+            return max;
         }
     }
 
