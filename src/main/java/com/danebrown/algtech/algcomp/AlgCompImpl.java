@@ -44,8 +44,10 @@ public abstract class AlgCompImpl<T,R>{
      * @return
      */
     public R prepare(){
+        AlgName algName = this.getClass().getAnnotation(AlgName.class);
+        int range =algName ==null?DefaultValue.RANGE:algName.range();
         AlgCompContext context = new AlgCompContext();
-        context.setRange(ThreadLocalRandom.current().nextLong(DefaultValue.RANGE));
+        context.setRange(ThreadLocalRandom.current().nextLong(range));
         return prepare(context);
     }
 

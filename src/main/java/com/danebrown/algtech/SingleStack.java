@@ -244,12 +244,11 @@ public class SingleStack {
      * 最大面积直方图
      */
     //TODO 尚未完成
-    @AlgName("最大面积直方图")
+    @AlgName(value = "最大面积直方图",range = 100000)
     public static class LargestRectangleInHistogram extends AlgCompImpl<Long,int[]>{
 
         @Override
         public int[] prepare(AlgCompContext context) {
-//            context.setRange(5);
             int range = ThreadLocalRandom.current().nextInt((int) context.getRange());
             int[] data = new int[range];
             for (int i = 0; i < data.length; i++) {
