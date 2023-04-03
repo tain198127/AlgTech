@@ -20,7 +20,6 @@ import java.util.concurrent.ThreadLocalRandom;
 @Log4j2
 public class SingleStack {
     public static void main(String[] args) {
-        SingleStack singleStack = new SingleStack();
         AlgCompMenu.addComp(new SingleStack.MinIndex());
         AlgCompMenu.addComp(new MaxSumSubArray());
         AlgCompMenu.addComp(new LargestRectangleInHistogram());
@@ -244,11 +243,13 @@ public class SingleStack {
     /**
      * 最大面积直方图
      */
+    //TODO 尚未完成
     @AlgName("最大面积直方图")
     public static class LargestRectangleInHistogram extends AlgCompImpl<Long,int[]>{
 
         @Override
         public int[] prepare(AlgCompContext context) {
+//            context.setRange(5);
             int range = ThreadLocalRandom.current().nextInt((int) context.getRange());
             int[] data = new int[range];
             for (int i = 0; i < data.length; i++) {
@@ -294,20 +295,71 @@ public class SingleStack {
             for(int i=0;i < data.length;i++){
                 while (!stack.isEmpty() && data[stack.peek()] >= data[i]){
                     int pop = stack.pop();
-                    long curIdx = stack.isEmpty()?i-1:stack.peek();
-                    long range = Math.abs(curIdx-i);
-                    max = Math.max(max,range*data[i]);
+                    long leftestIdx = stack.isEmpty()?-1:stack.peek();
+                    long range = (i-leftestIdx-1);
+                    //注意，这里的高度data[pop]要按照pop出来的来算
+                    max = Math.max(max,range*data[pop]);
                 }
                 stack.push(i);
             }
             while (!stack.isEmpty()){
                 int pop = stack.pop();
-                long curIdx = stack.isEmpty()?data.length-1:stack.peek();
-                long range = Math.abs(pop-curIdx);
+                long leaftestIdx = stack.isEmpty()?-1:stack.peek();
+                long range = Math.abs(data.length-leaftestIdx-1);
                 max = Math.max(max,range*data[pop]);
             }
 
             return max;
+        }
+    }
+
+    /**
+     * 给定一个二维数组matrix，其中的值不是0就是1，
+     * 返回全部由1组成的最大子矩形，内部有多少个1
+     * 这道题非常难，如果用暴力算法，会达到N^6次方这么多的时间复杂度
+     * 本质上做压缩数组技巧，进行压缩后，可以达到N^2的时间复杂度
+     */
+    //TODO 尚未完成
+    @AlgName("最大矩形面试")
+    public static class MaximalRectangle extends AlgCompImpl<Integer, int[][]>{
+
+        @Override
+        public int[][] prepare(AlgCompContext context) {
+            return new int[0][];
+        }
+
+        @Override
+        protected Integer standard(int[][] data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(int[][] data) {
+            return null;
+        }
+    }
+
+    /**
+     * 测试链接：https://leetcode.com/problems/count-submatrices-with-all-ones
+     * 给定一个二维数组matrix，其中的值不是0就是1，
+     * 返回全部由1组成的子矩形数量
+     */
+    @AlgName("最多矩形数量")
+    public static class CountSubmatricesWithAllOnes extends AlgCompImpl<Integer,int[][]>{
+
+        @Override
+        public int[][] prepare(AlgCompContext context) {
+            return new int[0][];
+        }
+
+        @Override
+        protected Integer standard(int[][] data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(int[][] data) {
+            return null;
         }
     }
 }
