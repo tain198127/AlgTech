@@ -317,6 +317,8 @@ public class SingleStack {
      * 返回全部由1组成的最大子矩形，内部有多少个1
      * 这道题非常难，如果用暴力算法，会达到N^6次方这么多的时间复杂度
      * 本质上做压缩数组技巧，进行压缩后，可以达到N^2的时间复杂度
+     * 思路如下，从每一行开始，对数组状态进行压缩，如果有值则本列的数量累加1.如果某一列为'0'，则本列的累加值归零
+     * 完成一行的扫描后，并将累加值统计完后，对累加值数组，进行'最大直方图'计算。并将最大值记录到临时变量中
      */
     @AlgName("最大矩形面积")
     public static class MaximalRectangle extends AlgCompImpl<Integer, char[][]>{
@@ -397,8 +399,29 @@ public class SingleStack {
                 for(int j=0; j < length;j++){
                     cur[j] = data[j][i]=='0'?0:cur[j]+1;
                 }
-                long m = new LargestRectangleInHistogram().test(cur);
-                max = (int) Math.max(max,m);
+                int m = largetRectangleInHistogram(cur);
+                max = Math.max(max,m);
+            }
+            return max;
+        }
+        private static int largetRectangleInHistogram(int[] data){
+            int[] stack = new int[data.length];
+            int idx = -1;
+            int max = 0;
+            for(int i=0; i < data.length;i++) {
+                while (idx != -1 && data[stack[idx]] >= data[i]){
+                    int popIdx = stack[idx--];
+                    int leftestIdx = idx ==-1?-1:stack[idx];
+                    int range = i - leftestIdx -1;
+                    max = Math.max(max, range * data[popIdx]);
+                }
+                stack[++idx]=i;
+            }
+            while (idx !=-1){
+                int popIdx = stack[idx--];
+                int leftestIdx = idx ==-1?-1:stack[idx];
+                int range = data.length - leftestIdx -1;
+                max = Math.max(max,range*data[popIdx]);
             }
             return max;
         }
