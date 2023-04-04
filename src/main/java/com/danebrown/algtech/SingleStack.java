@@ -8,10 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -24,6 +21,7 @@ public class SingleStack {
         AlgCompMenu.addComp(new MaxSumSubArray());
         AlgCompMenu.addComp(new LargestRectangleInHistogram());
         AlgCompMenu.addComp(new MaximalRectangle());
+        AlgCompMenu.addComp(new CountSubmatricesWithAllOnes());
         AlgCompMenu.run();
     }
 
@@ -433,21 +431,211 @@ public class SingleStack {
      * 返回全部由1组成的子矩形数量
      */
     @AlgName("最多矩形数量")
+    //https://leetcode.com/problems/count-submatrices-with-all-ones
     public static class CountSubmatricesWithAllOnes extends AlgCompImpl<Integer,int[][]>{
 
         @Override
         public int[][] prepare(AlgCompContext context) {
-            return new int[0][];
+//            context.setRange(5);
+            int length = (int) context.getRange();
+            int height = (int) Math.ceil(length* (ThreadLocalRandom.current().nextInt(1,100))/100);
+            int[][] result = new int[length][height];
+            for(int i=0; i < length;i++){
+                for(int j=0;j < height;j++){
+                    result[i][j] = ThreadLocalRandom.current().nextBoolean()?0:1;
+                }
+            }
+            if(log.isDebugEnabled()){
+                for(int i=0;i<length;i++){
+                    log.debug("{}",result[i]);
+                }
+            }
+            return result;
         }
 
         @Override
         protected Integer standard(int[][] data) {
-            return null;
+            return StandAlg.numSubmat(data);
+        }
+        public static class StandAlg{
+            public static int numSubmat(int[][] mat) {
+                if (mat == null || mat.length == 0 || mat[0].length == 0) {
+                    return 0;
+                }
+                int nums = 0;
+                int[] height = new int[mat[0].length];
+                for (int i = 0; i < mat.length; i++) {
+                    for (int j = 0; j < mat[0].length; j++) {
+                        height[j] = mat[i][j] == 0 ? 0 : height[j] + 1;
+                    }
+                    nums += countFromBottom(height);
+                }
+                return nums;
+
+            }
+
+            public static int countFromBottom(int[] height) {
+                if (height == null || height.length == 0) {
+                    return 0;
+                }
+                int nums = 0;
+                int[] stack = new int[height.length];
+                int si = -1;
+                for (int i = 0; i < height.length; i++) {
+                    while (si != -1 && height[stack[si]] >= height[i]) {
+                        int cur = stack[si--];
+                        if (height[cur] > height[i]) {
+                            int left = si == -1 ? -1 : stack[si];
+                            int n = i - left - 1;
+                            int down = Math.max(left == -1 ? 0 : height[left], height[i]);
+                            nums += (height[cur] - down) * num(n);
+                        }
+
+                    }
+                    stack[++si] = i;
+                }
+                while (si != -1) {
+                    int cur = stack[si--];
+                    int left = si == -1  ? -1 : stack[si];
+                    int n = height.length - left - 1;
+                    int down = left == -1 ? 0 : height[left];
+                    nums += (height[cur] - down) * num(n);
+                }
+                return nums;
+            }
+
+            public static int num(int n) {
+                return ((n * (1 + n)) >> 1);
+            }
+        }
+        @Override
+        protected Integer test(int[][] data) {
+            if(data==null || data.length<=0||data[0].length <=0){
+                return 0;
+            }
+
+            int length = data.length;
+            int height = data[0].length;
+            int[] sum = new int[data.length];
+            int max = 0;
+            //先扫描高度
+            for(int h=0; h < height;h++){
+                //再扫描宽度,压缩数组
+                for(int w=0;w<length;w++){
+                    sum[w] = data[w][h] == 0?0:sum[w]+1;
+                }
+                max +=maxSubMatrix(sum);
+            }
+            return max;
+        }
+        public static int maxSubMatrix(int[] height){
+            Stack<Integer> stack = new Stack<>();
+            int nums = 0;
+            for(int i=0 ;i < height.length;i++){
+                //如果 当前的值比stack中指定的值小，就把stack中的值弹出来
+                while (!stack.isEmpty() && height[stack.peek()] >= height[i]){
+                    int rightEstIdx = stack.pop();
+                    if(height[rightEstIdx] > height[i]) {
+                        int leftEstIdx = stack.isEmpty() ? -1 : stack.peek();
+
+                        int range = i - leftEstIdx - 1;
+                        //计算左右两侧哪边的值更大
+                        int leftOrRightMax = Math.max(leftEstIdx == -1 ? 0 : height[leftEstIdx], height[i]);
+                        //最高水位和最低水位中间的gap
+                        int gap = height[rightEstIdx] - leftOrRightMax;
+                        nums += gap* num(range);
+                    }
+                }
+                stack.push(i);
+            }
+            while (!stack.isEmpty()){
+                //最右边的idx
+                int rightEstIdx = stack.pop();
+                //最左边的idx
+                int leftEstIdx = stack.isEmpty()?-1:stack.peek();
+                //宽度
+                int range = height.length-leftEstIdx-1;
+                //最左或者最右边最高的水位
+                int leftOrRightMax = leftEstIdx == -1?0:height[leftEstIdx];
+                //最高水位和最低水位中间的gap
+                int gap = height[rightEstIdx] - leftOrRightMax;
+                nums += gap* num(range);
+            }
+            return nums;
+        }
+        private static int num(int n){
+            return ((n *(n+1)) >> 1);
+        }
+    }
+    @Data
+    public static class MergeStonesInput{
+        private int k;
+        private int[] stones;
+
+    }
+
+    /**
+     * 有 N 堆石头排成一排，第 i 堆中有stones[i]块石头。
+     *
+     * 每次移动（move）需要将连续的K堆石头合并为一堆，而这个移动的成本为这K堆石头的总数。
+     *
+     * 找出把所有石头合并成一堆的最低成本。如果不可能，返回 -1 。
+     * 链接：https://leetcode.cn/problems/minimum-cost-to-merge-stones
+     *
+     */
+    public static class MergeStones extends AlgCompImpl<Integer,MergeStonesInput> {
+
+        @Override
+        public MergeStonesInput prepare(AlgCompContext context) {
+            MergeStonesInput input = new MergeStonesInput();
+
+            int k = (int) (context.getRange() * ThreadLocalRandom.current().nextDouble(0.1d,0.3));
+
+            int N = ThreadLocalRandom.current ().nextInt((int) (context.getRange()*0.1), (int) context.getRange()) ;
+            int[] stones = new int[N];
+            for(int i =0; i < N;i++){
+                stones[i] = (int) (N *ThreadLocalRandom.current().nextDouble(0.1,1));
+            }
+            input.setStones(stones);
+            input.setK(k);
+            return input;
         }
 
         @Override
-        protected Integer test(int[][] data) {
-            return null;
+        protected Integer standard(MergeStonesInput data) {
+            int k = data.k;
+            int[] stones = data.stones;
+            int n = stones.length;
+            if ((n - 1) % (k - 1) != 0) {
+                return -1; // 无法合并为一堆
+            }
+            return merge(stones,k,new int[]{0});
+
+
+        }
+        private static int merge(int[] stones,int k, int[] lastSum){
+            int n = stones.length;
+            if ((n - 1) % (k - 1) != 0) {
+                return -1; // 无法合并为一堆
+            }
+            //base case
+            if(stones == null|| stones.length<=0 ){
+                return lastSum[0];
+            }
+            int[] sum = new int[]{0};
+            LinkedList<Integer> stonesArray = new LinkedList<>();
+            for(int i=0 ; i < stones.length;i++){
+                stonesArray.add(stones[i]);
+            }
+            while (!stonesArray.isEmpty()){
+
+            }
+            throw new RuntimeException("尚未完成");
+        }
+
+        @Override
+        protected Integer test(MergeStonesInput data) {
+            throw new RuntimeException("尚未完成");
         }
     }
 }
