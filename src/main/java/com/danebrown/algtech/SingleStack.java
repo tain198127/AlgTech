@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 
 /**
  * 单调栈
@@ -22,6 +23,7 @@ public class SingleStack {
         AlgCompMenu.addComp(new LargestRectangleInHistogram());
         AlgCompMenu.addComp(new MaximalRectangle());
         AlgCompMenu.addComp(new CountSubmatricesWithAllOnes());
+        AlgCompMenu.addComp(new MergeStones());
         AlgCompMenu.run();
     }
 
@@ -590,14 +592,19 @@ public class SingleStack {
             MergeStonesInput input = new MergeStonesInput();
 
             int k = (int) (context.getRange() * ThreadLocalRandom.current().nextDouble(0.1d,0.3));
-
-            int N = ThreadLocalRandom.current ().nextInt((int) (context.getRange()*0.1), (int) context.getRange()) ;
+            int N = 0;
+            while (k == 0 || N==0||(N - 1) % (k - 1) != 0) {
+                N = ThreadLocalRandom.current().nextInt((int) (context.getRange() * 0.1), (int) context.getRange());
+            }
             int[] stones = new int[N];
             for(int i =0; i < N;i++){
                 stones[i] = (int) (N *ThreadLocalRandom.current().nextDouble(0.1,1));
             }
             input.setStones(stones);
             input.setK(k);
+
+            input.setStones(new int[]{3,5,1,2,6});
+            input.setK(3);
             return input;
         }
 
@@ -609,33 +616,69 @@ public class SingleStack {
             if ((n - 1) % (k - 1) != 0) {
                 return -1; // 无法合并为一堆
             }
-            return merge(stones,k,new int[]{0});
+            return merge(stones,k);
 
 
         }
-        private static int merge(int[] stones,int k, int[] lastSum){
+        private static int merge(int[] stones,int k){
+            if(stones ==null|| stones.length<=0){
+                return 0;
+            }
             int n = stones.length;
             if ((n - 1) % (k - 1) != 0) {
                 return -1; // 无法合并为一堆
             }
-            //base case
-            if(stones == null|| stones.length<=0 ){
-                return lastSum[0];
-            }
-            int[] sum = new int[]{0};
-            LinkedList<Integer> stonesArray = new LinkedList<>();
-            for(int i=0 ; i < stones.length;i++){
-                stonesArray.add(stones[i]);
-            }
-            while (!stonesArray.isEmpty()){
 
+            int sum = 0;
+            List<Integer> tmp = new ArrayList<>();
+            for(int i=0;i< n;i=i+k){
+                int low = i;
+                int height = i+k;
+                int[] subrange = Arrays.copyOfRange(stones,low,height);
+                IntStream stream = Arrays.stream(subrange).sorted();
+                int bigest = stream.max().getAsInt();
+                int tmpSum = stream.sum();
+                int steps = tmpSum-bigest;
+                tmp.add(tmpSum);
+                sum += steps;
             }
-            throw new RuntimeException("尚未完成");
+            int[] input = tmp.stream().mapToInt(Integer::intValue).toArray();
+            sum+= merge(input,k);
+            return sum;
+//            throw new RuntimeException("尚未完成");
         }
-
+        private static int mergeStones(int[] origin, int range) {
+            int K = range;
+            int[] stones = origin;
+            int n = stones.length;
+            if ((n - 1) % (K - 1) != 0) {
+                return -1; // 无法合并为一堆
+            }
+            int[][][] dp = new int[n][n][K + 1]; // dp[i][j][k] 表示将第 i 到第 j 堆合并成 k 堆的最小成本
+            int[] prefixSum = new int[n + 1];
+            for (int i = 1; i <= n; i++) {
+                prefixSum[i] = prefixSum[i - 1] + stones[i - 1];
+            }
+            for (int len = K; len <= n; len++) {
+                for (int i = 0; i + len - 1 < n; i++) {
+                    int j = i + len - 1;
+                    for (int k = 2; k <= K; k++) {
+                        dp[i][j][k] = Integer.MAX_VALUE;
+                        for (int p = i; p < j; p += k - 1) {
+                            dp[i][j][k] = Math.min(dp[i][j][k], dp[i][p][1] + dp[p + 1][j][k - 1]);
+                        }
+                    }
+                    dp[i][j][1] = dp[i][j][K] + prefixSum[j + 1] - prefixSum[i];
+                }
+            }
+            return dp[0][n - 1][1];
+        }
         @Override
         protected Integer test(MergeStonesInput data) {
-            throw new RuntimeException("尚未完成");
+            int K = data.k;
+            int[] stones = data.stones;
+//            int n = stones.length;
+            return mergeStones(stones,K);
         }
     }
 }
