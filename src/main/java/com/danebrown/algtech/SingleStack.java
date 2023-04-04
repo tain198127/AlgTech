@@ -538,13 +538,15 @@ public class SingleStack {
                 while (!stack.isEmpty() && height[stack.peek()] >= height[i]){
                     int rightEstIdx = stack.pop();
                     if(height[rightEstIdx] > height[i]) {
+                        //最左边的idx
                         int leftEstIdx = stack.isEmpty() ? -1 : stack.peek();
-
+                        //算出宽度
                         int range = i - leftEstIdx - 1;
-                        //计算左右两侧哪边的值更大
+                        //两遍较小值里面最大的值，作为低水位
                         int leftOrRightMax = Math.max(leftEstIdx == -1 ? 0 : height[leftEstIdx], height[i]);
                         //最高水位和最低水位中间的gap
                         int gap = height[rightEstIdx] - leftOrRightMax;
+                        //N*N(+1)/2
                         nums += gap* num(range);
                     }
                 }
@@ -555,12 +557,13 @@ public class SingleStack {
                 int rightEstIdx = stack.pop();
                 //最左边的idx
                 int leftEstIdx = stack.isEmpty()?-1:stack.peek();
-                //宽度
+                //算出宽度
                 int range = height.length-leftEstIdx-1;
-                //最左或者最右边最高的水位
+                //最左或者最右边最低的高水位
                 int leftOrRightMax = leftEstIdx == -1?0:height[leftEstIdx];
                 //最高水位和最低水位中间的gap
                 int gap = height[rightEstIdx] - leftOrRightMax;
+                // N*N(+1)/2
                 nums += gap* num(range);
             }
             return nums;
