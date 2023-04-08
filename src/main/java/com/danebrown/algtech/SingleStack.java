@@ -572,13 +572,225 @@ public class SingleStack {
             return ((n *(n+1)) >> 1);
         }
     }
+
+
+    /**
+     * 给定一个数组arr，
+     * 返回所有子数组最小值的累加和
+     */
+    //TODO 未完成
+    public static class SubArrayMinValSum extends AlgCompImpl<Integer,int[]>{
+
+        @Override
+        public int[] prepare(AlgCompContext context) {
+            int range = (int) context.getRange();
+            int[] data = new int[range];
+            for(int i=0; i < data.length;i++){
+                data[i] = ThreadLocalRandom.current().nextInt(range);
+            }
+            return data;
+        }
+
+        public static int[] leftNearLessEqual2(int[] arr) {
+            int N = arr.length;
+            int[] left = new int[N];
+            for (int i = 0; i < N; i++) {
+                int ans = -1;
+                for (int j = i - 1; j >= 0; j--) {
+                    if (arr[j] <= arr[i]) {
+                        ans = j;
+                        break;
+                    }
+                }
+                left[i] = ans;
+            }
+            return left;
+        }
+
+        public static int[] rightNearLess2(int[] arr) {
+            int N = arr.length;
+            int[] right = new int[N];
+            for (int i = 0; i < N; i++) {
+                int ans = N;
+                for (int j = i + 1; j < N; j++) {
+                    if (arr[i] > arr[j]) {
+                        ans = j;
+                        break;
+                    }
+                }
+                right[i] = ans;
+            }
+            return right;
+        }
+        @Override
+        protected Integer standard(int[] data) {
+            // left[i] = x : arr[i]左边，离arr[i]最近，<=arr[i]，位置在x
+            int[] left = leftNearLessEqual2(data);
+            // right[i] = y : arr[i]右边，离arr[i]最近，< arr[i],的数，位置在y
+            int[] right = rightNearLess2(data);
+            int ans = 0;
+            for (int i = 0; i < data.length; i++) {
+                int start = i - left[i];
+                int end = right[i] - i;
+                ans += start * end * data[i];
+            }
+            return ans;
+        }
+
+        @Override
+        protected Integer test(int[] data) {
+            return null;
+        }
+    }
+
+    /**
+     * 1）斐波那契数列的线性求解（O(N)）的方式非常好理解
+     *
+     * 2）同时利用线性代数，也可以改写出另一种表示
+     *
+     *  | F(N) , F(N-1) | = | F(2), F(1) |  *  某个二阶矩阵的N-2次方
+     *
+     * 3）求出这个二阶矩阵，进而最快求出这个二阶矩阵的N-2次方
+     *
+     * 如果某个递归，除了初始项之外，具有如下的形式
+     *
+     * F(N) = C1 * F(N) + C2 * F(N-1) + … + Ck * F(N-k) ( C1…Ck 和k都是常数)
+     *
+     * 并且这个递归的表达式是严格的、不随条件转移的
+     *
+     * 那么都存在类似斐波那契数列的优化，时间复杂度都能优化成O(logN)
+     *
+     * 斐波那契数列矩阵乘法方式的实现
+     */
+    //TODO 未完成
+    public class Fib extends AlgCompImpl<Integer,int[]>{
+
+        @Override
+        public int[] prepare(AlgCompContext context) {
+            return new int[0];
+        }
+
+        @Override
+        protected Integer standard(int[] data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(int[] data) {
+            return null;
+        }
+    }
+
+    /**
+     * 一个人可以一次往上迈1个台阶，也可以迈2个台阶
+     *
+     * 返回这个人迈上N级台阶的方法数
+     */
+    public static class ClimbSteps extends AlgCompImpl<Integer,int[]>{
+
+        @Override
+        public int[] prepare(AlgCompContext context) {
+            return new int[0];
+        }
+
+        @Override
+        protected Integer standard(int[] data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(int[] data) {
+            return null;
+        }
+    }
+
+    /**
+     * 第一年农场有1只成熟的母牛A，往后的每年：
+     *
+     * 1）每一只成熟的母牛都会生一只母牛
+     *
+     * 2）每一只新出生的母牛都在出生的第三年成熟
+     *
+     * 3）每一只母牛永远不会死
+     *
+     * 返回N年后牛的数量
+     */
+    //TODO 未完成
+    public static class CowNum extends AlgCompImpl<Integer,Integer>{
+
+        @Override
+        public Integer prepare(AlgCompContext context) {
+            return null;
+        }
+
+        @Override
+        protected Integer standard(Integer data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(Integer data) {
+            return null;
+        }
+    }
+
+    /**
+     * 给定一个数N，想象只由0和1两种字符，组成的所有长度为N的字符串
+     *
+     * 如果某个字符串,任何0字符的左边都有1紧挨着,认为这个字符串达标
+     *
+     * 返回有多少达标的字符串
+     */
+    //TODO 未完成
+    public static class GoodNum extends AlgCompImpl<Integer,String>{
+
+        @Override
+        public String prepare(AlgCompContext context) {
+            return null;
+        }
+
+        @Override
+        protected Integer standard(String data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(String data) {
+            return null;
+        }
+    }
+
+    /**
+     * 用1*2的瓷砖，把N*2的区域填满
+     *
+     * 返回铺瓷砖的方法数
+     */
+    //TODO 未完成
+    public static class FillRegionWays extends AlgCompImpl<Integer,Integer>{
+
+        @Override
+        public Integer prepare(AlgCompContext context) {
+            return null;
+        }
+
+        @Override
+        protected Integer standard(Integer data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(Integer data) {
+            return null;
+        }
+    }
+
+
     @Data
     public static class MergeStonesInput{
         private int k;
         private int[] stones;
 
     }
-
     /**
      * 有 N 堆石头排成一排，第 i 堆中有stones[i]块石头。
      *
