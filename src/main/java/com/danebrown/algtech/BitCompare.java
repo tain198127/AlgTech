@@ -415,6 +415,8 @@ public class BitCompare {
 
         @Override
         protected Integer standard(Integer data) {
+            String abs= "0101110";
+
             int i = -0b0001;
             log.info("0b0001 >> 1位= %s \n",Integer.toBinaryString(i >> 1));
             i = 0b0001;

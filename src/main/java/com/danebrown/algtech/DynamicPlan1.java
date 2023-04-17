@@ -9,6 +9,7 @@ import com.google.common.primitives.Chars;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ public class DynamicPlan1 {
         AlgCompMenu.addComp(new LessMoney());
         AlgCompMenu.addComp(new SplitNumber());
         AlgCompMenu.addComp(new NQueens());
+        AlgCompMenu.addComp(new LongestPalindromeSubseq());
         AlgCompMenu.run();
     }
 
@@ -1392,6 +1394,59 @@ public class DynamicPlan1 {
                         (rightDiaLimit|mostRightOne)>>>1);
             }
             return res;
+        }
+    }
+
+    /**
+     * 最长回文子序列
+     * 注意，子序列只要保证顺序一致，不要求连续
+     * 回文：类似 12321，这种就叫回文。
+     */
+    @AlgName("最长回文子序列：LPS")
+    public static class LongestPalindromeSubseq extends AlgCompImpl<Integer,String>{
+
+        @Override
+        public String prepare(AlgCompContext context) {
+            int n = (int) context.getRange();
+            List<String> list = new ArrayList<>(10+26);
+            for (int i=0;i<9;i++){
+                list.add(String.valueOf(i));
+            }
+            for (int i='a';i < 'z';i++){
+                list.add(String.valueOf((char)i));
+            }
+            StringBuilder result = new StringBuilder();
+            for (int i=0; i < n;i++){
+                result.append(list.get(ThreadLocalRandom.current().nextInt(0,list.size()-1)));
+            }
+            return result.toString();
+        }
+
+        //使用逆序后最大公共子序列的算法
+        @Override
+        protected Integer standard(String data) {
+            String reverse = StringUtils.reverse(data);
+            MaxCommonSubsequence mcs = new MaxCommonSubsequence();
+            Integer v = mcs.test(new String[]{data,reverse});
+            return v;
+        }
+
+        //使用另外一种算法
+        @Override
+        protected Integer test(String data) {
+            char[] source = data.toCharArray();
+            int N = source.length;
+            int[][] dp = new int[N][N];
+            for(int i = N-1; i >= 0;i--){
+                dp[i][i] = 1;
+                for ( int j = i+1;j<N;j++ ){
+                    dp[i][j] = Math.max(dp[i][j-1],dp[i+1][j]);
+                    if(source[i] == source[j]){
+                        dp[i][j] = Math.max(dp[i][j],dp[i+1][j-1]+2);
+                    }
+                }
+            }
+            return dp[0][N-1];
         }
     }
 }

@@ -24,6 +24,7 @@ public class SingleStack {
         AlgCompMenu.addComp(new MaximalRectangle());
         AlgCompMenu.addComp(new CountSubmatricesWithAllOnes());
         AlgCompMenu.addComp(new MergeStones());
+        AlgCompMenu.addComp(new Fib());
         AlgCompMenu.run();
     }
 
@@ -663,7 +664,7 @@ public class SingleStack {
      * 斐波那契数列矩阵乘法方式的实现
      */
     //TODO 未完成
-    public class Fib extends AlgCompImpl<Integer,int[]>{
+    public static class Fib extends AlgCompImpl<Integer,int[]>{
 
         @Override
         public int[] prepare(AlgCompContext context) {
@@ -677,6 +678,20 @@ public class SingleStack {
 
         @Override
         protected Integer test(int[] data) {
+            //计算2的15次方
+            int sig = 15;
+            String bin = Integer.toBinaryString(sig);
+            char[] binArray = bin.toCharArray();
+            int base = 2;
+            long mul = 1;
+            for(int i=0;i < binArray.length;i++){
+                if(binArray[i] !=0){
+                    long tmp = (long) Math.pow(base,Math.pow(2,i));
+                    mul = mul * tmp;
+                }
+            }
+            boolean isEqual = mul == Math.pow(base,sig);
+            System.out.println(isEqual);
             return null;
         }
     }
