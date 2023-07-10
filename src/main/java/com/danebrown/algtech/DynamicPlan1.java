@@ -37,6 +37,7 @@ public class DynamicPlan1 {
         AlgCompMenu.addComp(new SplitNumber());
         AlgCompMenu.addComp(new NQueens());
         AlgCompMenu.addComp(new LongestPalindromeSubseq());
+        AlgCompMenu.addComp(new HorseJump());
         AlgCompMenu.run();
     }
 
@@ -1447,6 +1448,175 @@ public class DynamicPlan1 {
                 }
             }
             return dp[0][N-1];
+        }
+    }
+
+    /**
+     * 请同学们自行搜索或者想象一个象棋的棋盘，
+     * 然后把整个棋盘放入第一象限，棋盘的最左下角是(0,0)位置
+     * 那么整个棋盘就是横坐标上9条线、纵坐标上10条线的区域
+     * 给你三个 参数 x，y，k
+     * 返回“马”从(0,0)位置出发，必须走k步
+     * 最后落在(x,y)上的方法数有多少种?
+     */
+    @AlgName("马走日")
+    public static class HorseJump extends AlgCompImpl<Integer,int[]>{
+
+        @Override
+        public int[] prepare(AlgCompContext context) {
+            int[] ret = new int[3];
+            ret[0] = ThreadLocalRandom.current().nextInt(0,9);
+            ret[1] = ThreadLocalRandom.current().nextInt(0,8);
+            ret[2] = ThreadLocalRandom.current().nextInt(0, 25);
+//            ret[0] = 7;
+//            ret[1] = 7;
+//            ret[2] = 10;
+//            int x = 7;
+//            int y = 7;
+//            int step = 10;
+            return ret;
+        }
+
+        /**
+         * data的0位表示X 最大值是9
+         * data的1为表示Y，最大值8
+         * data的2为步数
+         * @param data
+         * @return
+         */
+        @Override
+        protected Integer standard(int[] data) {
+            int tarX = data[0];
+            int tarY = data[1];
+            int rest = data[2];
+            int[][][] cache = new int[10][9][rest+1];
+            for(int i=0;i < cache.length;i++){
+                for(int j=0;j<cache[0].length;j++){
+                    for(int k=0;k<cache[0][0].length;k++){
+                        cache[i][j][k] = -1;
+                    }
+                }
+            }
+            int steps = process(0,0,rest,tarX,tarY,cache);
+            return steps;
+        }
+        private int house_raid(int curX, int curY, int rest, int tarX, int tarY){
+            //base case
+            if(curX <0 || curX> 9||curY<0||curY>8){
+                return 0;
+            }
+            if(rest ==0){
+                return curX == tarX && curY == tarY?1:0;
+            }
+            int ways = 0;
+            ways += house_raid(curX+1,curY+2,rest -1, tarX,tarY);
+            ways += house_raid(curX-1,curY+2,rest -1, tarX,tarY);
+            ways += house_raid(curX+1,curY-2,rest -1, tarX,tarY);
+            ways += house_raid(curX-1,curY-2,rest -1, tarX,tarY);
+            ways += house_raid(curX+2,curY+1,rest -1, tarX,tarY);
+            ways += house_raid(curX+2,curY-1,rest -1, tarX,tarY);
+            ways += house_raid(curX-2,curY+1,rest -1, tarX,tarY);
+            ways += house_raid(curX-2,curY-1,rest -1, tarX,tarY);
+
+            return ways;
+        }
+        private int process(int curX, int curY, int rest, int tarX,int tarY,int[][][] cache){
+            //base case
+            if(curX <0 || curX> 9||curY<0||curY>8){
+                return 0;
+            }
+            if(rest ==0){
+                return curX == tarX && curY == tarY?1:0;
+            }
+            if(cache[curX][curY][rest] >=0){
+                return cache[curX][curY][rest];
+            }
+            int ways = 0;
+            ways += process(curX+1,curY+2,rest -1, tarX,tarY,cache);
+            ways += process(curX-1,curY+2,rest -1, tarX,tarY,cache);
+            ways += process(curX+1,curY-2,rest -1, tarX,tarY,cache);
+            ways += process(curX-1,curY-2,rest -1, tarX,tarY,cache);
+            ways += process(curX+2,curY+1,rest -1, tarX,tarY,cache);
+            ways += process(curX+2,curY-1,rest -1, tarX,tarY,cache);
+            ways += process(curX-2,curY+1,rest -1, tarX,tarY,cache);
+            ways += process(curX-2,curY-1,rest -1, tarX,tarY,cache);
+            cache[curX][curY][rest] = ways;
+            return ways;
+        }
+
+        @Override
+        protected Integer test(int[] data) {
+            int tarX = data[0];
+            int tarY = data[1];
+            int k = data[2];
+            //[从哪个X坐标开始][从哪个Y坐标开始][走K步]
+            int [][][] dp = new int[10][9][k+1];
+            dp[tarX][tarY][0] = 1;//base case
+
+            for(int rest = 1; rest <=k;rest++){
+                for(int curX=0;curX<10;curX++){
+                    for(int curY=0;curY<9;curY++){
+                        //注意，这里的ways每次从新算就可以，因为实际上ways已经记录在dp中，无需在重新记忆
+                        int ways = pick(dp,curX+1,curY+2,rest-1);
+                        ways += pick(dp,curX-1,curY+2,rest-1);
+                        ways += pick(dp,curX+1,curY-2,rest-1);
+                        ways += pick(dp,curX-1,curY-2,rest-1);
+                        ways += pick(dp,curX+2,curY+1,rest-1);
+                        ways += pick(dp,curX+2,curY-1,rest-1);
+                        ways += pick(dp,curX-2,curY+1,rest-1);
+                        ways += pick(dp,curX-2,curY-1,rest-1);
+                        dp[curX][curY][rest]=ways;
+                    }
+                }
+            }
+            /**
+             * 问题是，假设从X:0,Y:0的位置开始，走K步，到tarX，tarY的最多的走法有多少。
+             * tarX，tarY，已经变成了base-case内化到了算法中。
+             * dp中每一个格子，都是表示，到达tarX，tarY的最多走法
+             */
+            return dp[0][0][k];
+        }
+        private static int pick(int [][][] dp, int x, int y, int rest){
+            if (x <0 || x > 9 || y <0||y> 8){
+                return 0;
+            }
+            return dp[x][y][rest];
+        }
+    }
+
+    @Data
+    public static class CoffeeInput{
+        int[] arr;
+        int a;
+        int b;
+        int n;
+    }
+
+    /**
+     * 给定一个数组arr，arr[i]代表第i号咖啡机泡一杯咖啡的时间
+     * 给定一个正数N，表示N个人等着咖啡机泡咖啡，每台咖啡机只能轮流泡咖啡
+     * 只有一台咖啡机，一次只能洗一个杯子，时间耗费a，洗完才能洗下一杯
+     * 每个咖啡杯也可以自己挥发干净，时间耗费b，咖啡杯可以并行挥发
+     * 假设所有人拿到咖啡之后立刻喝干净，
+     * 返回从开始等到所有咖啡机变干净的最短时间
+     * 三个参数：int[] arr、int N，int a、int b
+     */
+    @AlgName("Coffee问题")
+    public static class Coffee extends AlgCompImpl<Integer,CoffeeInput>{
+
+        @Override
+        public CoffeeInput prepare(AlgCompContext context) {
+            return null;
+        }
+
+        @Override
+        protected Integer standard(CoffeeInput data) {
+            return null;
+        }
+
+        @Override
+        protected Integer test(CoffeeInput data) {
+            return null;
         }
     }
 }
