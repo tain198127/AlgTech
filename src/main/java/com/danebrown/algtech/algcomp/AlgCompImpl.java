@@ -11,6 +11,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,6 +124,22 @@ public abstract class AlgCompImpl<T,R>{
         }
         return new LoadedData(setupData,forTest,forStandard);
     }
+
+    /**
+     * 判断当前程序是否是debug
+     * @return
+     */
+    private boolean isDebug(){
+        List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
+        boolean isDebug = false;
+        for (String arg : args) {
+            if (arg.startsWith("-Xrunjdwp") || arg.startsWith("-agentlib:jdwp")) {
+                isDebug = true;
+                break;
+            }
+        }
+        return isDebug;
+    }
     /**
      * 对数
      * @param testName 对数器名称
@@ -140,6 +157,12 @@ public abstract class AlgCompImpl<T,R>{
         AlgName algName = this.getClass().getAnnotation(AlgName.class);
         if(algName!= null && algName.timeout() >0){
             timeout = algName.timeout();
+        }
+        /**
+         * 如果是debug模式，则所有设置的超时无效。
+         */
+        if(isDebug()){
+            timeout = -1;
         }
         LoadedData setupData = loadTestData(prepareSupplier);
         R originData = setupData.getSetupData();
